@@ -4,12 +4,14 @@ import com.egds.core.entity.MessageEntity;
 import com.egds.core.enums.DeliveryStatus;
 import com.egds.core.exception.MessageDeliveryFailureException;
 import com.egds.core.interfaces.IMessageOutputStrategy;
+import org.springframework.stereotype.Component;
 
 /**
  * {@link IMessageOutputStrategy} implementation targeting the standard output stream.
  * Delivers the formatted content of a {@link MessageEntity} to {@code System.out}.
  * This strategy is designated for CLI and non-interactive runtime environments.
  */
+@Component
 public class ConsoleOutputStrategy implements IMessageOutputStrategy {
 
     /**

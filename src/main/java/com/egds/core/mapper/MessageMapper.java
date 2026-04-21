@@ -2,6 +2,7 @@ package com.egds.core.mapper;
 
 import com.egds.core.dto.MessageContentDto;
 import com.egds.core.entity.MessageEntity;
+import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ import java.util.UUID;
  * This class enforces a strict separation between the transport layer (DTO) and the
  * domain representation (Entity) within the EGDS pipeline.
  */
+@Component
 public class MessageMapper {
 
     /**

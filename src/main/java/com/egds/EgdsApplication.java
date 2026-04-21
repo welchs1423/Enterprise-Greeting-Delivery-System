@@ -1,42 +1,26 @@
 package com.egds;
 
-import com.egds.core.aspect.MessageDeliveryLoggingAspect;
-import com.egds.core.factory.AbstractGreetingFactory;
-import com.egds.core.factory.GreetingFactoryProvider;
-import com.egds.core.factory.StandardGreetingFactory;
-import com.egds.core.mapper.MessageMapper;
-import com.egds.core.pipeline.MessageDeliveryPipeline;
-import com.egds.core.validator.MessageContentValidator;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.kafka.annotation.EnableKafka;
 
 /**
- * Bootstrap entry point for the Enterprise Greeting Delivery System (EGDS).
- * Initializes the factory registry, resolves the appropriate factory variant,
- * assembles the delivery pipeline, and delegates execution to the pipeline facade.
+ * Bootstrap entry point for the Enterprise Greeting Delivery System (EGDS) v2.
  *
- * In a production Spring Boot context, component wiring would be managed
- * by the IoC container via constructor injection and {@code @Configuration} classes.
- * This class would be annotated with {@code @SpringBootApplication} and the manual
- * instantiation below would be replaced by container-managed beans.
+ * <p>Spring Boot context initialization supersedes the manual IoC wiring of v1.0.
+ * Cache infrastructure is activated via {@code @EnableCaching};
+ * Kafka listener container lifecycle is managed via {@code @EnableKafka}.
+ *
+ * <p>JPA Auditing is activated in {@link com.egds.config.JpaAuditingConfig}
+ * rather than here to avoid {@code @DataJpaTest} slice failures.
  */
+@SpringBootApplication
+@EnableCaching
+@EnableKafka
 public class EgdsApplication {
 
-    /**
-     * Application entry point. Bootstraps the EGDS delivery pipeline.
-     *
-     * @param args command-line arguments; not consumed by the current pipeline implementation
-     */
     public static void main(String[] args) {
-        GreetingFactoryProvider factoryProvider = new GreetingFactoryProvider();
-        AbstractGreetingFactory factory = factoryProvider.getFactory(StandardGreetingFactory.FACTORY_TYPE);
-
-        MessageDeliveryPipeline pipeline = new MessageDeliveryPipeline(
-                factory.createMessageProvider(),
-                factory.createOutputStrategy(),
-                new MessageMapper(),
-                new MessageContentValidator(),
-                new MessageDeliveryLoggingAspect()
-        );
-
-        pipeline.execute();
+        SpringApplication.run(EgdsApplication.class, args);
     }
 }

@@ -3,6 +3,7 @@ package com.egds.core.validator;
 import com.egds.core.dto.MessageContentDto;
 import com.egds.core.exception.MessageDeliveryFailureException;
 import com.egds.core.interfaces.IMessageValidator;
+import org.springframework.stereotype.Component;
 
 /**
  * Reference implementation of {@link IMessageValidator} enforcing the EGDS
@@ -10,6 +11,7 @@ import com.egds.core.interfaces.IMessageValidator;
  * Validates that mandatory fields are populated and that content does not exceed
  * the maximum permitted payload size defined by the EGDS payload contract.
  */
+@Component
 public class MessageContentValidator implements IMessageValidator {
 
     /**

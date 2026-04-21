@@ -9,13 +9,18 @@ import com.egds.core.interfaces.IMessageOutputStrategy;
 import com.egds.core.interfaces.IMessageProvider;
 import com.egds.core.interfaces.IMessageValidator;
 import com.egds.core.mapper.MessageMapper;
+import org.springframework.stereotype.Service;
 
 /**
  * Core orchestration service implementing the EGDS message delivery lifecycle.
  * Coordinates the sequential invocation of content provision, validation,
  * mapping, aspect interception, and output strategy execution.
- * All lifecycle stage boundaries are instrumented via the injected {@link MessageDeliveryLoggingAspect}.
+ *
+ * <p>All lifecycle stage boundaries are instrumented via the injected
+ * {@link MessageDeliveryLoggingAspect}. In the Spring-managed context, all
+ * collaborators are injected via constructor by the IoC container.
  */
+@Service
 public class MessageDeliveryService implements IMessageDeliveryService {
 
     private final IMessageProvider messageProvider;
@@ -26,6 +31,7 @@ public class MessageDeliveryService implements IMessageDeliveryService {
 
     /**
      * Constructs a {@code MessageDeliveryService} with all required pipeline collaborators.
+     * All parameters are injected by the Spring IoC container.
      *
      * @param messageProvider  the provider supplying the raw message payload
      * @param outputStrategy   the strategy governing output channel delivery

@@ -2,6 +2,7 @@ package com.egds.core.aspect;
 
 import com.egds.core.dto.MessageContentDto;
 import com.egds.core.entity.MessageEntity;
+import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -15,6 +16,7 @@ import java.time.format.DateTimeFormatter;
  * and individual methods would carry {@code @Around} advice targeting the
  * {@code MessageDeliveryService} join points.
  */
+@Component
 public class MessageDeliveryLoggingAspect {
 
     private static final DateTimeFormatter TIMESTAMP_FORMATTER =
