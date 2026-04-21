@@ -1,0 +1,34 @@
+# ConfigMap: non-sensitive application configuration.
+# Sensitive values (JWT secret, DB credentials) are in secret.yaml — never here.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: egds-config
+  namespace: egds
+  labels:
+    app: egds
+    version: "3.0.0"
+    component: config
+data:
+  # Spring Boot active profile
+  SPRING_PROFILES_ACTIVE: "prod"
+
+  # Kafka cluster endpoint (injected via env; overrides application-prod.properties)
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka-cluster-headless.kafka.svc.cluster.local:9092"
+
+  # Kafka topic
+  EGDS_KAFKA_TOPIC_GREETING: "egds.greeting.events"
+
+  # Cache: Redis cluster endpoint
+  SPRING_REDIS_HOST: "redis-master.cache.svc.cluster.local"
+  SPRING_REDIS_PORT: "6379"
+
+  # gRPC server port (must match the container port defined in deployment.yaml)
+  GRPC_SERVER_PORT: "9090"
+
+  # JPA: DDL mode for production (validate only; schema managed by Flyway/Liquibase)
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "validate"
+  SPRING_JPA_SHOW_SQL: "false"
+
+  # H2 console disabled unconditionally in cluster deployments
+  SPRING_H2_CONSOLE_ENABLED: "false"

@@ -1,0 +1,160 @@
+# Deployment: EGDS application pods.
+# Exposes both HTTP (8080) and gRPC (9090) ports.
+# Resource requests and limits are sized for the greeting delivery workload baseline;
+# adjust for production based on profiling results from the CI/CD performance stage.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: egds
+  namespace: egds
+  labels:
+    app: egds
+    version: "3.0.0"
+    component: app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: egds
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0     # zero-downtime: no pod is terminated before a replacement is ready
+      maxSurge: 1           # one extra pod at a time during rollout to limit resource burst
+  template:
+    metadata:
+      labels:
+        app: egds
+        version: "3.0.0"
+      annotations:
+        # Istio sidecar injection. Remove if service mesh is not installed.
+        sidecar.istio.io/inject: "true"
+        # Prometheus scraping via Istio telemetry; adjust path if actuator metrics are exposed directly.
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      serviceAccountName: egds-sa
+      automountServiceAccountToken: false
+
+      # Pod-level security: drop all Linux capabilities; enforce read-only root filesystem.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: egds
+          image: ghcr.io/welchs1423/enterprise-greeting-delivery-system:3.0.0
+          imagePullPolicy: Always
+
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: grpc
+              containerPort: 9090
+              protocol: TCP
+
+          # Container-level security: immutable filesystem, no privilege escalation.
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+
+          # ConfigMap environment variables (non-sensitive configuration)
+          envFrom:
+            - configMapRef:
+                name: egds-config
+
+          # Secret environment variables (sensitive credentials)
+          env:
+            - name: EGDS_SECURITY_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: egds-secret
+                  key: JWT_SECRET
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: egds-secret
+                  key: DB_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: egds-secret
+                  key: DB_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: egds-secret
+                  key: DB_PASSWORD
+            - name: SPRING_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: egds-secret
+                  key: REDIS_PASSWORD
+
+          # Startup probe: allows up to 90 s for JVM warm-up and Kafka consumer group assignment.
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            failureThreshold: 18
+            periodSeconds: 5
+
+          # Liveness probe: restarts the pod if the JVM enters an unrecoverable state.
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
+
+          # Readiness probe: removes the pod from the Service endpoints during startup
+          # and during Kafka consumer group rebalances.
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            failureThreshold: 3
+            timeoutSeconds: 3
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+
+          # tmpfs mounts required because readOnlyRootFilesystem: true blocks writes to /.
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: logs
+              mountPath: /app/logs
+
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: logs
+          emptyDir: {}
+
+      # Spread pods across availability zones to prevent a single-zone outage
+      # from taking down all greeting delivery capacity.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: egds

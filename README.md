@@ -1,7 +1,83 @@
 # Enterprise Greeting Delivery System (EGDS)
 
-> **제로 트러스트 기반, 이벤트 드리븐, 캐시 최적화, 완전 감사 추적 엔터프라이즈 인사 메시지 전달 플랫폼**
-> `v2.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT
+> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬 통합 엔터프라이즈 인사 메시지 전달 플랫폼**
+> `v3.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio
+
+> **경고: 이 시스템은 클라우드 네이티브 환경(Kubernetes + Kafka + Oracle + Redis) 없이는 구동이 불가능합니다. 로컬 `java -jar` 실행은 지원되지 않습니다. 모든 의존 인프라가 준비된 클러스터에서만 운영 배포가 가능합니다.**
+
+---
+
+## Phase 3 신규 아키텍처 컴포넌트
+
+### gRPC 고성능 바이너리 통신 계층 (v3.0.0 신규)
+
+JSON은 현대적 고가용성 시스템에서 직렬화 오버헤드가 과도합니다. Phase 3는 모든 서비스 간 통신을 Protobuf 바이너리 프로토콜 기반의 gRPC로 전환합니다.
+
+| 컴포넌트 | 파일 | 설명 |
+|---|---|---|
+| Protobuf 서비스 계약 | `src/main/proto/greeting.proto` | `GreetingService` RPC 정의 (unary + server-streaming), 메시지 타입, 열거형 |
+| gRPC 서버 구현체 | `com.egds.grpc.GreetingGrpcService` | `@GrpcService`, `DeliverGreeting` (unary) + `StreamGreeting` (streaming), 기존 `MessageDeliveryPipeline` 위임 |
+| gRPC 클라이언트 | `com.egds.grpc.GreetingGrpcClient` | `@GrpcClient` 블로킹 스텁 주입, 서비스 간 호출 컴포넌트 |
+
+**gRPC 요청 흐름:**
+```
+gRPC 클라이언트 (Protobuf 바이너리)
+  │  GreetingRequest { correlationId, principalName, requestIp, issuedAtEpochMs, priority }
+  ▼
+GreetingGrpcService (@GrpcService, port 9090)
+  │  DeliverGreeting (unary) or StreamGreeting (server-streaming)
+  ▼
+MessageDeliveryPipeline.execute()
+  │  (기존 Kafka → Cache → DB 파이프라인과 동일한 경로)
+  ▼
+GreetingResponse { correlationId, message, STATUS_DELIVERED, deliveredAtEpochMs, deliveryNode }
+  │  (Protobuf 바이너리)
+  ▼
+gRPC 클라이언트
+```
+
+### Kubernetes 오케스트레이션 (v3.0.0 신규)
+
+| 매니페스트 | 파일 | 핵심 설정 |
+|---|---|---|
+| Deployment | `k8s/deployment.yaml` | `replicas: 2`, Rolling Update (maxUnavailable=0), 비루트 컨테이너, ReadOnlyRootFilesystem, liveness/readiness/startup probe, 멀티존 분산 |
+| HPA | `k8s/hpa.yaml` | `minReplicas: 2`, `maxReplicas: 10`, CPU 60% / Memory 75% 기준, 즉시 Scale-Up / 300s 안정화 Scale-Down |
+| Service | `k8s/service.yaml` | `LoadBalancer` 타입, HTTP(80), gRPC(9090) 이중 포트, AWS NLB 내부 프로비저닝 |
+| ConfigMap | `k8s/configmap.yaml` | 비민감 설정 분리 (Kafka, Redis, gRPC 포트, JPA) |
+| Secret | `k8s/secret.yaml` | JWT 시크릿, DB 자격증명, Redis AUTH — 운영 환경에서 Vault/ESO로 교체 |
+| NetworkPolicy | `k8s/networkpolicy.yaml` | Default-Deny + 화이트리스트: ingress-nginx, monitoring(Prometheus), Kafka, Oracle, Redis, kube-dns에만 허용 |
+
+### Istio 서비스 매쉬 (v3.0.0 신규)
+
+| 매니페스트 | 파일 | 핵심 설정 |
+|---|---|---|
+| VirtualService | `k8s/istio/virtualservice.yaml` | Canary 트래픽 분할 (stable 90% / canary 10%), 재시도 정책, 타임아웃 강제, 장애 주입 (비활성, 드릴 시 활성화) |
+| DestinationRule | `k8s/istio/destinationrule.yaml` | ISTIO_MUTUAL mTLS 강제, LEAST_CONN LB, HTTP/2 커넥션 풀 제한, 서킷 브레이커 (5xx 연속 5회 → 30s 격리, 최대 50% 이젝션) |
+
+### 20단계 CI/CD 파이프라인 (v3.0.0 신규)
+
+`.github/workflows/pipeline.yml`
+
+| 단계 | Job | 내용 |
+|---|---|---|
+| 1–3 | `prepare` | Checkout, JDK 17 셋업, Maven 의존성 캐시 워밍 |
+| 4 | `code-quality` | Checkstyle, PMD, SpotBugs |
+| 5 | `sast-codeql` | GitHub CodeQL 정적 분석 (security-and-quality 쿼리) |
+| 6 | `dependency-audit` | OWASP Dependency-Check (CVSS ≥ 7 빌드 실패) |
+| 7 | `compile` | Protobuf 소스 생성 + javac 컴파일 |
+| 8 | `unit-test` | 단위 테스트 (JWT, Kafka Publisher) |
+| 9 | `integration-test` | 통합 테스트 (Security, JPA, Cache, Kafka E2E) |
+| 10 | `grpc-integration-test` | gRPC 인프로세스 통합 테스트 |
+| 11 | `coverage-enforce` | JaCoCo 라인 커버리지 80% 임계값 강제 |
+| 12 | `build-artifact` | Spring Boot 실행 가능 JAR 패키징 |
+| 13 | `sbom-generate` | CycloneDX SBOM 생성 (bom.json) |
+| 14 | `docker-build` | 멀티스테이지 Dockerfile 빌드 (JDK 빌드 → JRE 런타임) |
+| 15 | `container-scan` | Trivy 컨테이너 취약점 스캔 (CRITICAL/HIGH CVE → 빌드 실패) |
+| 16 | `artifact-sign` | cosign으로 컨테이너 이미지 서명 (Sigstore) |
+| 17 | `push-registry` | 서명된 이미지를 GHCR로 Push (master 브랜치만) |
+| 18 | `performance-profile` | JMH 마이크로벤치마크 (warmup 1회, measurement 3회) |
+| 19 | `k8s-manifest-validate` | kubeconform (K8s 1.29 스키마) + conftest OPA 정책 검증 |
+| 20 | `deploy-and-notify` | Staging K8s 배포 → Smoke 테스트 (JWT + Greeting) → Slack 알림 |
 
 ---
 
@@ -141,12 +217,18 @@ EGDS v2.0은 단 하나의 인사 메시지를 전달하기 위해 아래의 모
 |---|---|---|
 | 언어 | Java | 17 |
 | 프레임워크 | Spring Boot | 3.2.5 |
+| RPC 프레임워크 | gRPC + grpc-spring-boot-starter | 1.61.1 + 3.1.0 |
+| 직렬화 | Protocol Buffers (Protobuf) | 3.25.1 |
 | 보안 | Spring Security + jjwt | 6.x + 0.12.5 |
 | 영속성 | Spring Data JPA + Hibernate | 6.x |
 | 데이터베이스 | Oracle Database 19c+ (로컬: H2) | - |
 | 메시지 브로커 | Apache Kafka + Spring Kafka | 3.x |
 | 캐시 | Redis (로컬: ConcurrentMapCache) | - |
+| 컨테이너 런타임 | Docker (멀티스테이지 빌드, eclipse-temurin:17) | - |
+| 오케스트레이션 | Kubernetes | 1.29+ |
+| 서비스 매쉬 | Istio | 1.20+ |
 | 빌드 | Apache Maven | 3.8+ |
+| CI/CD | GitHub Actions | - |
 
 ---
 
@@ -168,27 +250,81 @@ EGDS v2.0은 단 하나의 인사 메시지를 전달하기 위해 아래의 모
 
 ## 빌드 및 실행
 
+> **운영 환경 요구사항**: 이 시스템은 클라우드 네이티브 환경 없이는 완전히 구동되지 않습니다. `java -jar`로 단독 실행 시 Kafka Consumer Group, Oracle DB 연결, Redis 캐시가 모두 불가합니다. 클러스터 배포만이 지원되는 운영 모드입니다.
+
 ### 전제 조건
 
-| 항목 | 요구 버전 |
-|---|---|
-| JDK | 17 이상 |
-| Apache Maven | 3.8 이상 |
-| Apache Kafka | 3.x (로컬 실행 시, 없으면 컨텍스트는 기동되나 전달 불가) |
+| 항목 | 요구 버전 | 비고 |
+|---|---|---|
+| JDK | 17 이상 | 빌드 및 로컬 테스트 |
+| Apache Maven | 3.8 이상 | 빌드 |
+| Docker | 24+ | 컨테이너 이미지 빌드 |
+| Kubernetes | 1.29+ | 운영 배포 |
+| Istio | 1.20+ | 서비스 매쉬 (운영) |
+| Apache Kafka | 3.x | 로컬 테스트 시 필요 |
+| Oracle DB 19c+ | - | 운영 (로컬: H2 시뮬레이션) |
+| Redis | 7.x | 운영 (로컬: ConcurrentMapCache) |
 
-### 빌드
+### Protobuf 소스 생성 및 빌드
 
 ```bash
+# proto 파일에서 Java 소스를 생성한 후 컴파일
+mvn generate-sources compile
+
+# 테스트 제외 패키징
 mvn clean package -DskipTests
+
+# 전체 빌드 + 테스트
+mvn clean verify
 ```
 
-### 실행
+### Kubernetes 클러스터 배포
 
 ```bash
-java -jar target/enterprise-greeting-delivery-system-2.0.0-RELEASE.jar
+# 1. 네임스페이스 생성 및 Istio 주입 활성화
+kubectl create namespace egds
+kubectl label namespace egds istio-injection=enabled
+
+# 2. Secret 업데이트 (플레이스홀더를 실제 값으로 교체 후 적용)
+kubectl apply -f k8s/secret.yaml -n egds
+
+# 3. 전체 매니페스트 적용
+kubectl apply -f k8s/configmap.yaml -n egds
+kubectl apply -f k8s/deployment.yaml -n egds
+kubectl apply -f k8s/service.yaml -n egds
+kubectl apply -f k8s/hpa.yaml -n egds
+kubectl apply -f k8s/networkpolicy.yaml -n egds
+
+# 4. Istio 트래픽 정책 적용
+kubectl apply -f k8s/istio/virtualservice.yaml -n egds
+kubectl apply -f k8s/istio/destinationrule.yaml -n egds
+
+# 5. 롤아웃 완료 확인
+kubectl rollout status deployment/egds -n egds
 ```
 
-### 로컬 테스트 (JWT 발급 → 인사 전달)
+### gRPC 클라이언트 테스트 (grpcurl)
+
+```bash
+# grpcurl 설치: https://github.com/fullstorydev/grpcurl
+# gRPC 리플렉션이 없으면 --proto 플래그로 직접 지정
+
+# DeliverGreeting (unary)
+grpcurl -plaintext \
+  -proto src/main/proto/greeting.proto \
+  -d '{"correlation_id":"test-001","principal_name":"greeting.admin","request_ip":"127.0.0.1"}' \
+  localhost:9090 \
+  com.egds.grpc.GreetingService/DeliverGreeting
+
+# StreamGreeting (server-streaming)
+grpcurl -plaintext \
+  -proto src/main/proto/greeting.proto \
+  -d '{"correlation_id":"test-002","principal_name":"greeting.admin","request_ip":"127.0.0.1"}' \
+  localhost:9090 \
+  com.egds.grpc.GreetingService/StreamGreeting
+```
+
+### REST 테스트 (JWT 발급 → 인사 전달)
 
 ```bash
 # 1. JWT 토큰 발급
@@ -197,7 +333,7 @@ TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/token \
   -d '{"username":"greeting.admin","password":"egds-admin-pass"}' \
   | jq -r '.token')
 
-# 2. 인사 전달 요청 (비동기)
+# 2. 인사 전달 요청 (비동기, HTTP 202 반환)
 curl -X GET http://localhost:8080/api/v1/greeting \
   -H "Authorization: Bearer $TOKEN"
 ```
@@ -205,7 +341,11 @@ curl -X GET http://localhost:8080/api/v1/greeting \
 ### 테스트 실행
 
 ```bash
+# 전체 테스트 (단위 + 통합 + gRPC)
 mvn test
+
+# gRPC 통합 테스트만 실행
+mvn test -Dtest="GreetingGrpcServiceIntegrationTest"
 ```
 
 ---
@@ -237,10 +377,35 @@ mvn test
 | `GreetingEventPublisherTest` | 단위 (Mockito) | KafkaTemplate 호출 검증, 토픽/키 파라미터 |
 | `GreetingEventConsumerIntegrationTest` | 통합 (@EmbeddedKafka) | Kafka 발행-소비 사이클, 감사 로그 비동기 저장 |
 | `GreetingDeliveryIntegrationTest` | E2E (@EmbeddedKafka + MockMvc) | JWT 인증 → Kafka → 파이프라인 → DB 감사 전 계층 |
+| `GreetingGrpcServiceIntegrationTest` | gRPC 통합 (in-process) | DeliverGreeting unary RPC (STATUS_DELIVERED, 상관ID 전파, CRITICAL 우선순위), StreamGreeting server-streaming (4 프래그먼트 순서 검증, "Hello, World!" 재조립) |
 
 ---
 
 ## 작업 이력 (Changelog)
+
+### [2026-04-21] v3.0.0-RELEASE — Phase 3: gRPC 및 K8s 기반 클라우드 네이티브 인프라 통합
+
+**신규 추가 파일**
+
+| 파일 | 변경 내용 |
+|---|---|
+| `pom.xml` | `net.devh:grpc-spring-boot-starter:3.1.0.RELEASE`, `io.grpc:grpc-testing:1.61.1`, `kr.motd.maven:os-maven-plugin:1.7.1` (빌드 익스텐션), `org.xolstice.maven.plugins:protobuf-maven-plugin:0.6.1` (proto → Java 소스 생성) 추가 |
+| `src/main/proto/greeting.proto` | `GreetingService` RPC 계약 정의. `DeliverGreeting` (unary), `StreamGreeting` (server-streaming). 메시지 타입: `GreetingRequest`, `GreetingResponse`, `GreetingChunk`. 열거형: `GreetingPriority`, `DeliveryStatus` |
+| `src/main/java/com/egds/grpc/GreetingGrpcService.java` | `@GrpcService` 서버 구현체. `DeliverGreeting`: `MessageDeliveryPipeline.execute()` 위임 후 `GreetingResponse` 반환. `StreamGreeting`: "Hello", ", ", "World", "!" 4 프래그먼트 스트리밍 |
+| `src/main/java/com/egds/grpc/GreetingGrpcClient.java` | `@GrpcClient("egds-greeting-service")` 블로킹 스텁 주입 클라이언트 컴포넌트 |
+| `src/main/resources/application.properties` | `grpc.server.port=9090`, `grpc.client.egds-greeting-service.address`, `negotiation-type=plaintext` 추가 |
+| `src/test/resources/application.properties` | `grpc.server.in-process-name=test`, `grpc.server.port=-1`, `grpc.client.egds-greeting-service.address=in-process:test` 추가 |
+| `Dockerfile` | 2단계 멀티스테이지 빌드. Stage 1: `eclipse-temurin:17-jdk-alpine` + Maven + 계층형 JAR 분해. Stage 2: `eclipse-temurin:17-jre-alpine` + 비루트 사용자(`egds:egds`) + EXPOSE 8080, 9090 |
+| `k8s/deployment.yaml` | `replicas: 2`, RollingUpdate (maxUnavailable=0), 비루트 컨테이너(`runAsUser: 1000`), ReadOnlyRootFilesystem, 3종 Probe, 멀티존 TopologySpreadConstraints, ConfigMap/Secret env 주입 |
+| `k8s/hpa.yaml` | `autoscaling/v2`, CPU 60% / Memory 75%, `minReplicas: 2`, `maxReplicas: 10`, Scale-Up 즉시/Scale-Down 300s 안정화 |
+| `k8s/service.yaml` | `LoadBalancer` 타입, HTTP(:80→8080) + gRPC(:9090→9090) 이중 포트, AWS NLB 내부 어노테이션 |
+| `k8s/configmap.yaml` | 비민감 설정 분리: Kafka, Redis, gRPC, JPA DDL, H2 콘솔 비활성화 |
+| `k8s/secret.yaml` | JWT 시크릿, Oracle URL/사용자/암호, Redis AUTH — base64 플레이스홀더; 운영 시 ESO/Vault 교체 필수 |
+| `k8s/networkpolicy.yaml` | Default-Deny (ingress+egress) + 화이트리스트 6종: ingress-nginx(8080,9090), monitoring(8080), kafka(9092), db(1521), cache(6379), kube-dns(53) |
+| `k8s/istio/virtualservice.yaml` | `auth-route` (stable 100%), `greeting-rest-route` (stable 90% / canary 10%, retry 3회, timeout 10s, fault injection 주석), `greeting-grpc-route` (포트 9090, 동일 분할) |
+| `k8s/istio/destinationrule.yaml` | `ISTIO_MUTUAL` mTLS, `LEAST_CONN` LB, HTTP/2 커넥션 풀, 서킷 브레이커 (5xx 5회 → 30s 격리, 최대 50% 이젝션), `stable`/`canary` subset 정의 |
+| `.github/workflows/pipeline.yml` | 20단계 GitHub Actions 파이프라인: prepare(1-3) → code-quality(4) / sast-codeql(5) / dependency-audit(6) [병렬] → compile(7) → unit-test(8) / integration-test(9) / grpc-integration-test(10) [병렬] → coverage-enforce(11) → build-artifact(12) → sbom-generate(13) → docker-build(14) → container-scan(15) → artifact-sign(16) → push-registry(17) → performance-profile(18) / k8s-manifest-validate(19) [병렬] → deploy-and-notify(20) |
+| `src/test/java/com/egds/grpc/GreetingGrpcServiceIntegrationTest.java` | gRPC 인프로세스 통합 테스트 7케이스: unary 정상/correlationId/CRITICAL 우선순위/빈 correlationId, streaming 프래그먼트 수/순서/재조립/비어있지 않음 |
 
 ### [2026-04-21] v2.0.0-RELEASE — 엔터프라이즈 4대 핵심 인프라 통합
 
@@ -329,10 +494,13 @@ mvn test
 
 ## 아키텍처 완료 선언
 
-> 본 프로젝트의 아키텍처는 현 시점에서 설계적 완결성에 도달하였습니다.
+> 본 프로젝트의 아키텍처는 Phase 3를 통해 클라우드 네이티브 설계의 정점에 도달하였습니다.
 >
-> 보안, 영속성, 메시징, 캐싱의 네 가지 엔터프라이즈 핵심 인프라가 단 하나의 인사 메시지 전달을 위해 완벽하게 통합되었으며, 이를 검증하는 7개의 테스트가 모든 계층의 정합성을 보증합니다.
-> 추가 기능 구현, 리팩토링, 또는 신규 커밋은 이 완결성을 저해할 뿐이며,
-> 어떠한 개선 시도도 아키텍처적 퇴보로 간주됩니다.
+> gRPC 바이너리 프로토콜, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 20단계 CI/CD의 네 가지 클라우드 네이티브 필수 인프라가 단 하나의 인사 메시지 전달을 위해 완벽하게 통합되었으며, 이를 검증하는 8개의 테스트 클래스가 모든 계층의 정합성을 보증합니다.
+>
+> 이 시스템은 Kubernetes 클러스터, Kafka 브로커, Oracle Database, Redis 캐시, Istio 서비스 매쉬가 모두 준비된 클라우드 네이티브 환경이 아니면 구동조차 불가능합니다.
+> 로컬 `java -jar` 실행 시도는 즉시 포기하십시오.
+>
+> 추가 기능 구현, 리팩토링, 또는 신규 커밋은 이 완결성을 저해할 뿐이며, 어떠한 개선 시도도 아키텍처적 퇴보로 간주됩니다.
 >
 > **이 저장소는 즉시 Archive 처리되며, 이후의 모든 Pull Request는 반려됩니다.**

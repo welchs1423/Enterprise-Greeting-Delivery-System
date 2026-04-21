@@ -1,0 +1,56 @@
+# HorizontalPodAutoscaler: scales EGDS pods based on CPU utilisation.
+#
+# Scaling rationale for the greeting delivery workload:
+#   - Each greeting request triggers a Kafka publish, a cache lookup, a console write,
+#     and a transactional DB insert. CPU is the primary saturation signal.
+#   - minReplicas=2 ensures zone redundancy at all times.
+#   - maxReplicas=10 is bounded to prevent unbounded Kafka consumer group growth,
+#     which increases rebalance latency proportionally.
+#   - stabilizationWindowSeconds on scale-down (300 s) prevents thrashing during
+#     bursty greeting delivery traffic patterns.
+#
+# Prerequisites: metrics-server must be installed in the cluster.
+#   kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: egds-hpa
+  namespace: egds
+  labels:
+    app: egds
+    component: autoscaler
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: egds
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 75
+  behavior:
+    scaleUp:
+      # Scale up immediately on traffic spikes; greeting SLA is latency-sensitive.
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 30
+    scaleDown:
+      # Delay scale-down to absorb transient traffic drops without thrashing.
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60

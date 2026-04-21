@@ -25,6 +25,10 @@
     <properties>
         <java.version>17</java.version>
         <jjwt.version>0.12.5</jjwt.version>
+        <grpc.spring.boot.version>3.1.0.RELEASE</grpc.spring.boot.version>
+        <grpc.version>1.61.1</grpc.version>
+        <protobuf.version>3.25.1</protobuf.version>
+        <ascopes.protobuf.plugin.version>2.13.1</ascopes.protobuf.plugin.version>
     </properties>
 
     <dependencies>
@@ -101,6 +105,24 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- gRPC Spring Boot Starter (server + client autoconfiguration) -->
+        <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-spring-boot-starter</artifactId>
+            <version>${grpc.spring.boot.version}</version>
+        </dependency>
+
+        <!--
+            javax.annotation-api: required by gRPC-generated stub code which emits
+            @javax.annotation.Generated. This annotation was removed from the JDK in Java 9+
+            and is no longer transitively included by Spring Boot 3 (which uses Jakarta EE 9).
+        -->
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -118,6 +140,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- gRPC in-process testing support -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-testing</artifactId>
+            <version>${grpc.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -125,6 +155,38 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!--
+                Protobuf compiler plugin (ascopes variant).
+                Uses JVM Path API internally; avoids protoc subprocess path-encoding issues
+                on Windows hosts with non-ASCII working directory paths.
+                Generates Java message classes and gRPC service stubs from src/main/proto.
+            -->
+            <plugin>
+                <groupId>io.github.ascopes</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>${ascopes.protobuf.plugin.version}</version>
+                <configuration>
+                    <protocVersion>${protobuf.version}</protocVersion>
+                    <sourceDirectories>
+                        <sourceDirectory>${project.basedir}/src/main/proto</sourceDirectory>
+                    </sourceDirectories>
+                    <binaryMavenPlugins>
+                        <binaryMavenPlugin>
+                            <groupId>io.grpc</groupId>
+                            <artifactId>protoc-gen-grpc-java</artifactId>
+                            <version>${grpc.version}</version>
+                        </binaryMavenPlugin>
+                    </binaryMavenPlugins>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

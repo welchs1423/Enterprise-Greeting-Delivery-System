@@ -1,0 +1,176 @@
+# NetworkPolicy: default-deny posture for the egds namespace.
+#
+# Permitted ingress:
+#   - HTTP (8080) and gRPC (9090) from the ingress controller namespace only.
+#   - Prometheus scrape (8080) from the monitoring namespace only.
+#
+# Permitted egress:
+#   - Kafka cluster (9092) in the kafka namespace.
+#   - Oracle DB (1521) in the db namespace.
+#   - Redis (6379) in the cache namespace.
+#   - Kubernetes DNS (53/UDP+TCP) for service discovery.
+#
+# All other ingress and egress is denied.
+# This policy enforces that EGDS pods are unreachable from any namespace
+# not explicitly listed below, including other application namespaces.
+
+---
+# Default-deny: drop all ingress not matched by subsequent policies.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egds-default-deny-ingress
+  namespace: egds
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+
+---
+# Default-deny: drop all egress not matched by subsequent policies.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egds-default-deny-egress
+  namespace: egds
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+
+---
+# Allow HTTP and gRPC ingress from the ingress controller only.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egds-allow-ingress-controller
+  namespace: egds
+spec:
+  podSelector:
+    matchLabels:
+      app: egds
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 9090
+
+---
+# Allow Prometheus scrape from the monitoring namespace.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egds-allow-prometheus-scrape
+  namespace: egds
+spec:
+  podSelector:
+    matchLabels:
+      app: egds
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 8080
+
+---
+# Allow egress to Kafka cluster.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egds-allow-egress-kafka
+  namespace: egds
+spec:
+  podSelector:
+    matchLabels:
+      app: egds
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+
+---
+# Allow egress to Oracle DB.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egds-allow-egress-oracle
+  namespace: egds
+spec:
+  podSelector:
+    matchLabels:
+      app: egds
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: db
+      ports:
+        - protocol: TCP
+          port: 1521
+
+---
+# Allow egress to Redis cache cluster.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egds-allow-egress-redis
+  namespace: egds
+spec:
+  podSelector:
+    matchLabels:
+      app: egds
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cache
+      ports:
+        - protocol: TCP
+          port: 6379
+
+---
+# Allow egress to kube-dns for service name resolution.
+# Without this policy, all DNS lookups to cluster services fail.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egds-allow-egress-dns
+  namespace: egds
+spec:
+  podSelector:
+    matchLabels:
+      app: egds
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

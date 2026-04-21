@@ -1,0 +1,103 @@
+# Istio VirtualService: traffic routing rules for EGDS.
+#
+# Prerequisites:
+#   1. Istio control plane installed: istioctl install --set profile=production
+#   2. Namespace injection enabled: kubectl label namespace egds istio-injection=enabled
+#   3. Istio Gateway deployed (see gateway.yaml if needed)
+#
+# This VirtualService controls:
+#   - Canary traffic splitting between stable (v3.0.0) and canary releases
+#   - HTTP retry policy for transient greeting delivery failures
+#   - Request timeout enforcement
+#   - Fault injection for chaos engineering (commented out; enable per drill)
+#
+# Apply: kubectl apply -f k8s/istio/virtualservice.yaml
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: egds-vs
+  namespace: egds
+  labels:
+    app: egds
+    component: istio-routing
+spec:
+  hosts:
+    - egds-svc
+    - egds.example.internal    # FQDN used by external callers via the Istio Gateway
+  gateways:
+    - egds-gateway             # references an Istio Gateway resource (not included here)
+    - mesh                     # applies rules to intra-mesh (sidecar-to-sidecar) traffic
+  http:
+    # Route 1: JWT auth endpoint — routed to stable only; no canary for auth changes.
+    - name: "auth-route"
+      match:
+        - uri:
+            prefix: "/api/v1/auth"
+      route:
+        - destination:
+            host: egds-svc
+            subset: stable
+            port:
+              number: 80
+      timeout: 5s
+      retries:
+        attempts: 1
+        perTryTimeout: 5s
+
+    # Route 2: Greeting REST endpoint with canary split.
+    # Shift canary weight gradually: 0 → 10 → 30 → 50 → 100 over multiple deploys.
+    - name: "greeting-rest-route"
+      match:
+        - uri:
+            prefix: "/api/v1/greeting"
+      route:
+        - destination:
+            host: egds-svc
+            subset: stable
+            port:
+              number: 80
+          weight: 90
+        - destination:
+            host: egds-svc
+            subset: canary
+            port:
+              number: 80
+          weight: 10
+      timeout: 10s
+      retries:
+        attempts: 3
+        perTryTimeout: 3s
+        # Retry only on network-level and 5xx failures; never retry 401/403.
+        retryOn: "connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes"
+        retryRemoteStatuses: "500,502,503,504"
+
+      # Fault injection — disabled in normal operation.
+      # Uncomment to inject a 5% delay (chaos engineering drill):
+      # fault:
+      #   delay:
+      #     percentage:
+      #       value: 5.0
+      #     fixedDelay: 3s
+
+  # gRPC traffic routing (Protobuf binary; HTTP/2 transport)
+  - name: "greeting-grpc-route"
+    match:
+      - port: 9090
+    route:
+      - destination:
+          host: egds-svc
+          subset: stable
+          port:
+            number: 9090
+        weight: 90
+      - destination:
+          host: egds-svc
+          subset: canary
+          port:
+            number: 9090
+        weight: 10
+    timeout: 10s
+    retries:
+      attempts: 3
+      perTryTimeout: 3s
+      retryOn: "connect-failure,refused-stream,unavailable,cancelled"

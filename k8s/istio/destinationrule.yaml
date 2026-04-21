@@ -1,0 +1,81 @@
+# Istio DestinationRule: load balancing, connection pool, and circuit breaker configuration.
+#
+# Prerequisites: same as virtualservice.yaml (Istio installed, namespace injection enabled).
+#
+# This DestinationRule defines:
+#   - Two subsets: stable (v3.0.0) and canary (next release candidate)
+#   - mTLS enforcement: all traffic between sidecars is encrypted (ISTIO_MUTUAL)
+#   - Connection pool limits: prevents a single upstream surge from exhausting thread pools
+#   - Outlier detection (circuit breaker): ejects pods that return consecutive 5xx responses
+#
+# Apply: kubectl apply -f k8s/istio/destinationrule.yaml
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: egds-dr
+  namespace: egds
+  labels:
+    app: egds
+    component: istio-destination
+spec:
+  host: egds-svc
+
+  trafficPolicy:
+    # mTLS: enforce mutual TLS for all intra-mesh connections to EGDS.
+    # Certificates are rotated automatically by the Istio CA.
+    tls:
+      mode: ISTIO_MUTUAL
+
+    # Load balancing: LEAST_CONN distributes greeting delivery requests
+    # to the pod with the fewest active connections, which is preferable
+    # to ROUND_ROBIN when pipeline execution time varies per pod (cache miss rate).
+    loadBalancer:
+      simple: LEAST_CONN
+
+    # Connection pool: HTTP/2 limits (gRPC rides on HTTP/2).
+    connectionPool:
+      http:
+        http2MaxRequests: 1000
+        maxRequestsPerConnection: 100
+        # H1 fallback for REST clients that do not negotiate HTTP/2.
+        http1MaxPendingRequests: 200
+      tcp:
+        maxConnections: 100
+        connectTimeout: 3s
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+
+    # Outlier detection (circuit breaker).
+    # A pod is ejected from the load balancer pool when it returns 5 consecutive
+    # 5xx responses within a 30-second interval. It is re-admitted after 30 seconds.
+    # consecutiveGatewayErrors covers gRPC status codes mapped to HTTP 502/503/504.
+    outlierDetection:
+      consecutive5xxErrors: 5
+      consecutiveGatewayErrors: 3
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50    # never eject more than half the pool simultaneously
+      minHealthPercent: 50      # stop ejecting if fewer than 50% of pods are healthy
+
+  # Subsets correspond to pod label "version".
+  # The canary subset is deployed by the CI/CD pipeline's staging step
+  # before full promotion to stable.
+  subsets:
+    - name: stable
+      labels:
+        version: "3.0.0"
+      trafficPolicy:
+        connectionPool:
+          http:
+            http2MaxRequests: 1000
+
+    - name: canary
+      labels:
+        version: "3.0.0-canary"
+      trafficPolicy:
+        # Canary pods receive fewer concurrent requests to limit blast radius
+        # if the release candidate introduces a regression.
+        connectionPool:
+          http:
+            http2MaxRequests: 100

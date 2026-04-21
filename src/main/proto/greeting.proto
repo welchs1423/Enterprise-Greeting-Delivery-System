@@ -1,0 +1,71 @@
+// EGDS gRPC service contract.
+// Binary Protobuf encoding replaces JSON for inter-service communication on the high-performance path.
+// Regenerate Java sources: mvn generate-sources (protobuf-maven-plugin)
+
+syntax = "proto3";
+
+package com.egds.grpc;
+
+option java_multiple_files = true;
+option java_package = "com.egds.grpc.proto";
+option java_outer_classname = "GreetingProto";
+
+// GreetingService: high-performance binary RPC entry point for greeting delivery.
+// Supplements the existing Kafka-based async path for synchronous, latency-sensitive callers.
+service GreetingService {
+
+    // DeliverGreeting: unary RPC. Executes the full EGDS delivery pipeline and returns
+    // a single structured response. Replaces the HTTP GET /api/v1/greeting endpoint
+    // for inter-service callers that cannot afford JSON serialization overhead.
+    rpc DeliverGreeting(GreetingRequest) returns (GreetingResponse);
+
+    // StreamGreeting: server-streaming RPC. Delivers the greeting payload as an ordered
+    // sequence of fragments. Useful for large payload scenarios or progressive rendering
+    // on the consumer side.
+    rpc StreamGreeting(GreetingRequest) returns (stream GreetingChunk);
+}
+
+// GreetingRequest carries the caller-supplied trace context.
+// The correlation_id propagates through the pipeline and appears in all audit records.
+message GreetingRequest {
+    string correlation_id      = 1; // UUID v4; mandatory; used for distributed tracing
+    string principal_name      = 2; // authenticated subject identity (e.g. "greeting.admin")
+    string request_ip          = 3; // originating IP address for audit
+    int64  issued_at_epoch_ms  = 4; // Unix epoch ms at which the caller issued this request
+    GreetingPriority priority  = 5; // delivery urgency; defaults to PRIORITY_NORMAL if unset
+}
+
+// GreetingResponse is the unary delivery outcome.
+message GreetingResponse {
+    string           correlation_id      = 1; // echoes the request correlation_id
+    string           message             = 2; // the assembled greeting payload
+    DeliveryStatus   status              = 3; // terminal delivery state
+    int64            delivered_at_epoch_ms = 4; // Unix epoch ms at server-side delivery completion
+    string           delivery_node       = 5; // hostname of the pod that executed the pipeline
+}
+
+// GreetingChunk is a single fragment in the server-streaming response.
+message GreetingChunk {
+    string fragment        = 1; // partial greeting content
+    int32  sequence_number = 2; // zero-based fragment index; consumers must reassemble in order
+    bool   is_last         = 3; // true on the terminal fragment; false on all preceding chunks
+}
+
+// GreetingPriority mirrors com.egds.core.enums.MessagePriority.
+// PRIORITY_UNSPECIFIED maps to NORMAL in the server-side translation layer.
+enum GreetingPriority {
+    PRIORITY_UNSPECIFIED = 0;
+    PRIORITY_CRITICAL    = 1;
+    PRIORITY_HIGH        = 2;
+    PRIORITY_NORMAL      = 3;
+    PRIORITY_LOW         = 4;
+}
+
+// DeliveryStatus mirrors com.egds.core.enums.DeliveryStatus.
+enum DeliveryStatus {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_PENDING     = 1;
+    STATUS_IN_TRANSIT  = 2;
+    STATUS_DELIVERED   = 3;
+    STATUS_FAILED      = 4;
+}

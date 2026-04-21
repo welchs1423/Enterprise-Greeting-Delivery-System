@@ -1,9 +1,12 @@
 package com.egds.core.factory;
 
+import com.egds.core.dto.MessageContentDto;
+import com.egds.core.enums.MessagePriority;
 import com.egds.core.interfaces.IMessageOutputStrategy;
 import com.egds.core.interfaces.IMessageProvider;
-import com.egds.core.provider.HelloWorldMessageProvider;
 import com.egds.core.strategy.ConsoleOutputStrategy;
+
+import java.util.UUID;
 
 /**
  * Concrete Abstract Factory implementation producing the standard EGDS pipeline components.
@@ -27,14 +30,18 @@ public class StandardGreetingFactory extends AbstractGreetingFactory {
     }
 
     /**
-     * Creates a {@link HelloWorldMessageProvider} as the message content source
-     * for the standard delivery pipeline configuration.
+     * Returns a minimal {@link IMessageProvider} for non-Spring (v1.0) environments.
+     * In the Spring-managed context, {@code HelloWorldMessageProvider} is wired by the IoC
+     * container and this factory method is not invoked.
      *
-     * @return a new {@link HelloWorldMessageProvider} instance
+     * @return an inline provider that assembles the standard greeting without cache
      */
     @Override
     public IMessageProvider createMessageProvider() {
-        return new HelloWorldMessageProvider();
+        return () -> new MessageContentDto.Builder("Hello, World!", UUID.randomUUID().toString())
+                .locale("en-US")
+                .priority(MessagePriority.NORMAL)
+                .build();
     }
 
     /**
