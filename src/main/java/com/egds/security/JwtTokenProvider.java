@@ -33,24 +33,33 @@ public class JwtTokenProvider {
     /** JWT claim key for the list of granted authority strings. */
     public static final String CLAIM_ROLES = "roles";
 
+    /** HMAC secret key value resolved from application properties. */
     private final String secret;
+
+    /** Token expiration duration in milliseconds. */
     private final long expiration;
 
+    /**
+     * @param secretValue     the HMAC signing secret
+     * @param expirationValue the token expiration duration in milliseconds
+     */
     public JwtTokenProvider(
-            @Value("${egds.security.jwt.secret}") String secret,
-            @Value("${egds.security.jwt.expiration}") long expiration) {
-        this.secret = secret;
-        this.expiration = expiration;
+            @Value("${egds.security.jwt.secret}") final String secretValue,
+            @Value("${egds.security.jwt.expiration}")
+            final long expirationValue) {
+        this.secret = secretValue;
+        this.expiration = expirationValue;
     }
 
     /**
-     * Generates a signed JWT token from the supplied {@link Authentication} principal.
-     * The token encodes the username as the subject and the granted authorities as a role list.
+     * Generates a signed JWT token from the supplied
+     * {@link Authentication} principal. Encodes the username as the
+     * subject and the granted authorities as a role list.
      *
      * @param authentication the authenticated principal; must not be null
      * @return a compact, URL-safe JWT string
      */
-    public String generateToken(Authentication authentication) {
+    public String generateToken(final Authentication authentication) {
         List<String> roles = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
@@ -73,7 +82,7 @@ public class JwtTokenProvider {
      * @param token the compact JWT string
      * @return the username embedded in the subject claim
      */
-    public String extractUsername(String token) {
+    public String extractUsername(final String token) {
         return parseClaims(token).getSubject();
     }
 
@@ -81,10 +90,10 @@ public class JwtTokenProvider {
      * Extracts the role list from a validated JWT token.
      *
      * @param token the compact JWT string
-     * @return list of authority strings embedded in the {@value #CLAIM_ROLES} claim
+     * @return list of authority strings in the {@value #CLAIM_ROLES} claim
      */
     @SuppressWarnings("unchecked")
-    public List<String> extractRoles(String token) {
+    public List<String> extractRoles(final String token) {
         return (List<String>) parseClaims(token).get(CLAIM_ROLES);
     }
 
@@ -92,9 +101,9 @@ public class JwtTokenProvider {
      * Validates the token signature and expiration.
      *
      * @param token the compact JWT string
-     * @return {@code true} if the token is well-formed, correctly signed, and not expired
+     * @return {@code true} if well-formed, correctly signed, and not expired
      */
-    public boolean validateToken(String token) {
+    public boolean validateToken(final String token) {
         try {
             parseClaims(token);
             return true;
@@ -112,7 +121,7 @@ public class JwtTokenProvider {
         return expiration;
     }
 
-    private Claims parseClaims(String token) {
+    private Claims parseClaims(final String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
@@ -121,6 +130,7 @@ public class JwtTokenProvider {
     }
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(
+                secret.getBytes(StandardCharsets.UTF_8));
     }
 }

@@ -17,6 +17,10 @@ import org.springframework.kafka.config.TopicBuilder;
 @Configuration
 public class KafkaConfig {
 
+    /** Number of partitions for the greeting event topic. */
+    private static final int GREETING_TOPIC_PARTITIONS = 3;
+
+    /** Greeting event topic name, resolved from application properties. */
     @Value("${egds.kafka.topic.greeting}")
     private String greetingTopic;
 
@@ -28,7 +32,7 @@ public class KafkaConfig {
     @Bean
     public NewTopic greetingEventTopic() {
         return TopicBuilder.name(greetingTopic)
-                .partitions(3)
+                .partitions(GREETING_TOPIC_PARTITIONS)
                 .replicas(1)
                 .build();
     }

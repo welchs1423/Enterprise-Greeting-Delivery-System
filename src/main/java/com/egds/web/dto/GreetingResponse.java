@@ -2,23 +2,57 @@ package com.egds.web.dto;
 
 /**
  * Response body for the asynchronous greeting delivery endpoint
- * ({@code GET /api/v1/greeting}).
- * The correlation identifier can be used to trace the delivery event
- * through the Kafka topic and the JPA audit log.
+ * ({@code GET /api/v1/greeting}). The correlation identifier can be used
+ * to trace the delivery event through the Kafka topic and JPA audit log.
  */
-public class GreetingResponse {
+public final class GreetingResponse {
 
+    /** Unique correlation identifier for tracing this delivery event. */
     private final String correlationId;
+
+    /** Acceptance status string. */
     private final String status;
+
+    /** Human-readable message describing the async delivery initiation. */
     private final String message;
 
-    public GreetingResponse(String correlationId) {
-        this.correlationId = correlationId;
+    /**
+     * Constructs a GreetingResponse for the given correlation ID.
+     *
+     * @param corrId the unique correlation identifier
+     */
+    public GreetingResponse(final String corrId) {
+        this.correlationId = corrId;
         this.status = "ACCEPTED";
-        this.message = "Greeting delivery event published. Pipeline execution is asynchronous.";
+        this.message =
+                "Greeting delivery event published."
+                + " Pipeline execution is asynchronous.";
     }
 
-    public String getCorrelationId() { return correlationId; }
-    public String getStatus() { return status; }
-    public String getMessage() { return message; }
+    /**
+     * Returns the correlation ID.
+     *
+     * @return the correlation ID string
+     */
+    public String getCorrelationId() {
+        return correlationId;
+    }
+
+    /**
+     * Returns the acceptance status.
+     *
+     * @return the status string
+     */
+    public String getStatus() {
+        return status;
+    }
+
+    /**
+     * Returns the human-readable acceptance message.
+     *
+     * @return the message string
+     */
+    public String getMessage() {
+        return message;
+    }
 }

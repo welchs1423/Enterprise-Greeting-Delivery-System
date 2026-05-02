@@ -21,55 +21,67 @@ import java.util.UUID;
  * {@code ROLE_GREETING_ADMIN} authority. Requests without this authority
  * receive HTTP 403 Forbidden via Spring Security's method security layer.
  *
- * <p>The delivery pipeline is invoked asynchronously through the Kafka event bus.
- * The endpoint publishes a {@link GreetingEvent} and returns HTTP 202 Accepted
- * immediately; the Kafka consumer executes the pipeline on a separate thread.
+ * <p>The delivery pipeline is invoked asynchronously through the Kafka
+ * event bus. The endpoint publishes a {@link GreetingEvent} and returns
+ * HTTP 202 Accepted immediately; the Kafka consumer executes the pipeline
+ * on a separate thread.
  */
 @RestController
 @RequestMapping("/api/v1")
 public class GreetingController {
 
+    /** Kafka event publisher for asynchronous greeting delivery. */
     private final GreetingEventPublisher greetingEventPublisher;
 
-    public GreetingController(GreetingEventPublisher greetingEventPublisher) {
-        this.greetingEventPublisher = greetingEventPublisher;
+    /**
+     * @param publisher the Kafka greeting event publisher
+     */
+    public GreetingController(
+            final GreetingEventPublisher publisher) {
+        this.greetingEventPublisher = publisher;
     }
 
     /**
      * Initiates an asynchronous greeting delivery cycle.
-     * Requires the {@code ROLE_GREETING_ADMIN} authority; returns HTTP 403 otherwise.
+     * Requires the {@code ROLE_GREETING_ADMIN} authority.
      *
      * <p>Processing flow:
      * <ol>
-     *   <li>Resolve client IP (honouring {@code X-Forwarded-For} for proxied requests).</li>
-     *   <li>Publish a {@link GreetingEvent} to the Kafka greeting event topic.</li>
-     *   <li>Return HTTP 202 Accepted with the correlation identifier for downstream tracing.</li>
+     *   <li>Resolve client IP (honouring {@code X-Forwarded-For}).</li>
+     *   <li>Publish a {@link GreetingEvent} to the Kafka topic.</li>
+     *   <li>Return HTTP 202 Accepted with the correlation ID.</li>
      * </ol>
      *
-     * @param request the HTTP request, used to capture the originating client IP
-     * @return HTTP 202 Accepted with a {@link GreetingResponse} containing the correlation ID
+     * @param request the HTTP request for capturing the client IP
+     * @return HTTP 202 with a {@link GreetingResponse} containing the ID
      */
     @GetMapping("/greeting")
     @PreAuthorize("hasRole('GREETING_ADMIN')")
-    public ResponseEntity<GreetingResponse> deliverGreeting(HttpServletRequest request) {
+    public ResponseEntity<GreetingResponse> deliverGreeting(
+            final HttpServletRequest request) {
         String correlationId = UUID.randomUUID().toString();
         String requestIp = resolveClientIp(request);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String principalName = authentication != null ? authentication.getName() : "ANONYMOUS";
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+        String principalName = authentication != null
+                ? authentication.getName()
+                : "ANONYMOUS";
 
-        greetingEventPublisher.publish(new GreetingEvent(correlationId, requestIp, principalName));
+        greetingEventPublisher.publish(
+                new GreetingEvent(correlationId, requestIp, principalName));
 
-        return ResponseEntity.accepted().body(new GreetingResponse(correlationId));
+        return ResponseEntity.accepted()
+                .body(new GreetingResponse(correlationId));
     }
 
     /**
-     * Resolves the real client IP address, preferring the {@code X-Forwarded-For} header
-     * to handle requests routed through a load balancer or reverse proxy.
+     * Resolves the real client IP address, preferring
+     * {@code X-Forwarded-For} for requests routed through a proxy.
      *
      * @param request the HTTP request
      * @return the resolved IP address string
      */
-    private String resolveClientIp(HttpServletRequest request) {
+    private String resolveClientIp(final HttpServletRequest request) {
         String forwarded = request.getHeader("X-Forwarded-For");
         if (forwarded != null && !forwarded.isBlank()) {
             return forwarded.split(",")[0].trim();

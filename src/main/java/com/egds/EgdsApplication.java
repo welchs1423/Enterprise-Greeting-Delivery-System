@@ -8,7 +8,8 @@ import org.springframework.kafka.annotation.EnableKafka;
 /**
  * Bootstrap entry point for the Enterprise Greeting Delivery System (EGDS) v2.
  *
- * <p>Spring Boot context initialization supersedes the manual IoC wiring of v1.0.
+ * <p>Spring Boot context initialization supersedes the manual IoC
+ * wiring of v1.0.
  * Cache infrastructure is activated via {@code @EnableCaching};
  * Kafka listener container lifecycle is managed via {@code @EnableKafka}.
  *
@@ -18,9 +19,17 @@ import org.springframework.kafka.annotation.EnableKafka;
 @SpringBootApplication
 @EnableCaching
 @EnableKafka
-public class EgdsApplication {
+public final class EgdsApplication {
 
-    public static void main(String[] args) {
+    private EgdsApplication() {
+    }
+
+    /**
+     * Launches the Spring Boot application context.
+     *
+     * @param args command-line arguments passed to the JVM
+     */
+    public static void main(final String[] args) {
         SpringApplication.run(EgdsApplication.class, args);
     }
 }

@@ -5,12 +5,15 @@ package com.egds.config;
  *
  * <p>The backing store is determined by the active Spring profile:
  * <ul>
- *   <li>Local / CI: {@code ConcurrentMapCacheManager} (spring.cache.type=simple)</li>
- *   <li>Production: Redis (spring.cache.type=redis, activated via "prod" profile)</li>
+ *   <li>Local / CI: {@code ConcurrentMapCacheManager}
+ *       (spring.cache.type=simple)</li>
+ *   <li>Production: Redis
+ *       (spring.cache.type=redis, activated via "prod" profile)</li>
  * </ul>
  *
- * Cache manager auto-configuration is delegated to Spring Boot based on the
- * {@code spring.cache.type} property; no explicit {@code CacheManager} bean is defined here.
+ * Cache manager auto-configuration is delegated to Spring Boot based on
+ * the {@code spring.cache.type} property; no explicit
+ * {@code CacheManager} bean is defined here.
  */
 public final class CacheConfig {
 

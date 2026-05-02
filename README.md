@@ -383,6 +383,26 @@ mvn test -Dtest="GreetingGrpcServiceIntegrationTest"
 
 ## 작업 이력 (Changelog)
 
+### [2026-05-02] v3.0.1 — Checkstyle 전면 준수
+
+`mvn checkstyle:check` 기준 전체 소스 위반 0건 달성.
+
+| 위반 규칙 | 조치 내용 |
+|---|---|
+| `JavadocPackage` | `com.egds.*` 24개 패키지 및 `com.enterprise.greeting.*` 3개 패키지에 `package-info.java` 신규 생성 |
+| `ConstantName` | `private static final Logger log` → `LOG` (6개 클래스) |
+| `FinalParameters` | 전체 생성자 및 메서드 파라미터에 `final` 추가 |
+| `HiddenField` | 필드명과 충돌하는 생성자 파라미터 일괄 개명 |
+| `LineLength` | 80자 초과 행 전체 래핑 (Javadoc, 어노테이션 인자, 문자열 연결) |
+| `MagicNumber` | `GreetingAuditLog` 컬럼 길이·시퀀스 할당 크기, `KafkaConfig` 파티션 수, `AuditLogService` 쿼리 타임아웃을 `private static final` 상수로 추출 |
+| `AvoidStarImport` | `jakarta.persistence.*` → 개별 import 8종으로 교체 |
+| `OperatorWrap` | 문자열 연결 `+` 연산자를 속행 행 첫머리로 이동 |
+| `LeftCurly` | 단일 행 메서드 본문 `{ return x; }` 전부 다중 행으로 확장 |
+| `DesignForExtension` | JPA 엔티티: 각 getter에 Javadoc 추가. 순수 DTO·응답·요청 클래스: `final` 선언 |
+| `HideUtilityClassConstructor` / `FinalClass` | `EgdsApplication`: `private` 생성자 추가 후 클래스 `final` 선언 |
+| `MissingJavadocMethod` / `JavadocVariable` | 미작성 Javadoc 전면 보완 |
+| `UnusedImports` | 미사용 import 제거 |
+
 ### [2026-04-21] v3.0.0-RELEASE — Phase 3: gRPC 및 K8s 기반 클라우드 네이티브 인프라 통합
 
 **신규 추가 파일**

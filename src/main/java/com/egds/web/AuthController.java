@@ -16,41 +16,57 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST endpoint for JWT token issuance.
- * Accepts username and password credentials and returns a signed JWT bearer token
- * valid for the configured expiration period ({@code egds.security.jwt.expiration}).
+ * Accepts username and password credentials and returns a signed JWT
+ * bearer token valid for the configured expiration period
+ * ({@code egds.security.jwt.expiration}).
  *
- * <p>This endpoint is explicitly excluded from JWT authentication requirements
- * in {@link com.egds.config.SecurityConfig}; no bearer token is required to call it.
+ * <p>This endpoint is explicitly excluded from JWT authentication
+ * requirements in {@link com.egds.config.SecurityConfig}; no bearer
+ * token is required to call it.
  */
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
+    /** Spring Security authentication manager. */
     private final AuthenticationManager authenticationManager;
+
+    /** JWT token provider for token generation. */
     private final JwtTokenProvider jwtTokenProvider;
 
-    public AuthController(AuthenticationManager authenticationManager,
-                          JwtTokenProvider jwtTokenProvider) {
-        this.authenticationManager = authenticationManager;
-        this.jwtTokenProvider = jwtTokenProvider;
+    /**
+     * @param manager      the Spring Security authentication manager
+     * @param tokenProvider the JWT token provider
+     */
+    public AuthController(
+            final AuthenticationManager manager,
+            final JwtTokenProvider tokenProvider) {
+        this.authenticationManager = manager;
+        this.jwtTokenProvider = tokenProvider;
     }
 
     /**
      * Authenticates the supplied credentials and issues a JWT bearer token.
-     * Delegates authentication to the Spring Security {@link AuthenticationManager};
-     * throws {@code AuthenticationException} on invalid credentials (HTTP 401).
+     * Delegates authentication to the Spring Security
+     * {@link AuthenticationManager}; throws {@code AuthenticationException}
+     * on invalid credentials (HTTP 401).
      *
-     * @param request the login credentials; both username and password must not be blank
-     * @return HTTP 200 with a {@link TokenResponse} containing the signed JWT
+     * @param request the login credentials; username and password required
+     * @return HTTP 200 with a {@link TokenResponse} containing the JWT
      */
     @PostMapping("/token")
-    public ResponseEntity<TokenResponse> generateToken(@RequestBody @Valid TokenRequest request) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    public ResponseEntity<TokenResponse> generateToken(
+            @RequestBody @Valid final TokenRequest request) {
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.getUsername(),
+                                request.getPassword()));
+        SecurityContextHolder.getContext()
+                .setAuthentication(authentication);
 
         String token = jwtTokenProvider.generateToken(authentication);
-        return ResponseEntity.ok(new TokenResponse(token, jwtTokenProvider.getExpiration()));
+        return ResponseEntity.ok(
+                new TokenResponse(token, jwtTokenProvider.getExpiration()));
     }
 }

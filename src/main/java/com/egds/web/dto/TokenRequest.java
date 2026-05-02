@@ -3,28 +3,68 @@ package com.egds.web.dto;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * Request body for the JWT token issuance endpoint ({@code POST /api/v1/auth/token}).
- * Both fields are mandatory; blank values are rejected by the validation layer.
+ * Request body for the JWT token issuance endpoint
+ * ({@code POST /api/v1/auth/token}).
+ * Both fields are mandatory; blank values are rejected by validation.
  */
-public class TokenRequest {
+public final class TokenRequest {
 
+    /** The login username; must not be blank. */
     @NotBlank
     private String username;
 
+    /** The login password; must not be blank. */
     @NotBlank
     private String password;
 
+    /** Required by Jackson for JSON deserialization. */
     public TokenRequest() {
     }
 
-    public TokenRequest(String username, String password) {
-        this.username = username;
-        this.password = password;
+    /**
+     * Constructs a TokenRequest with the given credentials.
+     *
+     * @param user the username value
+     * @param pass the password value
+     */
+    public TokenRequest(final String user, final String pass) {
+        this.username = user;
+        this.password = pass;
     }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    /**
+     * Returns the username.
+     *
+     * @return the username string
+     */
+    public String getUsername() {
+        return username;
+    }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    /**
+     * Sets the username.
+     *
+     * @param value the new username value
+     */
+    public void setUsername(final String value) {
+        this.username = value;
+    }
+
+    /**
+     * Returns the password.
+     *
+     * @return the password string
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Sets the password.
+     *
+     * @param value the new password value
+     */
+    public void setPassword(final String value) {
+        this.password = value;
+    }
 }

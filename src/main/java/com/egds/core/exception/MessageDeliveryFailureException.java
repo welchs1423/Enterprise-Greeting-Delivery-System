@@ -2,45 +2,55 @@ package com.egds.core.exception;
 
 /**
  * Signals an unrecoverable failure in the message delivery lifecycle.
- * This exception is thrown when the delivery pipeline encounters a state
- * from which it cannot recover without external intervention.
+ * Thrown when the delivery pipeline encounters a state from which it
+ * cannot recover without external intervention.
  */
 public class MessageDeliveryFailureException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
+    /** Correlation ID of the message that failed delivery. */
     private final String correlationId;
+
+    /** Machine-readable failure classification code. */
     private final String failureCode;
 
     /**
-     * Constructs a new MessageDeliveryFailureException with the specified detail message.
+     * Constructs a new exception with the specified detail message.
      *
-     * @param message       a human-readable description of the failure condition
-     * @param correlationId the correlation identifier of the message that failed delivery
-     * @param failureCode   a machine-readable failure classification code
+     * @param message human-readable description of the failure
+     * @param corrId  correlation ID of the message that failed
+     * @param code    machine-readable failure classification code
      */
-    public MessageDeliveryFailureException(String message, String correlationId, String failureCode) {
+    public MessageDeliveryFailureException(
+            final String message,
+            final String corrId,
+            final String code) {
         super(message);
-        this.correlationId = correlationId;
-        this.failureCode = failureCode;
+        this.correlationId = corrId;
+        this.failureCode = code;
     }
 
     /**
-     * Constructs a new MessageDeliveryFailureException with a causal exception.
+     * Constructs a new exception with a causal exception.
      *
-     * @param message       a human-readable description of the failure condition
-     * @param correlationId the correlation identifier of the message that failed delivery
-     * @param failureCode   a machine-readable failure classification code
-     * @param cause         the underlying exception that precipitated this failure
+     * @param message human-readable description of the failure
+     * @param corrId  correlation ID of the message that failed
+     * @param code    machine-readable failure classification code
+     * @param cause   the underlying exception that caused this failure
      */
-    public MessageDeliveryFailureException(String message, String correlationId, String failureCode, Throwable cause) {
+    public MessageDeliveryFailureException(
+            final String message,
+            final String corrId,
+            final String code,
+            final Throwable cause) {
         super(message, cause);
-        this.correlationId = correlationId;
-        this.failureCode = failureCode;
+        this.correlationId = corrId;
+        this.failureCode = code;
     }
 
     /**
-     * Returns the correlation identifier associated with the failed message.
+     * Returns the correlation ID of the failed message.
      *
      * @return the correlation ID string
      */

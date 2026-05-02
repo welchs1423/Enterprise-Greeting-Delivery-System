@@ -16,64 +16,80 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 /**
  * Spring Security configuration for the EGDS platform.
  *
- * <p>Enforces stateless JWT-based authentication on all endpoints except the token
- * issuance path ({@code /api/v1/auth/**}). Session management is STATELESS;
- * no server-side session state is created or consulted.
+ * <p>Enforces stateless JWT-based authentication on all endpoints except
+ * the token issuance path ({@code /api/v1/auth/**}). Session management
+ * is STATELESS; no server-side session state is created or consulted.
  *
- * <p>Method-level security is enabled via {@code @EnableMethodSecurity}, allowing
- * {@code @PreAuthorize("hasRole('GREETING_ADMIN')")} on individual controller methods.
+ * <p>Method-level security is enabled via {@code @EnableMethodSecurity},
+ * allowing {@code @PreAuthorize} on individual controller methods.
  */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    /** JWT entry point for handling authentication errors. */
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+    /** JWT filter applied before the username/password filter. */
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
-                          JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    /**
+     * @param entryPoint the JWT authentication entry point
+     * @param authFilter the JWT authentication filter
+     */
+    public SecurityConfig(
+            final JwtAuthenticationEntryPoint entryPoint,
+            final JwtAuthenticationFilter authFilter) {
+        this.jwtAuthenticationEntryPoint = entryPoint;
+        this.jwtAuthenticationFilter = authFilter;
     }
 
     /**
      * Defines the primary security filter chain.
-     * Requests to {@code /api/v1/auth/**} and the H2 console are permitted without authentication.
-     * All other requests require a valid JWT bearer token.
+     * Requests to {@code /api/v1/auth/**} and the H2 console are
+     * permitted without authentication. All other requests require
+     * a valid JWT bearer token.
      *
      * @param http the {@link HttpSecurity} builder
      * @return the constructed {@link SecurityFilterChain}
      * @throws Exception if filter chain construction fails
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            final HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(ex ->
+                    ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+            .sessionManagement(session ->
+                    session.sessionCreationPolicy(
+                            SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .headers(headers ->
+                    headers.frameOptions(frame -> frame.sameOrigin()))
+            .addFilterBefore(
+                    jwtAuthenticationFilter,
+                    UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     /**
-     * Exposes the {@link AuthenticationManager} as a Spring bean for use in
-     * the token issuance endpoint.
+     * Exposes the {@link AuthenticationManager} as a Spring bean for use
+     * in the token issuance endpoint.
      *
      * @param config the auto-configured {@link AuthenticationConfiguration}
      * @return the resolved {@link AuthenticationManager}
      * @throws Exception if manager resolution fails
      */
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
-            throws Exception {
+    public AuthenticationManager authenticationManager(
+            final AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }

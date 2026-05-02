@@ -10,36 +10,40 @@ import java.util.List;
 
 /**
  * Spring Data JPA repository for {@link GreetingAuditLog} persistence.
- * Provides standard CRUD operations and domain-specific query methods for
- * the EGDS audit trail. All write operations execute within the transaction
- * boundary established by the calling service layer.
+ * Provides standard CRUD operations and domain-specific query methods
+ * for the EGDS audit trail. All write operations execute within the
+ * transaction boundary established by the calling service layer.
  */
 @Repository
-public interface GreetingAuditLogRepository extends JpaRepository<GreetingAuditLog, Long> {
+public interface GreetingAuditLogRepository
+        extends JpaRepository<GreetingAuditLog, Long> {
 
     /**
-     * Retrieves all audit records associated with a specific delivery correlation identifier,
+     * Retrieves all audit records for a specific correlation identifier,
      * ordered by creation timestamp ascending.
      *
      * @param correlationId the correlation identifier to search by
      * @return list of matching audit records
      */
-    List<GreetingAuditLog> findByCorrelationIdOrderByOccurredAtAsc(String correlationId);
+    List<GreetingAuditLog> findByCorrelationIdOrderByOccurredAtAsc(
+            String correlationId);
 
     /**
-     * Retrieves all audit records created within the specified time window (inclusive).
+     * Retrieves all audit records within the specified time window.
      *
      * @param from the inclusive start of the time window
      * @param to   the inclusive end of the time window
      * @return list of matching audit records
      */
-    List<GreetingAuditLog> findByOccurredAtBetween(LocalDateTime from, LocalDateTime to);
+    List<GreetingAuditLog> findByOccurredAtBetween(
+            LocalDateTime from, LocalDateTime to);
 
     /**
-     * Counts the total number of records with {@code DELIVERED} status in the audit log.
+     * Counts the total number of records with {@code DELIVERED} status.
      *
      * @return count of successfully delivered greeting events
      */
-    @Query("SELECT COUNT(g) FROM GreetingAuditLog g WHERE g.deliveryStatus = 'DELIVERED'")
+    @Query("SELECT COUNT(g) FROM GreetingAuditLog g"
+            + " WHERE g.deliveryStatus = 'DELIVERED'")
     long countSuccessfulDeliveries();
 }

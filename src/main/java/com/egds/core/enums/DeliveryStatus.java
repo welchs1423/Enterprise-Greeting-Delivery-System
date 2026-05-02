@@ -1,8 +1,9 @@
 package com.egds.core.enums;
 
 /**
- * Represents the lifecycle state of a message within the EGDS delivery pipeline.
- * State transitions are managed exclusively by the MessageDeliveryPipeline.
+ * Represents the lifecycle state of a message within the EGDS delivery
+ * pipeline. State transitions are managed exclusively by the
+ * MessageDeliveryPipeline.
  */
 public enum DeliveryStatus {
 
@@ -15,6 +16,6 @@ public enum DeliveryStatus {
     /** Message has been successfully delivered to the output strategy. */
     DELIVERED,
 
-    /** Delivery failed. Consult the associated MessageDeliveryFailureException for root cause. */
+    /** Delivery failed; consult MessageDeliveryFailureException. */
     FAILED
 }

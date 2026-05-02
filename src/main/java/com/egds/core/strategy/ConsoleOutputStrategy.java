@@ -7,24 +7,25 @@ import com.egds.core.interfaces.IMessageOutputStrategy;
 import org.springframework.stereotype.Component;
 
 /**
- * {@link IMessageOutputStrategy} implementation targeting the standard output stream.
- * Delivers the formatted content of a {@link MessageEntity} to {@code System.out}.
- * This strategy is designated for CLI and non-interactive runtime environments.
+ * {@link IMessageOutputStrategy} implementation targeting the standard
+ * output stream. Delivers the formatted content of a
+ * {@link MessageEntity} to {@code System.out}.
+ * Designated for CLI and non-interactive runtime environments.
  */
 @Component
 public class ConsoleOutputStrategy implements IMessageOutputStrategy {
 
     /**
-     * Writes the formatted content of the supplied entity to the standard output stream.
-     * Transitions the entity's delivery status to IN_TRANSIT prior to write and
-     * to DELIVERED on success, or FAILED on error.
+     * Writes the formatted content of the supplied entity to stdout.
+     * Transitions the entity's delivery status to IN_TRANSIT prior to
+     * write and to DELIVERED on success, or FAILED on error.
      *
-     * @param messageEntity the finalized entity to be delivered; must not be null
-     * @throws MessageDeliveryFailureException if the entity is null or the output stream
-     *         cannot be written to
+     * @param messageEntity the finalized entity to deliver; must not be null
+     * @throws MessageDeliveryFailureException if entity is null or output
+     *         stream cannot be written to
      */
     @Override
-    public void output(MessageEntity messageEntity) {
+    public void output(final MessageEntity messageEntity) {
         if (messageEntity == null) {
             throw new MessageDeliveryFailureException(
                     "ConsoleOutputStrategy received a null MessageEntity.",
@@ -39,7 +40,7 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
         } catch (Exception e) {
             messageEntity.setDeliveryStatus(DeliveryStatus.FAILED);
             throw new MessageDeliveryFailureException(
-                    "ConsoleOutputStrategy failed during output stream write.",
+                    "ConsoleOutputStrategy failed during output write.",
                     messageEntity.getCorrelationId(),
                     "ERR_OUTPUT_WRITE_FAILURE",
                     e
