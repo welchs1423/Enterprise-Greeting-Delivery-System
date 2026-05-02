@@ -1,9 +1,86 @@
 # Enterprise Greeting Delivery System (EGDS)
 
-> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬 통합 엔터프라이즈 인사 메시지 전달 플랫폼**
-> `v3.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio
+> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라 통합 엔터프라이즈 인사 메시지 전달 플랫폼**
+> `v4.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | OpenTelemetry (Micrometer Tracing) | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio
 
 > **경고: 이 시스템은 클라우드 네이티브 환경(Kubernetes + Kafka + Oracle + Redis) 없이는 구동이 불가능합니다. 로컬 `java -jar` 실행은 지원되지 않습니다. 모든 의존 인프라가 준비된 클러스터에서만 운영 배포가 가능합니다.**
+
+---
+
+## Phase 4 신규 아키텍처 컴포넌트
+
+### Observability Layer: 분산 추적 (OpenTelemetry, v4.0.0 신규)
+
+단 하나의 "Hello, World!" 전달이 수십 개의 마이크로서비스 계층을 통과하는 모든 인과관계를 단일 Trace ID로 추적합니다.
+
+| 계층 | Span 이름 | 태그 |
+|---|---|---|
+| Kafka 소비자 | `egds.consumer-pipeline` | `correlationId`, `principal`, `requestIp` |
+| 파이프라인 Stage 1 | `egds.stage.provision` | `correlationId` |
+| 파이프라인 Stage 2 | `egds.stage.validate` | `correlationId` |
+| 파이프라인 Stage 3 | `egds.stage.map` | `correlationId` |
+| 파이프라인 Stage 4 | `egds.stage.deliver` | `correlationId` |
+| 콘솔 출력 | `egds.console-output` | `correlationId`, `deliveryStatus` |
+| Kafka 발행자 | `egds.kafka-publish` | `correlationId`, `topic`, `messageKey` |
+
+**Trace ID 로그 상관 관계**: 모든 로그 라인에 `traceId=` / `spanId=` 포함 (MDC 자동 주입).  
+**Prometheus Endpoint**: `/actuator/prometheus` — CB 상태, Rate Limiter 사용률, Retry 통계, JVM 메트릭 전체 노출.
+
+```
+Observability Stack (Phase 4):
+  ┌─────────────────────────────────────────────────────────────┐
+  │  OpenTelemetry SDK (Micrometer Tracing OTel Bridge)         │
+  │  traceId propagation: MDC → Log → Span → Trace Backend      │
+  └──────────────────────────┬──────────────────────────────────┘
+                             │
+  ┌──────────────────────────▼──────────────────────────────────┐
+  │  egds.consumer-pipeline Span (GreetingEventConsumer)        │
+  │   ├─ egds.stage.provision  (HelloWorldMessageProvider)      │
+  │   ├─ egds.stage.validate   (MessageContentValidator)        │
+  │   ├─ egds.stage.map        (MessageMapper)                  │
+  │   └─ egds.stage.deliver    (MessageDeliveryService)         │
+  │       └─ egds.console-output (ConsoleOutputStrategy)        │
+  └─────────────────────────────────────────────────────────────┘
+  ┌─────────────────────────────────────────────────────────────┐
+  │  egds.kafka-publish Span (GreetingEventPublisher)           │
+  └─────────────────────────────────────────────────────────────┘
+  ┌─────────────────────────────────────────────────────────────┐
+  │  /actuator/prometheus (Prometheus scrape endpoint)          │
+  │  R4j CB state + Rate Limiter + Retry + JVM + HTTP metrics   │
+  └─────────────────────────────────────────────────────────────┘
+```
+
+### 회복 탄력성 Layer: Resilience4j (v4.0.0 신규)
+
+"Hello, World!" 전달 경로의 모든 외부 의존 구간에 세 가지 장애 대응 패턴을 중첩 적용합니다.
+
+| 적용 대상 | Circuit Breaker | Rate Limiter | Retry | Fallback |
+|---|---|---|---|---|
+| `ConsoleOutputStrategy.output()` | `consoleOutput` (50% / 10-call) | 50 calls/s | 3회 / 200ms | `[EGDS-DEGRADED] Hello, World!` 출력 |
+| `GreetingEventPublisher.publish()` | `kafkaPublish` (40% / 20-call) | 100 events/s | 3회 / 500ms(×2 지수) | `CompletableFuture.failedFuture()` 반환 |
+| `GreetingEventConsumer.consume()` | `consumerPipeline` (60% / 10-call) | — | — | `FAILED` 감사 로그 기록 후 offset commit |
+
+**R4j Health Indicator 통합**: 각 CB 상태(`CLOSED` / `OPEN` / `HALF_OPEN`)가 `/actuator/health/readiness` 그룹에 포함되어 K8s ReadinessProbe가 장애 상태의 파드를 자동으로 Service 엔드포인트에서 제거합니다.
+
+### 자가 치유 인프라: K8s Probe 세분화 (v4.0.0 신규)
+
+```yaml
+# Liveness Group: { livenessState, diskSpace }
+# - JVM 생존 여부 (데드락, OOM 감지)
+# - tmpfs 디스크 임계값 초과 감지
+livenessProbe: periodSeconds=15, failureThreshold=2, timeoutSeconds=5
+
+# Readiness Group: { readinessState, kafka, consoleOutputCircuitBreaker,
+#                    kafkaPublishCircuitBreaker, consumerPipelineCircuitBreaker }
+# - 애플리케이션 레벨 준비 상태
+# - Kafka 브로커 프로듀서 연결 상태
+# - 세 개의 R4j Circuit Breaker 상태
+readinessProbe: periodSeconds=5, failureThreshold=3, successThreshold=2
+
+# Startup: 150s 허용 (30 × 5s) — Protobuf 소스 생성 + JVM 워밍업 대응
+# preStop: sleep 15s — iptables 전파 완료 후 JVM 종료 개시
+# terminationGracePeriodSeconds: 60s — Kafka Consumer Group 리밸런스 여유
+```
 
 ---
 
@@ -224,6 +301,9 @@ EGDS v2.0은 단 하나의 인사 메시지를 전달하기 위해 아래의 모
 | 데이터베이스 | Oracle Database 19c+ (로컬: H2) | - |
 | 메시지 브로커 | Apache Kafka + Spring Kafka | 3.x |
 | 캐시 | Redis (로컬: ConcurrentMapCache) | - |
+| **분산 추적** | **OpenTelemetry (Micrometer Tracing OTel Bridge)** | **BOM managed** |
+| **회복 탄력성** | **Resilience4j (CB + RL + Retry)** | **2.2.0** |
+| **메트릭** | **Micrometer + Prometheus** | **BOM managed** |
 | 컨테이너 런타임 | Docker (멀티스테이지 빌드, eclipse-temurin:17) | - |
 | 오케스트레이션 | Kubernetes | 1.29+ |
 | 서비스 매쉬 | Istio | 1.20+ |
@@ -370,6 +450,8 @@ mvn test -Dtest="GreetingGrpcServiceIntegrationTest"
 
 | 테스트 클래스 | 유형 | 검증 대상 |
 |---|---|---|
+| `CircuitBreakerResilienceTest` | 통합 (R4j) | CB 초기 CLOSED, 임계값 초과 후 OPEN 전환, Fallback 출력 검증, 정상 호출 후 CLOSED 유지 |
+| `TraceContextPropagationTest` | 통합 (OTel) | Tracer 빈 자동 구성, non-zero Trace ID 생성, MDC traceId 주입/해제, 자식 Span 계층 검증 |
 | `JwtTokenProviderTest` | 단위 | JWT 생성, 서명 검증, 만료 처리, 위변조 감지 |
 | `SecurityLayerTest` | 통합 (MockMvc) | HTTP 401/403/202 응답, JWT 발급/검증 흐름 |
 | `AuditLogServiceTest` | JPA 슬라이스 (@DataJpaTest) | 감사 로그 영속성, JPA Auditing, 트랜잭션 격리 |
@@ -382,6 +464,30 @@ mvn test -Dtest="GreetingGrpcServiceIntegrationTest"
 ---
 
 ## 작업 이력 (Changelog)
+
+### [2026-05-02] v4.0.0-RELEASE — Phase 4: 자가 치유 및 분산 추적 아키텍처 통합
+
+**신규 추가 파일**
+
+| 파일 | 변경 내용 |
+|---|---|
+| `pom.xml` | `spring-boot-starter-actuator`, `micrometer-registry-prometheus`, `micrometer-tracing-bridge-otel` (OTel 분산 추적), `resilience4j-spring-boot3:2.2.0` (CB + RL + Retry), `spring-boot-starter-aop` 추가. 버전 `4.0.0-RELEASE`로 갱신 |
+| `src/main/java/com/egds/observability/package-info.java` | Observability 패키지 신규 생성. OTel 분산 추적, MDC traceId 전파, Prometheus 메트릭 노출 패키지 설명 |
+| `src/test/java/com/egds/resilience/CircuitBreakerResilienceTest.java` | R4j CB 통합 테스트: 초기 CLOSED 확인, 50% 임계값 초과 후 OPEN 전환, Fallback 출력 검증, 정상 호출 후 CLOSED 유지 |
+| `src/test/java/com/egds/observability/TraceContextPropagationTest.java` | OTel 분산 추적 통합 테스트: Tracer 빈 존재, non-zero Trace ID, MDC traceId 주입/해제, 자식 Span 계층 검증 |
+
+**수정된 기존 파일**
+
+| 파일 | 변경 내용 |
+|---|---|
+| `src/main/resources/application.properties` | Actuator 엔드포인트 노출 (`health`, `prometheus`, `info`, `metrics`). Liveness 그룹: `livenessState`, `diskSpace`. Readiness 그룹: `readinessState`, `kafka`, 3개 R4j CB 인디케이터. OTel 리소스 속성 (`service.name=egds`, `service.version=4.0.0`). MDC traceId 포함 로그 패턴. R4j CB/RL/Retry 전체 인스턴스 설정 (`consoleOutput`, `kafkaPublish`, `consumerPipeline`) |
+| `src/test/resources/application.properties` | Actuator 테스트 설정, OTel 샘플링 100%, `spring.application.name=egds-test` 추가 |
+| `config/SecurityConfig.java` | `/actuator/health/**`, `/actuator/prometheus`, `/actuator/info` JWT 인증 제외 추가 (K8s 프로브 및 Prometheus 스크레이핑 허용) |
+| `core/strategy/ConsoleOutputStrategy.java` | `@CircuitBreaker(consoleOutput, fallback=outputFallback)`, `@RateLimiter(consoleOutput, fallback=outputFallback)`, `@Retry(consoleOutput)` 중첩 적용. `Tracer` 주입 후 `egds.console-output` Span 생성 (`correlationId`, `deliveryStatus` 태그). `outputFallback()` 구현: `[EGDS-DEGRADED] Hello, World!` 출력 + `FAILED` 상태 기록 |
+| `messaging/GreetingEventPublisher.java` | `@RateLimiter(kafkaPublish, fallback)`, `@CircuitBreaker(kafkaPublish, fallback)`, `@Retry(kafkaPublish)` 중첩 적용. `Tracer` 주입 후 `egds.kafka-publish` Span 생성 (`messaging.system=kafka`, `topic`, `messageKey` 태그). `publishFallback()` 구현: `CompletableFuture.failedFuture()` 반환 |
+| `messaging/GreetingEventConsumer.java` | `@CircuitBreaker(consumerPipeline, fallback=consumeFallback)` 적용. `Tracer` 주입 후 `egds.consumer-pipeline` Span 생성 (`correlationId`, `principal`, `requestIp` 태그). `consumeFallback()` 구현: Kafka offset commit 보장(루프 방지) + `FAILED` 감사 로그 기록 |
+| `core/service/MessageDeliveryService.java` | `Tracer` 주입. 각 파이프라인 단계를 전용 OTel 자식 Span으로 래핑: `egds.stage.provision`, `egds.stage.validate`, `egds.stage.map`, `egds.stage.deliver`. 예외 발생 시 `span.error(e)` 마킹으로 추적 백엔드에 장애 전파 |
+| `k8s/deployment.yaml` | `terminationGracePeriodSeconds: 60` 추가. `lifecycle.preStop: exec: sleep 15` 추가 (iptables 전파 여유). **Startup**: `failureThreshold: 30 (150s 허용)`. **Liveness**: `periodSeconds: 15`, `failureThreshold: 2`, `successThreshold: 1`. **Readiness**: `successThreshold: 2` (2연속 성공 후 재등록), 전체 파라미터 재조정. 이미지 태그 `4.0.0`으로 갱신 |
 
 ### [2026-05-02] v3.0.1 — Checkstyle 전면 준수
 
@@ -514,11 +620,11 @@ mvn test -Dtest="GreetingGrpcServiceIntegrationTest"
 
 ## 아키텍처 완료 선언
 
-> 본 프로젝트의 아키텍처는 Phase 3를 통해 클라우드 네이티브 설계의 정점에 도달하였습니다.
+> 본 프로젝트의 아키텍처는 Phase 4를 통해 자가 치유 분산 시스템의 정점에 도달하였습니다.
 >
-> gRPC 바이너리 프로토콜, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 20단계 CI/CD의 네 가지 클라우드 네이티브 필수 인프라가 단 하나의 인사 메시지 전달을 위해 완벽하게 통합되었으며, 이를 검증하는 8개의 테스트 클래스가 모든 계층의 정합성을 보증합니다.
+> gRPC 바이너리 프로토콜, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 20단계 CI/CD에 더하여, OpenTelemetry 분산 추적, Resilience4j 3중 회복 탄력성 패턴, Prometheus 메트릭 노출, K8s 자가 치유 프로브 세분화까지 완벽하게 통합되었습니다. 단 하나의 "Hello, World!" 전달을 추적하는 7개의 OTel Span, 3개의 Circuit Breaker, 2개의 Rate Limiter, 3개의 Retry 구성이 10개의 테스트 클래스에 의해 보증됩니다.
 >
-> 이 시스템은 Kubernetes 클러스터, Kafka 브로커, Oracle Database, Redis 캐시, Istio 서비스 매쉬가 모두 준비된 클라우드 네이티브 환경이 아니면 구동조차 불가능합니다.
+> 이 시스템은 Kubernetes 클러스터, Kafka 브로커, Oracle Database, Redis 캐시, Istio 서비스 매쉬, OTel Collector가 모두 준비된 클라우드 네이티브 환경이 아니면 구동조차 불가능합니다.
 > 로컬 `java -jar` 실행 시도는 즉시 포기하십시오.
 >
 > 추가 기능 구현, 리팩토링, 또는 신규 커밋은 이 완결성을 저해할 뿐이며, 어떠한 개선 시도도 아키텍처적 퇴보로 간주됩니다.

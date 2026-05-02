@@ -1,7 +1,11 @@
 # Deployment: EGDS application pods.
 # Exposes both HTTP (8080) and gRPC (9090) ports.
-# Resource requests and limits are sized for the greeting delivery workload baseline;
-# adjust for production based on profiling results from the CI/CD performance stage.
+# Phase 4: probes are split into dedicated liveness and readiness health
+# groups. The liveness group checks JVM state and disk space only;
+# restarting on those conditions is safe. The readiness group checks Kafka
+# connectivity and all Resilience4j circuit breaker states, ensuring the
+# pod is removed from the Service endpoint list whenever a dependency is
+# degraded rather than hard-failed.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -9,7 +13,7 @@ metadata:
   namespace: egds
   labels:
     app: egds
-    version: "3.0.0"
+    version: "4.0.0"
     component: app
 spec:
   replicas: 2
@@ -19,17 +23,18 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 0     # zero-downtime: no pod is terminated before a replacement is ready
-      maxSurge: 1           # one extra pod at a time during rollout to limit resource burst
+      maxUnavailable: 0   # zero-downtime: no pod terminated before replacement
+      maxSurge: 1         # one extra pod at a time during rollout
   template:
     metadata:
       labels:
         app: egds
-        version: "3.0.0"
+        version: "4.0.0"
       annotations:
         # Istio sidecar injection. Remove if service mesh is not installed.
         sidecar.istio.io/inject: "true"
-        # Prometheus scraping via Istio telemetry; adjust path if actuator metrics are exposed directly.
+        # Prometheus scrape configuration.
+        # /actuator/prometheus is open without JWT (SecurityConfig Phase 4).
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
         prometheus.io/path: "/actuator/prometheus"
@@ -37,7 +42,12 @@ spec:
       serviceAccountName: egds-sa
       automountServiceAccountToken: false
 
-      # Pod-level security: drop all Linux capabilities; enforce read-only root filesystem.
+      # Graceful shutdown window: allow 60 s for Kafka consumer group
+      # rebalance and in-flight pipeline completion before SIGKILL.
+      terminationGracePeriodSeconds: 60
+
+      # Pod-level security: drop all Linux capabilities; enforce
+      # read-only root filesystem.
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -48,7 +58,7 @@ spec:
 
       containers:
         - name: egds
-          image: ghcr.io/welchs1423/enterprise-greeting-delivery-system:3.0.0
+          image: ghcr.io/welchs1423/enterprise-greeting-delivery-system:4.0.0
           imagePullPolicy: Always
 
           ports:
@@ -59,12 +69,22 @@ spec:
               containerPort: 9090
               protocol: TCP
 
-          # Container-level security: immutable filesystem, no privilege escalation.
+          # Container-level security: immutable filesystem, no privilege
+          # escalation.
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
+
+          # Graceful pre-termination pause.
+          # Kubernetes routes traffic for a brief window after SIGTERM
+          # is sent while iptables rules propagate. The sleep absorbs
+          # that window before the JVM starts shutting down.
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 15"]
 
           # ConfigMap environment variables (non-sensitive configuration)
           envFrom:
@@ -99,26 +119,53 @@ spec:
                   name: egds-secret
                   key: REDIS_PASSWORD
 
-          # Startup probe: allows up to 90 s for JVM warm-up and Kafka consumer group assignment.
+          # --- Startup Probe ---
+          # Allows up to 150 s (30 * 5 s) for JVM warm-up, Protobuf
+          # class generation, and Kafka consumer group assignment before
+          # liveness probing begins. failureThreshold is generous here
+          # because a false-positive restart during startup is more
+          # disruptive than a slow start.
           startupProbe:
             httpGet:
               path: /actuator/health/liveness
               port: http
-            failureThreshold: 18
+            failureThreshold: 30
             periodSeconds: 5
+            timeoutSeconds: 5
 
-          # Liveness probe: restarts the pod if the JVM enters an unrecoverable state.
+          # --- Liveness Probe ---
+          # Checks /actuator/health/liveness which maps to the Spring Boot
+          # liveness group: { livenessState, diskSpace }.
+          # livenessState: set to BROKEN by the application when it
+          #   detects an unrecoverable condition (e.g. deadlock, OOM).
+          # diskSpace: fails when available disk falls below threshold,
+          #   preventing log floods that fill the tmpfs mount.
+          # A pod is restarted only after 2 consecutive failures (30 s),
+          # reducing flapping due to momentary GC pauses.
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: http
             initialDelaySeconds: 0
-            periodSeconds: 10
-            failureThreshold: 3
+            periodSeconds: 15
+            failureThreshold: 2
+            successThreshold: 1
             timeoutSeconds: 5
 
-          # Readiness probe: removes the pod from the Service endpoints during startup
-          # and during Kafka consumer group rebalances.
+          # --- Readiness Probe ---
+          # Checks /actuator/health/readiness which maps to the Spring Boot
+          # readiness group:
+          #   readinessState  — application-level readiness flag
+          #   kafka           — Spring Kafka health indicator (producer
+          #                     connectivity to the broker)
+          #   consoleOutputCircuitBreaker — R4j CB for stdout path
+          #   kafkaPublishCircuitBreaker  — R4j CB for Kafka publish path
+          #   consumerPipelineCircuitBreaker — R4j CB for consumer pipeline
+          # The pod is removed from Service endpoints when ANY indicator
+          # is DOWN, preventing traffic from reaching a degraded instance.
+          # successThreshold: 2 requires two consecutive healthy checks
+          # before re-admission to avoid premature endpoint re-registration
+          # after a transient failure.
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
@@ -126,6 +173,7 @@ spec:
             initialDelaySeconds: 0
             periodSeconds: 5
             failureThreshold: 3
+            successThreshold: 2
             timeoutSeconds: 3
 
           resources:
@@ -136,7 +184,8 @@ spec:
               cpu: "1000m"
               memory: "1Gi"
 
-          # tmpfs mounts required because readOnlyRootFilesystem: true blocks writes to /.
+          # tmpfs mounts required because readOnlyRootFilesystem: true
+          # blocks writes to /.
           volumeMounts:
             - name: tmp
               mountPath: /tmp
@@ -149,8 +198,8 @@ spec:
         - name: logs
           emptyDir: {}
 
-      # Spread pods across availability zones to prevent a single-zone outage
-      # from taking down all greeting delivery capacity.
+      # Spread pods across availability zones to prevent a single-zone
+      # outage from taking down all greeting delivery capacity.
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: topology.kubernetes.io/zone

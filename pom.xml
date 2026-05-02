@@ -13,7 +13,7 @@
 
     <groupId>com.egds</groupId>
     <artifactId>enterprise-greeting-delivery-system</artifactId>
-    <version>2.0.0-RELEASE</version>
+    <version>4.0.0-RELEASE</version>
     <packaging>jar</packaging>
     <name>Enterprise Greeting Delivery System</name>
     <description>
@@ -29,6 +29,7 @@
         <grpc.version>1.61.1</grpc.version>
         <protobuf.version>3.25.1</protobuf.version>
         <ascopes.protobuf.plugin.version>2.13.1</ascopes.protobuf.plugin.version>
+        <resilience4j.version>2.2.0</resilience4j.version>
     </properties>
 
     <dependencies>
@@ -103,6 +104,47 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- Actuator: health probes, Prometheus scrape endpoint -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Prometheus metrics registry (runtime) -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!--
+            Micrometer Tracing OTel bridge.
+            Provides Tracer/Span API backed by OpenTelemetry SDK.
+            Version managed by Spring Boot 3.2.x BOM.
+            Populates MDC with traceId/spanId for log correlation.
+        -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        </dependency>
+
+        <!--
+            Resilience4j Spring Boot 3 starter.
+            Provides Circuit Breaker, Rate Limiter, Retry, Bulkhead
+            annotation support and Micrometer metrics integration.
+        -->
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot3</artifactId>
+            <version>${resilience4j.version}</version>
+        </dependency>
+
+        <!-- AOP support required for Resilience4j annotations -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
         <!-- gRPC Spring Boot Starter (server + client autoconfiguration) -->

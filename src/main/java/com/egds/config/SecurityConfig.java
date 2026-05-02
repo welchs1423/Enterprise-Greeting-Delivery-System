@@ -68,6 +68,11 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
+                // Actuator health probes must be reachable by K8s without JWT.
+                // Prometheus scrape does not carry bearer tokens.
+                .requestMatchers("/actuator/health/**").permitAll()
+                .requestMatchers("/actuator/prometheus").permitAll()
+                .requestMatchers("/actuator/info").permitAll()
                 .anyRequest().authenticated()
             )
             .headers(headers ->
