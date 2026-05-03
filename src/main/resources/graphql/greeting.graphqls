@@ -1,0 +1,27 @@
+# GraphQL Supergraph schema for the EGDS greeting delivery pipeline.
+#
+# Each field of GreetingFragment is resolved by a dedicated virtual
+# microservice resolver executing asynchronously, simulating a federated
+# subgraph architecture where individual tokens are owned by independent
+# downstream services.
+
+type Query {
+    greeting: GreetingFragment
+}
+
+type GreetingFragment {
+    "Salutation token resolved by the Salutation Subgraph service."
+    salutation: String
+
+    "Whitespace separator token resolved by the Formatting Subgraph service."
+    separator: String
+
+    "Subject token resolved by the Subject Subgraph service."
+    subject: String
+
+    "Punctuation token resolved by the Emphasis Subgraph service."
+    emphasis: String
+
+    "Final assembled greeting concatenated from all subgraph tokens."
+    assembled: String
+}

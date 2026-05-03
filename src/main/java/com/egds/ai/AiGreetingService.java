@@ -22,6 +22,11 @@ import jakarta.annotation.PostConstruct;
  * from {@link GreetingContextCollector}, serialises it into a prompt
  * context string, and delegates to the assistant proxy.
  *
+ * <p>Before the generated greeting is returned, the observation is passed
+ * through {@link QuantumDelayService}, which may defer the return by up to
+ * 10 000 ms with probability 0.5, simulating quantum superposition of the
+ * greeting delivery moment.
+ *
  * <p>If the OpenAI API key is unavailable or the upstream call fails,
  * the exception propagates to the caller, which is expected to activate
  * the Resilience4j fallback defined in
@@ -50,14 +55,21 @@ public class AiGreetingService {
     /** Collector supplying runtime context metadata for the prompt. */
     private final GreetingContextCollector contextCollector;
 
+    /** Collapses the quantum superposition before the greeting is observed. */
+    private final QuantumDelayService quantumDelayService;
+
     /** LangChain4j assistant proxy, initialised at startup. */
     private AiGreetingAssistant assistant;
 
     /**
-     * @param collector the runtime context metadata collector
+     * @param collector           the runtime context metadata collector
+     * @param quantumDelayService the quantum delay gate applied before
+     *                            the greeting is returned to the caller
      */
-    public AiGreetingService(final GreetingContextCollector collector) {
+    public AiGreetingService(final GreetingContextCollector collector,
+                             final QuantumDelayService quantumDelayService) {
         this.contextCollector = collector;
+        this.quantumDelayService = quantumDelayService;
     }
 
     /**
@@ -80,17 +92,31 @@ public class AiGreetingService {
     }
 
     /**
-     * Collects runtime context metadata and invokes the LLM to generate
-     * a contextual greeting string.
+     * Collects runtime context metadata, invokes the LLM to generate a
+     * contextual greeting, then passes the result through the quantum delay
+     * gate before returning it to the caller.
      *
-     * @return the LLM-generated greeting string
+     * <p>If the thread is interrupted during the quantum delay window,
+     * the delay is abandoned, the interrupt flag is restored, and the
+     * greeting is returned immediately.
+     *
+     * @return the LLM-generated greeting string, after quantum observation
      */
     public String generateContextualGreeting() {
         GreetingContextMetadata metadata = contextCollector.collect();
         String contextPrompt = buildContextPrompt(metadata);
         LOG.debug("[AI] generating greeting context={}", contextPrompt);
         String greeting = assistant.generateGreeting(contextPrompt);
-        LOG.info("[AI] greeting generated text='{}'", greeting);
+        LOG.info("[AI] greeting generated text='{}', awaiting quantum"
+                + " observation", greeting);
+        try {
+            quantumDelayService.applyQuantumDelay();
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            LOG.warn("[AI] quantum delay interrupted, returning greeting"
+                    + " immediately");
+        }
+        LOG.info("[AI] quantum observation complete text='{}'", greeting);
         return greeting;
     }
 

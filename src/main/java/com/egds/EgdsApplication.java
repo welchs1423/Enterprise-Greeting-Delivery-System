@@ -19,10 +19,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 @SpringBootApplication
 @EnableCaching
 @EnableKafka
-public final class EgdsApplication {
-
-    private EgdsApplication() {
-    }
+public class EgdsApplication {
 
     /**
      * Launches the Spring Boot application context.

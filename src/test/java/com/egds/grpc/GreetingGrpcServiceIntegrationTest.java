@@ -1,17 +1,18 @@
 package com.egds.grpc;
 
+import com.egds.ai.AiGreetingService;
 import com.egds.grpc.proto.DeliveryStatus;
 import com.egds.grpc.proto.GreetingChunk;
 import com.egds.grpc.proto.GreetingPriority;
 import com.egds.grpc.proto.GreetingRequest;
 import com.egds.grpc.proto.GreetingResponse;
 import com.egds.grpc.proto.GreetingServiceGrpc;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import net.devh.boot.grpc.client.inject.GrpcClient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 
 import java.time.Instant;
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
 /**
  * Integration tests for {@link GreetingGrpcService}.
@@ -36,6 +37,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * {@code KafkaConfig} and {@code GreetingEventConsumer}, which auto-connect on startup.
  * The SpEL topic expression matches the one used by all other integration tests so that
  * Spring Test can share a single cached {@code ApplicationContext} across the full suite.
+ *
+ * <p>{@link AiGreetingService} is replaced by a {@link MockBean} so that gRPC
+ * tests do not require a live OpenAI endpoint. The mock returns a deterministic
+ * greeting string that allows pipeline assertions to be made predictably.
  */
 @SpringBootTest(properties = "grpc.server.in-process-name=test")
 @EmbeddedKafka(partitions = 1, topics = "${egds.kafka.topic.greeting:egds.greeting.events.test}")
@@ -46,6 +51,15 @@ class GreetingGrpcServiceIntegrationTest {
 
     @GrpcClient("egds-greeting-service")
     private GreetingServiceGrpc.GreetingServiceStub asyncStub;
+
+    @MockBean
+    private AiGreetingService aiGreetingService;
+
+    @BeforeEach
+    void stubAiService() {
+        when(aiGreetingService.generateContextualGreeting())
+                .thenReturn("Hello, World!");
+    }
 
     // ──────────────────────────────────────────────────────────────────────────
     // DeliverGreeting (unary RPC) tests

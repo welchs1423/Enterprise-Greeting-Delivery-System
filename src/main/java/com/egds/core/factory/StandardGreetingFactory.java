@@ -48,13 +48,20 @@ public class StandardGreetingFactory extends AbstractGreetingFactory {
     }
 
     /**
-     * Creates a {@link ConsoleOutputStrategy} as the delivery output
-     * channel for the standard delivery pipeline configuration.
+     * Not supported in standalone mode.
      *
-     * @return a new {@link ConsoleOutputStrategy} instance
+     * <p>{@link ConsoleOutputStrategy} requires Spring-managed
+     * {@code Tracer} and {@code GreetingIntegrityVerifier} dependencies
+     * and cannot be instantiated outside the IoC container. In all
+     * operational deployments this method is never reached because Spring
+     * wires {@code ConsoleOutputStrategy} directly.
+     *
+     * @throws UnsupportedOperationException always
      */
     @Override
     public IMessageOutputStrategy createOutputStrategy() {
-        return new ConsoleOutputStrategy();
+        throw new UnsupportedOperationException(
+                "ConsoleOutputStrategy requires Spring-managed dependencies;"
+                        + " obtain the bean from the ApplicationContext.");
     }
 }

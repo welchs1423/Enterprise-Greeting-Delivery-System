@@ -1,5 +1,8 @@
 package com.egds.messaging;
 
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.TraceContext;
+import io.micrometer.tracing.Tracer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,14 +16,17 @@ import org.springframework.kafka.support.SendResult;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link GreetingEventPublisher}.
- * No Spring context is loaded; {@link KafkaTemplate} is mocked via Mockito to isolate
- * publisher logic from Kafka broker connectivity.
+ * No Spring context is loaded; {@link KafkaTemplate} and
+ * {@link Tracer} are mocked via Mockito to isolate publisher logic
+ * from Kafka broker connectivity and OTel infrastructure.
  */
 @ExtendWith(MockitoExtension.class)
 class GreetingEventPublisherTest {
@@ -30,11 +36,31 @@ class GreetingEventPublisherTest {
     @Mock
     private KafkaTemplate<String, GreetingEvent> kafkaTemplate;
 
+    @Mock
+    private Tracer tracer;
+
+    @Mock
+    private Span span;
+
+    @Mock
+    private Tracer.SpanInScope spanInScope;
+
+    @Mock
+    private TraceContext traceContext;
+
     private GreetingEventPublisher publisher;
 
     @BeforeEach
     void setUp() {
-        publisher = new GreetingEventPublisher(kafkaTemplate, TOPIC);
+        when(tracer.nextSpan()).thenReturn(span);
+        when(span.name(anyString())).thenReturn(span);
+        when(span.tag(anyString(), anyString())).thenReturn(span);
+        when(span.start()).thenReturn(span);
+        when(tracer.withSpan(any(Span.class))).thenReturn(spanInScope);
+        when(span.context()).thenReturn(traceContext);
+        when(traceContext.traceId()).thenReturn("test-trace-id");
+
+        publisher = new GreetingEventPublisher(kafkaTemplate, TOPIC, tracer);
     }
 
     @Test

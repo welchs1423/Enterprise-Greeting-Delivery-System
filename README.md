@@ -1,7 +1,68 @@
 # Enterprise Greeting Delivery System (EGDS)
 
-> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라, CQRS/이벤트 소싱, 블록체인 무결성 증명, 생성형 AI 문맥 라우팅 통합 엔터프라이즈 인사 메시지 전달 플랫폼**
-> `v5.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | OpenTelemetry (Micrometer Tracing) | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio | **Web3j (Ethereum)** | **CQRS + MongoDB** | **LangChain4j (GPT-4o)**
+> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라, CQRS/이벤트 소싱, 블록체인 무결성 증명, 생성형 AI 문맥 라우팅, 양자 지연 시뮬레이션, GraphQL 슈퍼그래프, WASM 로깅 어댑터 통합 엔터프라이즈 인사 메시지 전달 플랫폼**
+> `v6.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | GraphQL | OpenTelemetry (Micrometer Tracing) | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio | **Web3j (Ethereum)** | **CQRS + MongoDB** | **LangChain4j (GPT-4o)** | **QuantumDelay** | **WASM JNI**
+
+---
+
+## Phase 6 신규 아키텍처 컴포넌트 (v6.0.0 — V3.0 우주적 확장 아키텍처) _(2026-05-03)_
+
+### 1. 양자 지연 시뮬레이터 (QuantumDelayService, v6.0.0 신규)
+
+슈뢰딩거의 고양이 원리를 AI 응답 경로에 적용합니다. 50% 확률로 0~10초의 무작위 지연을 삽입하여 관측 시점까지 인사 메시지의 전달 상태를 중첩(superposition)으로 유지합니다.
+
+```
+AiGreetingService.generateContextualGreeting()
+  │ LLM 응답 수신 (GPT-4o)
+  ▼
+QuantumDelayService.applyQuantumDelay()
+  ├─ 50% 확률: [QUANTUM] superposition collapsed to immediate eigenstate
+  └─ 50% 확률: [QUANTUM] superposition collapsed to delayed eigenstate
+       └─ Thread.sleep(0..10000ms) — 슈뢰딩거적 관측 지연
+  ▼
+greeting 반환
+```
+
+| 컴포넌트 | 클래스 | 설명 |
+|---|---|---|
+| 양자 지연 서비스 | `QuantumDelayService` | ThreadLocalRandom 기반 50% 확률 지연, `egds.quantum.max-delay-ms` 설정 |
+| AI 인사 서비스 | `AiGreetingService` | QuantumDelayService 주입, LLM 응답 후 양자 지연 적용 |
+
+### 2. GraphQL 슈퍼그래프 (Spring for GraphQL, v6.0.0 신규)
+
+인사 메시지를 4개의 독립 가상 마이크로서비스 토큰으로 분해하는 GraphQL 연합 아키텍처를 구현합니다. 각 필드 리졸버는 별도의 비동기 실행 단위로 동작합니다.
+
+```graphql
+query {
+  greeting {
+    salutation   # "Hello"  — 독립 서브그래프 리졸버 (ForkJoinPool 비동기)
+    separator    # " "      — 독립 서브그래프 리졸버
+    subject      # "World"  — 독립 서브그래프 리졸버
+    emphasis     # "!"      — 독립 서브그래프 리졸버
+    assembled    # "Hello World!" — 조합 리졸버
+  }
+}
+```
+
+| 컴포넌트 | 클래스 | 설명 |
+|---|---|---|
+| GraphQL 스키마 | `greeting.graphqls` | `GreetingFragment` 타입 정의 (5개 필드) |
+| Fragment 레코드 | `GreetingFragment` | 루트 쿼리 타입 (Java record) |
+| GraphQL 컨트롤러 | `GreetingGraphQlController` | `@QueryMapping` + `@SchemaMapping` 비동기 리졸버 |
+
+### 3. Rust/WASM 로깅 어댑터 (WasmLoggingAdapter, v6.0.0 신규)
+
+JNI(Java Native Interface) 선언으로 Rust/WASM 컴파일 네이티브 라이브러리 연결을 준비합니다. 네이티브 라이브러리가 없는 환경(CI/CD)에서는 SLF4J로 자동 폴백합니다.
+
+```
+WasmLoggingAdapter.log(level, message)
+  ├─ NATIVE_AVAILABLE=true:  native void wasmLog(level, message)  → egds_wasm_logger.dll/.so/.dylib
+  └─ NATIVE_AVAILABLE=false: [WASM-FALLBACK] SLF4J 로깅 (System.loadLibrary 실패 시)
+```
+
+| 컴포넌트 | 클래스 | 설명 |
+|---|---|---|
+| WASM 어댑터 | `WasmLoggingAdapter` | JNI native 선언, UnsatisfiedLinkError 폴백 처리 |
 
 > **경고: 이 시스템은 클라우드 네이티브 환경(Kubernetes + Kafka + Oracle + Redis + MongoDB + Ethereum RPC Endpoint + OpenAI API) 없이는 구동이 불가능합니다. 로컬 `java -jar` 실행은 지원되지 않습니다. 모든 의존 인프라가 준비된 클러스터에서만 운영 배포가 가능합니다.**
 
