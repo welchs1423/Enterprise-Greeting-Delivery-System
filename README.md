@@ -176,6 +176,16 @@ EGDS v2.0은 단 하나의 인사 메시지를 전달하기 위해 아래의 모
 ## 전체 요청 처리 흐름
 
 ```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  Observability Layer (Phase 4)                                               │
+│  OpenTelemetry (Micrometer Tracing OTel Bridge)                              │
+│  ├─ Trace ID: MDC 자동 주입 → 전 계층 로그 상관                                │
+│  ├─ Spans: egds.kafka-publish / egds.consumer-pipeline / egds.stage.* /      │
+│  │         egds.console-output  (총 7 Span/요청)                              │
+│  ├─ Resilience4j: CB(3) + RL(2) + Retry(2) 상태 → /actuator/health/readiness │
+│  └─ Prometheus: /actuator/prometheus  (CB·RL·Retry·JVM·HTTP 메트릭 전체 노출) │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                      │ 전 계층 계측
 클라이언트
   │
   ├─ POST /api/v1/auth/token  ──▶ AuthController
@@ -197,24 +207,30 @@ EGDS v2.0은 단 하나의 인사 메시지를 전달하기 위해 아래의 모
                              GreetingController
                              @PreAuthorize("hasRole('GREETING_ADMIN')")
                                       │
-                             GreetingEventPublisher
+                             GreetingEventPublisher                    ← [egds.kafka-publish Span]
+                             @RateLimiter + @CircuitBreaker + @Retry
                                       │
                              KafkaTemplate.send(topic, correlationId, GreetingEvent)
                                       │
                              ◀── HTTP 202 Accepted + correlationId
                              (비동기 처리 계속)
                                       │
-                             Kafka Broker ──▶ GreetingEventConsumer
+                             Kafka Broker ──▶ GreetingEventConsumer   ← [egds.consumer-pipeline Span]
+                                             @CircuitBreaker
                                                       │
                                         MessageDeliveryPipeline.execute()
                                                       │
-                                        ┌─────────────┼─────────────────┐
-                                        ▼             ▼                 ▼
-                               GreetingCacheService  MessageDeliveryService  AuditLogService
-                               assembleGreeting()    (validate/map/output)   @Transactional REQUIRES_NEW
-                               @Cacheable            ConsoleOutputStrategy   GreetingAuditLog → Oracle DB
-                               Cache MISS → 계산      System.out.println()
-                               Cache HIT → 즉시 반환
+                             ┌────────────────────────┼──────────────────────────────┐
+                             ▼                        ▼                              ▼
+                  GreetingCacheService    MessageDeliveryService           AuditLogService
+                  assembleGreeting()      ├─ egds.stage.provision          @Transactional REQUIRES_NEW
+                  @Cacheable              ├─ egds.stage.validate           GreetingAuditLog → Oracle DB
+                  Cache MISS → 계산       ├─ egds.stage.map
+                  Cache HIT → 즉시 반환   └─ egds.stage.deliver
+                                              └─ ConsoleOutputStrategy     ← [egds.console-output Span]
+                                                 @CircuitBreaker + @RateLimiter + @Retry
+                                                 System.out.println("Hello, World!")
+                                                 Fallback: "[EGDS-DEGRADED] Hello, World!"
 ```
 
 ---
@@ -464,6 +480,20 @@ mvn test -Dtest="GreetingGrpcServiceIntegrationTest"
 ---
 
 ## 작업 이력 (Changelog)
+
+### [2026-05-03] v4.0.0-RELEASE — Phase 4: 자가 치유 및 분산 추적 아키텍처 통합 (워크플로우 검증)
+
+**검증 및 문서화**
+
+| 항목 | 내용 |
+|---|---|
+| OTel 분산 추적 | 7개 Span 계층 (`egds.consumer-pipeline` → `egds.stage.*` → `egds.console-output`) 전체 동작 확인 |
+| Resilience4j 3중 패턴 | `consoleOutput` / `kafkaPublish` / `consumerPipeline` CB·RL·Retry 설정 및 Fallback 로직 정상 동작 확인 |
+| K8s Probe 세분화 | Liveness(`livenessState`, `diskSpace`) / Readiness(R4j CB 3종 + `kafka` + `readinessState`) 그룹 분리 확인 |
+| Prometheus 엔드포인트 | `/actuator/prometheus` R4j 상태·JVM·HTTP 메트릭 노출 확인 |
+| 테스트 스위트 | `CircuitBreakerResilienceTest` (4케이스) + `TraceContextPropagationTest` (5케이스) 전체 통과 확인 |
+| README | 아키텍처 다이어그램 Observability Layer 명시 추가 |
+| archived.yaml | 프로젝트 Archived 선언 YAML 신규 생성 |
 
 ### [2026-05-02] v4.0.0-RELEASE — Phase 4: 자가 치유 및 분산 추적 아키텍처 통합
 

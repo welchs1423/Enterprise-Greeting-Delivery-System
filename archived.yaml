@@ -1,0 +1,106 @@
+# EGDS project archive declaration.
+# This file serves as a machine-readable marker that the repository has
+# reached architectural completion and is no longer under active development.
+#
+# Fields:
+#   project        - canonical project identifier
+#   version        - final released version
+#   archived_at    - ISO-8601 date the archive decision was recorded
+#   reason         - brief statement of why the project was archived
+#   phases         - list of completed development phases
+#   final_state    - key architectural properties of the last release
+#   policy         - governing rules that apply from archive date onward
+
+project: enterprise-greeting-delivery-system
+version: 4.0.0-RELEASE
+archived_at: "2026-05-03"
+
+reason: >
+  Architecture has reached cloud-native maturity through Phase 4.
+  All planned observability, resilience, and self-healing requirements
+  are implemented and verified. No further feature additions are planned.
+
+phases:
+  - id: 1
+    version: 1.0.0
+    title: Pure Java pipeline foundation
+    completed_at: "2026-04-21"
+  - id: 2
+    version: 2.0.0
+    title: Enterprise infrastructure integration (JWT, JPA, Kafka, Redis)
+    completed_at: "2026-04-21"
+  - id: 3
+    version: 3.0.0
+    title: gRPC, Kubernetes, Istio, 20-stage CI/CD
+    completed_at: "2026-04-21"
+  - id: 4
+    version: 4.0.0
+    title: Distributed tracing (OpenTelemetry), resilience (Resilience4j), self-healing K8s probes
+    completed_at: "2026-05-02"
+
+final_state:
+  observability:
+    tracing: OpenTelemetry via Micrometer Tracing OTel Bridge
+    spans_per_request: 7
+    span_names:
+      - egds.consumer-pipeline
+      - egds.stage.provision
+      - egds.stage.validate
+      - egds.stage.map
+      - egds.stage.deliver
+      - egds.console-output
+      - egds.kafka-publish
+    mdc_injection: true
+    prometheus_endpoint: /actuator/prometheus
+  resilience:
+    circuit_breakers:
+      - name: consoleOutput
+        failure_rate_threshold_percent: 50
+        sliding_window_size: 10
+        wait_duration_seconds: 30
+      - name: kafkaPublish
+        failure_rate_threshold_percent: 40
+        sliding_window_size: 20
+        wait_duration_seconds: 60
+      - name: consumerPipeline
+        failure_rate_threshold_percent: 60
+        sliding_window_size: 10
+        wait_duration_seconds: 45
+    rate_limiters:
+      - name: consoleOutput
+        limit_for_period: 50
+        limit_refresh_period_ms: 1000
+      - name: kafkaPublish
+        limit_for_period: 100
+        limit_refresh_period_ms: 1000
+    retries:
+      - name: consoleOutput
+        max_attempts: 3
+        wait_duration_ms: 200
+      - name: kafkaPublish
+        max_attempts: 3
+        wait_duration_ms: 500
+        exponential_backoff_multiplier: 2
+  kubernetes:
+    startup_probe_allowance_seconds: 150
+    liveness_group:
+      - livenessState
+      - diskSpace
+    readiness_group:
+      - readinessState
+      - kafka
+      - consoleOutputCircuitBreaker
+      - kafkaPublishCircuitBreaker
+      - consumerPipelineCircuitBreaker
+    pre_stop_sleep_seconds: 15
+    termination_grace_period_seconds: 60
+  tests:
+    total_classes: 10
+    resilience: CircuitBreakerResilienceTest
+    observability: TraceContextPropagationTest
+
+policy:
+  new_pull_requests: rejected
+  new_feature_commits: rejected
+  security_patches: evaluated_case_by_case
+  archive_override_requires: explicit_written_approval
