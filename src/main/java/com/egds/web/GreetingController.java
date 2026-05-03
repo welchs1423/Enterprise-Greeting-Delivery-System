@@ -1,7 +1,7 @@
 package com.egds.web;
 
-import com.egds.messaging.GreetingEvent;
-import com.egds.messaging.GreetingEventPublisher;
+import com.egds.cqrs.command.DeliverGreetingCommand;
+import com.egds.cqrs.command.GreetingCommandHandler;
 import com.egds.web.dto.GreetingResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -15,45 +15,52 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 /**
- * Primary REST endpoint for EGDS greeting delivery operations.
+ * CQRS command-side REST endpoint for EGDS greeting delivery.
+ *
+ * <p>This controller operates exclusively on the write path. It
+ * constructs a {@link DeliverGreetingCommand} from the incoming HTTP
+ * request and delegates to {@link GreetingCommandHandler}, which
+ * publishes the authoritative {@code GreetingRequestedEvent} to the
+ * Kafka event log and triggers the legacy delivery pipeline.
+ *
+ * <p>The endpoint returns HTTP 202 Accepted immediately. All downstream
+ * processing is asynchronous. Clients poll the query endpoint
+ * {@code GET /api/v1/greeting/status/{correlationId}} to retrieve the
+ * projected read model from MongoDB.
  *
  * <p>All operations require a valid JWT bearer token carrying the
- * {@code ROLE_GREETING_ADMIN} authority. Requests without this authority
- * receive HTTP 403 Forbidden via Spring Security's method security layer.
- *
- * <p>The delivery pipeline is invoked asynchronously through the Kafka
- * event bus. The endpoint publishes a {@link GreetingEvent} and returns
- * HTTP 202 Accepted immediately; the Kafka consumer executes the pipeline
- * on a separate thread.
+ * {@code ROLE_GREETING_ADMIN} authority.
  */
 @RestController
 @RequestMapping("/api/v1")
 public class GreetingController {
 
-    /** Kafka event publisher for asynchronous greeting delivery. */
-    private final GreetingEventPublisher greetingEventPublisher;
+    /** CQRS command handler for greeting delivery commands. */
+    private final GreetingCommandHandler commandHandler;
 
     /**
-     * @param publisher the Kafka greeting event publisher
+     * @param handler the CQRS greeting command handler
      */
-    public GreetingController(
-            final GreetingEventPublisher publisher) {
-        this.greetingEventPublisher = publisher;
+    public GreetingController(final GreetingCommandHandler handler) {
+        this.commandHandler = handler;
     }
 
     /**
-     * Initiates an asynchronous greeting delivery cycle.
+     * Accepts a greeting delivery command and returns HTTP 202 Accepted.
      * Requires the {@code ROLE_GREETING_ADMIN} authority.
      *
      * <p>Processing flow:
      * <ol>
      *   <li>Resolve client IP (honouring {@code X-Forwarded-For}).</li>
-     *   <li>Publish a {@link GreetingEvent} to the Kafka topic.</li>
-     *   <li>Return HTTP 202 Accepted with the correlation ID.</li>
+     *   <li>Build a {@link DeliverGreetingCommand} and dispatch to
+     *       {@link GreetingCommandHandler}.</li>
+     *   <li>Return HTTP 202 with the correlation ID for async polling.
+     *       </li>
      * </ol>
      *
      * @param request the HTTP request for capturing the client IP
-     * @return HTTP 202 with a {@link GreetingResponse} containing the ID
+     * @return HTTP 202 with a {@link GreetingResponse} containing the
+     *         correlation ID
      */
     @GetMapping("/greeting")
     @PreAuthorize("hasRole('GREETING_ADMIN')")
@@ -61,14 +68,14 @@ public class GreetingController {
             final HttpServletRequest request) {
         String correlationId = UUID.randomUUID().toString();
         String requestIp = resolveClientIp(request);
-        Authentication authentication =
+        Authentication auth =
                 SecurityContextHolder.getContext().getAuthentication();
-        String principalName = authentication != null
-                ? authentication.getName()
-                : "ANONYMOUS";
+        String principalName = (auth != null)
+                ? auth.getName() : "ANONYMOUS";
 
-        greetingEventPublisher.publish(
-                new GreetingEvent(correlationId, requestIp, principalName));
+        commandHandler.handle(
+                new DeliverGreetingCommand(
+                        correlationId, requestIp, principalName));
 
         return ResponseEntity.accepted()
                 .body(new GreetingResponse(correlationId));

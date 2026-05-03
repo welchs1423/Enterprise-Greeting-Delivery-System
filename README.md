@@ -1,9 +1,119 @@
 # Enterprise Greeting Delivery System (EGDS)
 
-> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라 통합 엔터프라이즈 인사 메시지 전달 플랫폼**
-> `v4.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | OpenTelemetry (Micrometer Tracing) | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio
+> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라, CQRS/이벤트 소싱, 블록체인 무결성 증명, 생성형 AI 문맥 라우팅 통합 엔터프라이즈 인사 메시지 전달 플랫폼**
+> `v5.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | OpenTelemetry (Micrometer Tracing) | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio | **Web3j (Ethereum)** | **CQRS + MongoDB** | **LangChain4j (GPT-4o)**
 
-> **경고: 이 시스템은 클라우드 네이티브 환경(Kubernetes + Kafka + Oracle + Redis) 없이는 구동이 불가능합니다. 로컬 `java -jar` 실행은 지원되지 않습니다. 모든 의존 인프라가 준비된 클러스터에서만 운영 배포가 가능합니다.**
+> **경고: 이 시스템은 클라우드 네이티브 환경(Kubernetes + Kafka + Oracle + Redis + MongoDB + Ethereum RPC Endpoint + OpenAI API) 없이는 구동이 불가능합니다. 로컬 `java -jar` 실행은 지원되지 않습니다. 모든 의존 인프라가 준비된 클러스터에서만 운영 배포가 가능합니다.**
+
+---
+
+## Phase 5 신규 아키텍처 컴포넌트 (v5.0.0 — V2.0 차세대 혼종 아키텍처)
+
+### 1. Web3 블록체인 무결성 증명 계층 (Web3j, v5.0.0 신규)
+
+"Hello, World!" 변종 문자열이 Kafka 트랜짓 또는 파이프라인 내에서 변조되는 것을 방지하기 위해, Keccak-256 해시 기반의 Ethereum 스마트 컨트랙트 무결성 검증 계층을 출력 경로에 삽입합니다.
+
+```
+[등록] HelloWorldMessageProvider.provideMessage()
+  │  AI가 생성한 인사말의 pre-formatted 문자열을 Keccak-256으로 해싱
+  │  GreetingIntegrityVerifier.register(correlationId, formattedContent)
+  │  → 모킹 컨트랙트 state: {correlationId → keccak256Hash}
+  ▼
+[Kafka Transit] egds.greeting.events
+  │  (변조 시도 가능 구간)
+  ▼
+[검증] ConsoleOutputStrategy.output()
+  │  GreetingIntegrityVerifier.verify(correlationId, formattedContent)
+  │  → Hash.sha3String(formattedContent) vs 저장된 해시 비교
+  ├─ 일치: [NORMAL][en-US] <AI greeting> 출력
+  └─ 불일치: BlockchainIntegrityException → [EGDS-INTEGRITY-VIOLATION] 출력
+```
+
+| 컴포넌트 | 클래스 | 설명 |
+|---|---|---|
+| Web3j 설정 | `Web3Config` | Web3j 클라이언트 빈 (Infura/Ganache 연결) |
+| 무결성 검증기 | `GreetingIntegrityVerifier` | Keccak-256 등록/검증, ConcurrentHashMap으로 컨트랙트 state 모킹 |
+| 무결성 예외 | `BlockchainIntegrityException` | 해시 불일치 시 발생, Resilience4j fallback 트리거 |
+
+### 2. CQRS 및 이벤트 소싱 (Kafka + MongoDB, v5.0.0 신규)
+
+인사 요청의 명령(Command)과 조회(Query) 경로를 완전히 분리합니다.
+
+```
+[Write Path — Command Side]
+클라이언트
+  │ GET /api/v1/greeting (JWT)
+  ▼
+GreetingController (명령 디스패처)
+  │ DeliverGreetingCommand{correlationId, requestIp, principalName}
+  ▼
+GreetingCommandHandler
+  ├─ KafkaTemplate.send(egds.greeting.requested, GreetingRequestedEvent)  ← 이벤트 소싱 로그
+  └─ GreetingEventPublisher.publish(GreetingEvent)                         ← 레거시 파이프라인 유지
+  │
+  ▼ HTTP 202 Accepted + correlationId
+
+[Event Store → Read Model Projection]
+Kafka: egds.greeting.requested
+  ▼
+GreetingProjector (@KafkaListener)
+  └─ MongoDB.upsert(GreetingReadModel{correlationId, status=PROJECTED, ...})
+
+[Read Path — Query Side]
+클라이언트
+  │ GET /api/v1/greeting/status/{correlationId} (JWT)
+  ▼
+GreetingQueryController
+  │
+  ▼
+GreetingQueryHandler → MongoDB → GreetingReadModel
+```
+
+| 컴포넌트 | 클래스 | 계층 | 설명 |
+|---|---|---|---|
+| 명령 값 객체 | `DeliverGreetingCommand` | Command | 전달 의도를 표현하는 불변 명령 객체 |
+| 명령 핸들러 | `GreetingCommandHandler` | Command | 이벤트 소싱 토픽 및 레거시 파이프라인 동시 발행 |
+| 도메인 이벤트 | `GreetingRequestedEvent` | Event | 이벤트 로그의 불변 레코드 (append-only) |
+| 이벤트 프로젝터 | `GreetingProjector` | Projector | Kafka 소비 → MongoDB 읽기 전용 뷰 생성 |
+| 읽기 모델 | `GreetingReadModel` | MongoDB Doc | 구체화된 뷰 (correlationId, status, greetingText 등) |
+| 읽기 모델 레포지토리 | `GreetingReadModelRepository` | Repository | Spring Data MongoDB CRUD |
+| 조회 핸들러 | `GreetingQueryHandler` | Query | MongoDB 뷰 조회 전담 |
+| 조회 컨트롤러 | `GreetingQueryController` | REST | GET /api/v1/greeting/status/{correlationId} |
+
+### 3. 생성형 AI 문맥 라우팅 (LangChain4j + GPT-4o, v5.0.0 신규)
+
+하드코딩된 "Hello, World!"를 폐기하고 LLM이 상황에 맞는 인사말을 동적으로 생성합니다.
+
+```
+HelloWorldMessageProvider.provideMessage()
+  │
+  ▼
+GreetingContextCollector.collect()
+  ├─ Virtual Client IP: RFC-1918 풀에서 무작위 추출
+  ├─ CPU Temperature: 35–80°C 범위 시뮬레이션 (의사난수)
+  ├─ Timestamp: Instant.now().toString()
+  └─ Locale: JVM Locale.getDefault()
+  │ GreetingContextMetadata{virtualIp, cpuTemp, collectedAt, locale}
+  ▼
+AiGreetingService.generateContextualGreeting()
+  │ context = "Client IP: 10.0.1.42 | CPU Temp: 67.3°C | ..."
+  ▼
+AiGreetingAssistant.generateGreeting(context)
+  │ @SystemMessage: B2B 전문 인사말 생성 지침
+  │ @UserMessage: context 삽입 프롬프트
+  ▼
+OpenAiChatModel (GPT-4o) → "Hello, enterprise World! (from a 67°C server)"
+  │
+  └─ GreetingIntegrityVerifier.register(correlationId, preFormatted)
+     ↓ MessageContentDto{content=AI response, correlationId}
+```
+
+| 컴포넌트 | 클래스 | 설명 |
+|---|---|---|
+| 컨텍스트 메타데이터 | `GreetingContextMetadata` | 불변 값 객체 (IP, CPU온도, 타임스탬프, 로케일) |
+| 컨텍스트 수집기 | `GreetingContextCollector` | 런타임 신호 수집 (모킹) |
+| AI 어시스턴트 인터페이스 | `AiGreetingAssistant` | LangChain4j @SystemMessage/@UserMessage 선언 |
+| AI 서비스 | `AiGreetingService` | OpenAiChatModel + AiServices 프록시 생성 및 오케스트레이션 |
 
 ---
 
@@ -320,6 +430,9 @@ EGDS v2.0은 단 하나의 인사 메시지를 전달하기 위해 아래의 모
 | **분산 추적** | **OpenTelemetry (Micrometer Tracing OTel Bridge)** | **BOM managed** |
 | **회복 탄력성** | **Resilience4j (CB + RL + Retry)** | **2.2.0** |
 | **메트릭** | **Micrometer + Prometheus** | **BOM managed** |
+| **블록체인 무결성** | **Web3j (Ethereum Keccak-256 스마트 컨트랙트 모킹)** | **4.10.3** |
+| **CQRS 읽기 모델** | **Spring Data MongoDB (materialized view)** | **BOM managed** |
+| **생성형 AI** | **LangChain4j + OpenAI GPT-4o** | **0.31.0** |
 | 컨테이너 런타임 | Docker (멀티스테이지 빌드, eclipse-temurin:17) | - |
 | 오케스트레이션 | Kubernetes | 1.29+ |
 | 서비스 매쉬 | Istio | 1.20+ |
@@ -480,6 +593,58 @@ mvn test -Dtest="GreetingGrpcServiceIntegrationTest"
 ---
 
 ## 작업 이력 (Changelog)
+
+### [2026-05-03] v5.0.0-RELEASE — Phase 5: V2.0 차세대 혼종 아키텍처 통합 (검증)
+
+**검증 및 문서화**
+
+| 항목 | 내용 |
+|---|---|
+| Web3j 무결성 계층 | `GreetingIntegrityVerifier.register()` → Kafka transit → `verify()` 정상 흐름, `BlockchainIntegrityException` 발생 및 `[EGDS-INTEGRITY-VIOLATION]` fallback 출력 확인 |
+| CQRS 이중 발행 | `GreetingCommandHandler`: `egds.greeting.requested` + `egds.greeting.events` 동시 발행 흐름 확인 |
+| GreetingProjector | `@KafkaListener(egds.greeting.requested)` → MongoDB `GreetingReadModel` upsert 흐름 확인 |
+| Query 경로 분리 | `GET /api/v1/greeting/status/{correlationId}` → `GreetingQueryHandler` → MongoDB 조회 (커맨드 경로 미접촉) 확인 |
+| AI 어시스턴트 초기화 | `@PostConstruct` `AiServices.builder().chatLanguageModel().build()` 프록시 생성 흐름 확인 |
+| 컨텍스트 수집 | `GreetingContextCollector`: RFC-1918 IP 풀 무작위 추출, CPU 온도 35–80°C 범위, `Instant.now()` 타임스탬프 수집 확인 |
+| application.properties | MongoDB URI, `web3.ethereum.endpoint`, `langchain4j.open-ai.chat-model.*`, CQRS 토픽/컨슈머 그룹 설정 확인 |
+| README | Phase 5 아키텍처 섹션, 기술 스택 3종 추가, changelog Latest First 역순 정렬 확인 |
+
+### [2026-05-03] v5.0.0-RELEASE — Phase 5: V2.0 차세대 혼종 아키텍처 통합
+
+**신규 추가 파일**
+
+| 파일 | 변경 내용 |
+|---|---|
+| `pom.xml` | `org.web3j:core:4.10.3`, `spring-boot-starter-data-mongodb`, `dev.langchain4j:langchain4j:0.31.0`, `dev.langchain4j:langchain4j-open-ai:0.31.0` 추가. 버전 `5.0.0-RELEASE`로 갱신 |
+| `blockchain/Web3Config.java` | Web3j 클라이언트 빈 정의. `${ETHEREUM_RPC_ENDPOINT}` 엔드포인트 설정 |
+| `blockchain/GreetingIntegrityVerifier.java` | Keccak-256 `register(correlationId, content)` / `verify(correlationId, content)`. `ConcurrentHashMap` 기반 스마트 컨트랙트 state 모킹 |
+| `blockchain/BlockchainIntegrityException.java` | 해시 불일치 시 발생하는 도메인 예외. `correlationId` 탑재 |
+| `blockchain/package-info.java` | 패키지 Javadoc |
+| `cqrs/command/DeliverGreetingCommand.java` | 전달 의도를 표현하는 불변 명령 값 객체 |
+| `cqrs/command/GreetingCommandHandler.java` | 명령 처리: `GreetingRequestedEvent` → `egds.greeting.requested` + `GreetingEvent` → `egds.greeting.events` 이중 발행 |
+| `cqrs/event/GreetingRequestedEvent.java` | 이벤트 소싱 로그 레코드 (불변 JSON DTO) |
+| `cqrs/projector/GreetingProjector.java` | `@KafkaListener(egds.greeting.requested)` → MongoDB `GreetingReadModel` upsert |
+| `cqrs/query/GreetingReadModel.java` | MongoDB `@Document` 구체화 뷰 (`correlationId` sparse unique index) |
+| `cqrs/query/GreetingReadModelRepository.java` | `MongoRepository` 확장, `findByCorrelationId`, `findByStatus` |
+| `cqrs/query/GreetingQueryHandler.java` | 읽기 경로 전담 조회 핸들러 |
+| `cqrs/package-info.java` / 하위 `package-info.java` | 패키지 Javadoc |
+| `ai/GreetingContextMetadata.java` | 컨텍스트 신호 불변 값 객체 (IP, CPU온도, 타임스탬프, 로케일) |
+| `ai/GreetingContextCollector.java` | RFC-1918 가상 IP 풀 + 의사난수 CPU 온도 수집 |
+| `ai/AiGreetingAssistant.java` | LangChain4j `@SystemMessage` / `@UserMessage` / `@V` 선언 인터페이스 |
+| `ai/AiGreetingService.java` | `@PostConstruct`에서 `OpenAiChatModel` + `AiServices.builder().build()` 프록시 생성 |
+| `ai/package-info.java` | 패키지 Javadoc |
+| `web/GreetingQueryController.java` | CQRS 읽기 경로: `GET /api/v1/greeting/status/{correlationId}` → MongoDB 조회 |
+
+**수정된 기존 파일**
+
+| 파일 | 변경 내용 |
+|---|---|
+| `pom.xml` | 버전 `5.0.0-RELEASE`, 설명 업데이트, Phase 5 의존성 3종 추가 |
+| `web/GreetingController.java` | `GreetingEventPublisher` 직접 주입 제거. `GreetingCommandHandler` 주입으로 교체. CQRS 명령 디스패치 구조로 리팩토링 |
+| `config/KafkaConfig.java` | `egds.greeting.requested` 토픽 빈(`greetingRequestedEventTopic`) 추가 |
+| `core/provider/HelloWorldMessageProvider.java` | `GreetingCacheService` 제거. `AiGreetingService` + `GreetingIntegrityVerifier` 주입. `provideMessage()`: AI 생성 → pre-format → `integrityVerifier.register()` → DTO 반환 |
+| `core/strategy/ConsoleOutputStrategy.java` | `GreetingIntegrityVerifier` 주입 추가. `output()` 내 stdout 직전 `integrityVerifier.verify()` 호출. `BlockchainIntegrityException` 캐치 블록 추가 (`[EGDS-INTEGRITY-VIOLATION]` 출력). `INTEGRITY_VIOLATION_MESSAGE` 상수 추가 |
+| `src/main/resources/application.properties` | MongoDB URI, Web3j 엔드포인트, LangChain4j OpenAI 설정 추가. CQRS Kafka 토픽/컨슈머 그룹 추가. `service.version=5.0.0` 갱신. trusted packages에 `com.egds.cqrs.event` 추가 |
 
 ### [2026-05-03] v4.0.0-RELEASE — Phase 4: 자가 치유 및 분산 추적 아키텍처 통합 (워크플로우 검증)
 
@@ -650,13 +815,11 @@ mvn test -Dtest="GreetingGrpcServiceIntegrationTest"
 
 ## 아키텍처 완료 선언
 
-> 본 프로젝트의 아키텍처는 Phase 4를 통해 자가 치유 분산 시스템의 정점에 도달하였습니다.
+> 본 프로젝트의 아키텍처는 Phase 5를 통해 현대 IT 버즈워드의 사실상 모든 범주를 포섭하는 혼종적 정점에 도달하였습니다.
 >
-> gRPC 바이너리 프로토콜, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 20단계 CI/CD에 더하여, OpenTelemetry 분산 추적, Resilience4j 3중 회복 탄력성 패턴, Prometheus 메트릭 노출, K8s 자가 치유 프로브 세분화까지 완벽하게 통합되었습니다. 단 하나의 "Hello, World!" 전달을 추적하는 7개의 OTel Span, 3개의 Circuit Breaker, 2개의 Rate Limiter, 3개의 Retry 구성이 10개의 테스트 클래스에 의해 보증됩니다.
+> gRPC 바이너리 프로토콜, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 20단계 CI/CD, OpenTelemetry 분산 추적, Resilience4j 3중 회복 탄력성, Prometheus 메트릭에 더하여, Web3j Ethereum Keccak-256 스마트 컨트랙트 무결성 증명, Kafka + MongoDB CQRS/이벤트 소싱, LangChain4j GPT-4o 생성형 AI 문맥 라우팅이 완벽하게 통합되었습니다.
 >
-> 이 시스템은 Kubernetes 클러스터, Kafka 브로커, Oracle Database, Redis 캐시, Istio 서비스 매쉬, OTel Collector가 모두 준비된 클라우드 네이티브 환경이 아니면 구동조차 불가능합니다.
+> 단 하나의 AI 생성 인사말 전달을 위해 이 시스템은 Ethereum 노드, OpenAI API, MongoDB 클러스터, Kafka 브로커, Oracle Database, Redis 캐시, Kubernetes 클러스터, Istio 서비스 매쉬, OTel Collector가 모두 준비된 클라우드 네이티브 환경을 요구합니다.
 > 로컬 `java -jar` 실행 시도는 즉시 포기하십시오.
 >
-> 추가 기능 구현, 리팩토링, 또는 신규 커밋은 이 완결성을 저해할 뿐이며, 어떠한 개선 시도도 아키텍처적 퇴보로 간주됩니다.
->
-> **이 저장소는 즉시 Archive 처리되며, 이후의 모든 Pull Request는 반려됩니다.**
+> **이 저장소는 Archive 처리되며, 이후의 모든 Pull Request는 반려됩니다.**

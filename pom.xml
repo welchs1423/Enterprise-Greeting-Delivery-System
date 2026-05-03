@@ -13,13 +13,16 @@
 
     <groupId>com.egds</groupId>
     <artifactId>enterprise-greeting-delivery-system</artifactId>
-    <version>4.0.0-RELEASE</version>
+    <version>5.0.0-RELEASE</version>
     <packaging>jar</packaging>
     <name>Enterprise Greeting Delivery System</name>
     <description>
-        Zero-trust, event-driven, cache-optimized, fully audited enterprise greeting delivery platform.
-        Delivers a single "Hello, World!" through JWT authentication, Kafka message brokering,
-        Redis-backed distributed caching, and Oracle-persisted JPA audit logging.
+        Zero-trust, event-driven, CQRS/Event-Sourced, blockchain-integrity-verified,
+        AI-context-routed enterprise greeting delivery platform.
+        Delivers a dynamically generated greeting through JWT authentication, Kafka CQRS
+        event sourcing, MongoDB materialized views, Web3j Ethereum integrity proofing,
+        LangChain4j generative AI context routing, Redis-backed distributed caching,
+        and Oracle-persisted JPA audit logging.
     </description>
 
     <properties>
@@ -30,6 +33,8 @@
         <protobuf.version>3.25.1</protobuf.version>
         <ascopes.protobuf.plugin.version>2.13.1</ascopes.protobuf.plugin.version>
         <resilience4j.version>2.2.0</resilience4j.version>
+        <web3j.version>4.10.3</web3j.version>
+        <langchain4j.version>0.31.0</langchain4j.version>
     </properties>
 
     <dependencies>
@@ -188,6 +193,42 @@
             <artifactId>grpc-testing</artifactId>
             <version>${grpc.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- MongoDB: CQRS read-model materialized view persistence -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+
+        <!--
+            Web3j Ethereum client.
+            Provides JSON-RPC connectivity and the Hash utility (Keccak-256)
+            used by GreetingIntegrityVerifier to simulate smart contract calls.
+            Production deployments connect to an Infura or private geth/besu node.
+        -->
+        <dependency>
+            <groupId>org.web3j</groupId>
+            <artifactId>core</artifactId>
+            <version>${web3j.version}</version>
+        </dependency>
+
+        <!-- LangChain4j core: AiServices, ChatLanguageModel, service annotations -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+            <version>${langchain4j.version}</version>
+        </dependency>
+
+        <!--
+            LangChain4j OpenAI provider.
+            Supplies OpenAiChatModel backed by the OpenAI Chat Completions API.
+            API key is sourced from the OPENAI_API_KEY environment variable.
+        -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-open-ai</artifactId>
+            <version>${langchain4j.version}</version>
         </dependency>
 
     </dependencies>

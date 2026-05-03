@@ -1,5 +1,7 @@
 package com.egds.core.strategy;
 
+import com.egds.blockchain.BlockchainIntegrityException;
+import com.egds.blockchain.GreetingIntegrityVerifier;
 import com.egds.core.entity.MessageEntity;
 import com.egds.core.enums.DeliveryStatus;
 import com.egds.core.exception.MessageDeliveryFailureException;
@@ -17,6 +19,13 @@ import org.springframework.stereotype.Component;
  * {@link IMessageOutputStrategy} implementation targeting the standard
  * output stream. Delivers the formatted content of a
  * {@link MessageEntity} to {@code System.out}.
+ *
+ * <p>Before writing to stdout, the formatted content of the entity is
+ * verified against the Keccak-256 fingerprint stored in the mock
+ * Ethereum smart contract via {@link GreetingIntegrityVerifier#verify}.
+ * If the stored hash does not match the recomputed hash, a
+ * {@link BlockchainIntegrityException} is thrown and the fallback emits
+ * an integrity-violation marker instead of the tampered payload.
  *
  * <p>Each invocation is instrumented with an OpenTelemetry
  * {@link Span} to enable distributed trace correlation. The write path
@@ -40,6 +49,11 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
             "[EGDS-DEGRADED] Hello, World!"
             + " (circuit open - output subsystem degraded)";
 
+    /** Marker emitted when blockchain integrity verification fails. */
+    private static final String INTEGRITY_VIOLATION_MESSAGE =
+            "[EGDS-INTEGRITY-VIOLATION] delivery blocked:"
+            + " payload hash mismatch detected by smart contract";
+
     /** Resilience4j instance name for all three patterns. */
     private static final String RESILIENCE_NAME = "consoleOutput";
 
@@ -49,11 +63,18 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
     /** Tracer used to create and manage delivery spans. */
     private final Tracer tracer;
 
+    /** Blockchain verifier for pre-output content integrity checks. */
+    private final GreetingIntegrityVerifier integrityVerifier;
+
     /**
-     * @param tracer the Micrometer Tracing tracer for span creation
+     * @param tracer   the Micrometer Tracing tracer for span creation
+     * @param verifier the blockchain integrity verifier
      */
-    public ConsoleOutputStrategy(final Tracer tracer) {
+    public ConsoleOutputStrategy(
+            final Tracer tracer,
+            final GreetingIntegrityVerifier verifier) {
         this.tracer = tracer;
+        this.integrityVerifier = verifier;
     }
 
     /**
@@ -79,6 +100,8 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
      *                      null
      * @throws MessageDeliveryFailureException if entity is null or the
      *         output stream cannot be written to
+     * @throws BlockchainIntegrityException if the entity's formatted
+     *         content does not match the fingerprint in the mock contract
      */
     @CircuitBreaker(name = RESILIENCE_NAME, fallbackMethod = "outputFallback")
     @RateLimiter(name = RESILIENCE_NAME, fallbackMethod = "outputFallback")
@@ -99,6 +122,12 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
                 .start();
         try (Tracer.SpanInScope ignored = tracer.withSpan(span)) {
             messageEntity.setDeliveryStatus(DeliveryStatus.IN_TRANSIT);
+
+            integrityVerifier.verify(
+                    messageEntity.getCorrelationId(),
+                    messageEntity.getFormattedContent());
+            span.tag("egds.blockchain.integrity", "VERIFIED");
+
             LOG.info("[OUTPUT] Writing to stdout"
                     + " correlationId={} traceId={}",
                     messageEntity.getCorrelationId(),
@@ -106,6 +135,15 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
             System.out.println(messageEntity.getFormattedContent());
             messageEntity.setDeliveryStatus(DeliveryStatus.DELIVERED);
             span.tag("egds.deliveryStatus", "DELIVERED");
+        } catch (BlockchainIntegrityException e) {
+            messageEntity.setDeliveryStatus(DeliveryStatus.FAILED);
+            span.tag("egds.deliveryStatus", "FAILED");
+            span.tag("egds.blockchain.integrity", "VIOLATED");
+            span.error(e);
+            LOG.error("[BLOCKCHAIN] integrity violation correlationId={}",
+                    messageEntity.getCorrelationId());
+            System.out.println(INTEGRITY_VIOLATION_MESSAGE);
+            throw e;
         } catch (Exception e) {
             messageEntity.setDeliveryStatus(DeliveryStatus.FAILED);
             span.tag("egds.deliveryStatus", "FAILED");
