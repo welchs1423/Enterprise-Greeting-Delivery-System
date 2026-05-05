@@ -1,7 +1,71 @@
 # Enterprise Greeting Delivery System (EGDS)
 
-> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라, CQRS/이벤트 소싱, 블록체인 무결성 증명, 생성형 AI 문맥 라우팅, 딥러닝 지연 최적화, GraphQL 슈퍼그래프, WASM 로깅 어댑터, Terraform 1회용 인프라, AS/400 메인프레임 이중 장부 통합 메타-엔터프라이즈 인사 메시지 전달 플랫폼**
-> `v7.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | GraphQL | OpenTelemetry (Micrometer Tracing) | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio | **Web3j (Ethereum)** | **CQRS + MongoDB** | **LangChain4j (GPT-4o)** | **TensorFlow JNI** | **Terraform Ephemeral Lambda** | **AS/400 EBCDIC 2PC** | **WASM JNI**
+> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라, CQRS/이벤트 소싱, 블록체인 무결성 증명, 생성형 AI 문맥 라우팅, 딥러닝 지연 최적화, GraphQL 슈퍼그래프, WASM 로깅 어댑터, Terraform 1회용 인프라, AS/400 메인프레임 이중 장부 통합, 시간 역행 예측 라우팅, 마이크로서비스 의회 투표, 4차원 테서랙트 투영 메타-엔터프라이즈 인사 메시지 전달 플랫폼**
+> `v8.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | GraphQL | OpenTelemetry (Micrometer Tracing) | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio | **Web3j (Ethereum)** | **CQRS + MongoDB** | **LangChain4j (GPT-4o)** | **TensorFlow JNI** | **Terraform Ephemeral Lambda** | **AS/400 EBCDIC 2PC** | **WASM JNI** | **Chronos Predictive Routing** | **Microservice Parliament** | **Quantum Tesseract JNI**
+
+---
+
+## [2026-05-05] V6.0: 인과율 역전 및 마이크로서비스 자아 형성 아키텍처 (Phase 9)
+
+### 1. 시간 역행 예측 라우팅 (`PredictiveGreetingCronJob` + `TemporalRollbackManager`)
+
+클라이언트 요청을 기다리지 않고, 60초 주기 스케줄러가 현재 시각 기반 이중 가우시안 확률 모델(09:00 / 14:00 피크)로 요청 발생 확률을 계산합니다.
+확률이 임계값(0.65)을 초과하면 인사 메시지를 L1 캐시에 선제 저장하고, `TemporalRollbackManager`에 등록합니다.
+5분 이내에 실제 요청이 해당 예측을 `claim`하지 않으면 보상 트랜잭션으로 캐시 항목을 무효화합니다(타임 파라독스 방지).
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `PredictiveGreetingCronJob` | `com.egds.temporal` | 60초 주기 확률 계산, L1 캐시 선제 저장 |
+| `TemporalRollbackManager` | `com.egds.temporal` | 예측 등록/클레임/만료 롤백 보상 트랜잭션 |
+| `PredictedGreetingEntry` | `com.egds.temporal` | 예측 항목 불변 레코드 |
+
+```
+Scheduler tick (60s)
+  → computePredictionProbability()   ← bimodal Gaussian (09:00, 14:00)
+  → probability >= 0.65
+      → cache.put(correlationId, entry)   ← L1 pre-cache
+      → rollbackManager.register(entry)
+
+No claim within 5 minutes
+  → rollbackManager.rollbackExpired()    ← compensating transaction
+```
+
+### 2. 마이크로서비스 의회 투표 (`ConsensusVotingEngine`)
+
+인사 메시지 전달 전, 등록된 모든 `GreetingVoter` 구현체가 별도 스레드에서 동시에 투표를 진행합니다.
+만장일치(unanimous consent)일 때만 `"Hello, World!"`를 반환하며, 단 한 표라도 반대하면 `"Greeting Denied: You are not worthy."`를 출력합니다.
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `ConsensusVotingEngine` | `com.egds.consensus` | `CompletableFuture` 병렬 투표 수집, 만장일치 판정 |
+| `AiRouterVoter` | `com.egds.consensus` | LangChain4j 추론 시뮬레이션 (해시 기반) |
+| `BlockchainVerifierVoter` | `com.egds.consensus` | Web3j 온체인 신원 검증 시뮬레이션 (UUID 형식 검사) |
+| `IpfsResolverVoter` | `com.egds.consensus` | IPFS CIDv1 프리픽스 검증 시뮬레이션 |
+
+```
+POST /api/v1/greeting
+  → ConsensusVotingEngine.vote(correlationId)
+      → [AI-Router, Blockchain-Verifier, IPFS-Resolver] 병렬 투표
+      → allMatch(true)  → "Hello, World!"
+      → anyMatch(false) → "Greeting Denied: You are not worthy."
+```
+
+### 3. 4차원 테서랙트 출력 (`QuantumTesseractAdapter`)
+
+JNI를 통해 양자 공동 프로세서(가상)의 큐비트를 제어하는 인터페이스를 선언합니다.
+실행 환경에 네이티브 라이브러리(`egds-quantum-tesseract`)가 없으면 JVM 폴백이 활성화됩니다.
+JVM 폴백은 4x4 직교 회전 행렬 R_XW(π/4) × R_YZ(π/6)를 구성하고, 입력 메시지의 UTF-8 바이트 벡터에 적용한 뒤 W축 그림자(W-shadow)를 행 단위로 로그에 출력합니다.
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `QuantumTesseractAdapter` | `com.egds.quantum` | JNI 네이티브 선언 + JVM 4D 테서랙트 투영 폴백 |
+
+```
+project("Hello, World!")
+  → R_XW(π/4) × R_YZ(π/6)          ← 4×4 직교 회전 행렬 합성
+  → composed × [H, e, l, l]         ← UTF-8 바이트 벡터 투영
+  → W-shadow = [-25.46, 33.47, 144.03, 127.28]
+```
 
 ---
 
