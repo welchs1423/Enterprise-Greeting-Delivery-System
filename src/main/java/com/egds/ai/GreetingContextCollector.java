@@ -26,6 +26,7 @@ import java.util.Random;
 public class GreetingContextCollector {
 
     /** RFC-1918 private IP pool simulating inbound client diversity. */
+    @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
     private static final String[] VIRTUAL_IP_POOL = {
         "10.0.1.42", "172.16.8.7", "192.168.100.23",
         "10.10.50.199", "172.31.255.3", "192.168.0.1"
