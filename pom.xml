@@ -44,6 +44,51 @@
         <tomcat.version>10.1.36</tomcat.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!--
+                Explicit Tomcat version lock to pick up 2024-2025 security patches.
+                CVE-2024-34750/38286 fixed in 10.1.26; CVE-2024-50379/56337/52316
+                fixed in 10.1.34; CVE-2025-24813 fixed in 10.1.35;
+                CVE-2025-31650/31651 fixed in 10.1.36.
+                spring-boot-starter-parent manages Tomcat via tomcat.version but
+                transitive pulls can still resolve the older BOM-default version,
+                so each artifact is pinned here explicitly.
+            -->
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-el</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <!--
+                Explicit protobuf-java version lock.
+                CVE-2024-7254 (CVSS 8.7) fixed in 3.25.5.
+                gRPC 1.61.1 pulls protobuf-java:3.25.1 transitively; this
+                entry overrides that to the patched version.
+            -->
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java-util</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
 
         <!-- Web -->

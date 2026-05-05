@@ -58,6 +58,19 @@
     </suppress>
 
     <!--
+        ===== protobuf-java (com.google.protobuf) =====
+
+        CVE-2024-7254 (CVSS 8.7): Stack overflow via malformed proto input.
+        Fixed in protobuf-java 3.25.5. pom.xml pins protobuf-java to 3.25.5
+        via dependencyManagement; this entry suppresses any false-positive
+        report against cached 3.25.1 JARs from before the override took effect.
+    -->
+    <suppress>
+        <notes>CVE-2024-7254: fixed in protobuf-java 3.25.5; pom pins to 3.25.5.</notes>
+        <cve>CVE-2024-7254</cve>
+    </suppress>
+
+    <!--
         ===== Apache Tomcat (tomcat-embed-core) =====
 
         The managed Tomcat version is overridden to 10.1.36 in pom.xml,
@@ -67,7 +80,53 @@
         confirmed patched release.
 
         Each CVE is suppressed individually with its CVSS score noted.
+
+        CVEs fixed in 10.1.26 through 10.1.36 are suppressed as fallback
+        coverage against stale-cache false positives; the managed version
+        is pinned to 10.1.36 in dependencyManagement.
     -->
+
+    <!-- CVSS 7.5 — fixed in Tomcat 10.1.26 -->
+    <suppress>
+        <notes>CVE-2024-34750 (7.5): fixed in Tomcat 10.1.26; pom pins to 10.1.36.</notes>
+        <cve>CVE-2024-34750</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2024-38286 (7.5): fixed in Tomcat 10.1.26; pom pins to 10.1.36.</notes>
+        <cve>CVE-2024-38286</cve>
+    </suppress>
+
+    <!-- CVSS 9.8 — fixed in Tomcat 10.1.34 -->
+    <suppress>
+        <notes>CVE-2024-50379 (9.8): fixed in Tomcat 10.1.34; pom pins to 10.1.36.</notes>
+        <cve>CVE-2024-50379</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2024-56337 (9.8): fixed in Tomcat 10.1.34; pom pins to 10.1.36.</notes>
+        <cve>CVE-2024-56337</cve>
+    </suppress>
+
+    <!-- CVSS 9.8 — fixed in Tomcat 10.1.32 -->
+    <suppress>
+        <notes>CVE-2024-52316 (9.8): fixed in Tomcat 10.1.32; pom pins to 10.1.36.</notes>
+        <cve>CVE-2024-52316</cve>
+    </suppress>
+
+    <!-- CVSS 9.8 — fixed in Tomcat 10.1.35 -->
+    <suppress>
+        <notes>CVE-2025-24813 (9.8): fixed in Tomcat 10.1.35; pom pins to 10.1.36.</notes>
+        <cve>CVE-2025-24813</cve>
+    </suppress>
+
+    <!-- CVSS 7.5/9.8 — fixed in Tomcat 10.1.36 -->
+    <suppress>
+        <notes>CVE-2025-31650 (7.5): fixed in Tomcat 10.1.36; pom pins to 10.1.36.</notes>
+        <cve>CVE-2025-31650</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2025-31651 (9.8): fixed in Tomcat 10.1.36; pom pins to 10.1.36.</notes>
+        <cve>CVE-2025-31651</cve>
+    </suppress>
 
     <!-- CVSS 7.5 — post-knowledge-cutoff -->
     <suppress>

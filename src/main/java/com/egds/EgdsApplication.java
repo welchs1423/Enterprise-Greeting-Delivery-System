@@ -17,7 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * <p>JPA Auditing is activated in {@link com.egds.config.JpaAuditingConfig}
  * rather than here to avoid {@code @DataJpaTest} slice failures.
  */
-@SpringBootApplication
+@SpringBootApplication(proxyBeanMethods = false)
 @EnableCaching
 @EnableKafka
 @EnableScheduling
