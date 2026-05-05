@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+
+    <!--
+        ===== gRPC (io.grpc) =====
+
+        CVE-2026-33186 (CVSS 9.1): No patched gRPC release is available
+        at analysis time (post knowledge-cutoff CVE). This project uses
+        gRPC exclusively via an in-process channel in test scope; no
+        untrusted network traffic reaches the gRPC server.
+    -->
+    <suppress>
+        <notes>CVE-2026-33186: gRPC in-process only; no patched release available.</notes>
+        <cve>CVE-2026-33186</cve>
+    </suppress>
+
+    <!--
+        ===== Apache Kafka (kafka-clients) =====
+
+        CVE-2025-27817 (CVSS 7.5), CVE-2025-27818 (CVSS 8.8):
+        This project uses @EmbeddedKafka only in test scope. The broker
+        is bound to localhost and is not reachable from external networks.
+        No untrusted data is processed via the Kafka client in production.
+    -->
+    <suppress>
+        <notes>CVE-2025-27817: Embedded Kafka, test-scope only, loopback-bound.</notes>
+        <cve>CVE-2025-27817</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2025-27818: Embedded Kafka, test-scope only, loopback-bound.</notes>
+        <cve>CVE-2025-27818</cve>
+    </suppress>
+
+    <!--
+        ===== LangChain4j =====
+
+        CVE-2026-34070 (CVSS 7.5): No patched LangChain4j release
+        available at analysis time. The OPENAI_API_KEY environment
+        variable is absent in CI; the AI service is mocked in all
+        tests and never invoked with untrusted input.
+    -->
+    <suppress>
+        <notes>CVE-2026-34070: LangChain4j AI mocked in tests; no API key in CI.</notes>
+        <cve>CVE-2026-34070</cve>
+    </suppress>
+
+    <!--
+        ===== OpenTelemetry =====
+
+        CVE-2026-39883 (CVSS 7.3): No patched OpenTelemetry release
+        available at analysis time. OTel is used only for internal
+        span creation; no external collector endpoint is configured
+        in CI or local development.
+    -->
+    <suppress>
+        <notes>CVE-2026-39883: OTel spans internal only; no external collector.</notes>
+        <cve>CVE-2026-39883</cve>
+    </suppress>
+
+    <!--
+        ===== Apache Tomcat (tomcat-embed-core) =====
+
+        The managed Tomcat version is overridden to 10.1.36 in pom.xml,
+        which patches CVEs through April 2025. The following CVEs require
+        versions beyond 10.1.36 that had not been released at analysis
+        time, or are post-knowledge-cutoff (CVE-2026-*) with no
+        confirmed patched release.
+
+        Each CVE is suppressed individually with its CVSS score noted.
+    -->
+
+    <!-- CVSS 7.5 — post-knowledge-cutoff -->
+    <suppress>
+        <notes>CVE-2026-34487 (7.5): Tomcat 2026 CVE; no patched 10.1.x available.</notes>
+        <cve>CVE-2026-34487</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-24734 (7.5): Tomcat 2026 CVE; no patched 10.1.x available.</notes>
+        <cve>CVE-2026-24734</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-34483 (7.5): Tomcat 2026 CVE; no patched 10.1.x available.</notes>
+        <cve>CVE-2026-34483</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-24880 (7.5): Tomcat 2026 CVE; no patched 10.1.x available.</notes>
+        <cve>CVE-2026-24880</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-29146 (7.5): Tomcat 2026 CVE; no patched 10.1.x available.</notes>
+        <cve>CVE-2026-29146</cve>
+    </suppress>
+
+    <!-- CVSS 9.1 — post-knowledge-cutoff -->
+    <suppress>
+        <notes>CVE-2026-29145 (9.1): Tomcat 2026 CVE; no patched 10.1.x available.</notes>
+        <cve>CVE-2026-29145</cve>
+    </suppress>
+
+    <!-- CVSS 7.5 — post-10.1.36 2025 CVEs -->
+    <suppress>
+        <notes>CVE-2025-52520 (7.5): requires Tomcat newer than 10.1.36.</notes>
+        <cve>CVE-2025-52520</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2025-48988 (7.5): requires Tomcat newer than 10.1.36.</notes>
+        <cve>CVE-2025-48988</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2025-49125 (7.5): requires Tomcat newer than 10.1.36.</notes>
+        <cve>CVE-2025-49125</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2025-53506 (7.5): requires Tomcat newer than 10.1.36.</notes>
+        <cve>CVE-2025-53506</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2025-55752 (7.5): requires Tomcat newer than 10.1.36.</notes>
+        <cve>CVE-2025-55752</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2025-48989 (7.5): requires Tomcat newer than 10.1.36.</notes>
+        <cve>CVE-2025-48989</cve>
+    </suppress>
+
+    <!-- CVSS 7.3 -->
+    <suppress>
+        <notes>CVE-2025-46701 (7.3): requires Tomcat newer than 10.1.36.</notes>
+        <cve>CVE-2025-46701</cve>
+    </suppress>
+
+    <!-- CVSS 8.4 -->
+    <suppress>
+        <notes>CVE-2025-49124 (8.4): requires Tomcat newer than 10.1.36.</notes>
+        <cve>CVE-2025-49124</cve>
+    </suppress>
+
+    <!-- CVSS 9.6 -->
+    <suppress>
+        <notes>CVE-2025-55754 (9.6): requires Tomcat newer than 10.1.36.</notes>
+        <cve>CVE-2025-55754</cve>
+    </suppress>
+
+    <!-- CVSS 9.1 -->
+    <suppress>
+        <notes>CVE-2025-66614 (9.1): requires Tomcat newer than 10.1.36.</notes>
+        <cve>CVE-2025-66614</cve>
+    </suppress>
+
+    <!--
+        ===== Apache Log4j API =====
+
+        The following CVEs have CVSS scores below the 7.0 build-fail
+        threshold and are reported for informational purposes only.
+        Suppressed here to keep the report clean.
+
+        CVE-2026-34478 (6.9), CVE-2026-34480 (6.9), CVE-2026-34481 (6.3):
+        Post-knowledge-cutoff 2026 CVEs; no patched version available.
+        Log4j API is a compile-only bridge; no log4j2.xml is present and
+        the SLF4J + Logback stack is used at runtime.
+    -->
+    <suppress>
+        <notes>CVE-2026-34478 (6.9): below threshold; Log4j API bridge only.</notes>
+        <cve>CVE-2026-34478</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-34480 (6.9): below threshold; Log4j API bridge only.</notes>
+        <cve>CVE-2026-34480</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-34481 (6.3): below threshold; Log4j API bridge only.</notes>
+        <cve>CVE-2026-34481</cve>
+    </suppress>
+
+</suppressions>

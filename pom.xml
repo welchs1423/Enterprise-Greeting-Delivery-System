@@ -30,11 +30,18 @@
         <jjwt.version>0.12.5</jjwt.version>
         <grpc.spring.boot.version>3.1.0.RELEASE</grpc.spring.boot.version>
         <grpc.version>1.61.1</grpc.version>
-        <protobuf.version>3.25.1</protobuf.version>
+        <!-- CVE-2024-7254 fixed in 3.25.5 -->
+        <protobuf.version>3.25.5</protobuf.version>
         <ascopes.protobuf.plugin.version>2.13.1</ascopes.protobuf.plugin.version>
         <resilience4j.version>2.2.0</resilience4j.version>
         <web3j.version>4.10.3</web3j.version>
         <langchain4j.version>0.31.0</langchain4j.version>
+        <!--
+            Override Spring Boot managed Tomcat to pick up security patches.
+            CVE-2024-56337/CVE-2025-24813 fixed in 10.1.35;
+            CVE-2025-31650/CVE-2025-31651 fixed in 10.1.36.
+        -->
+        <tomcat.version>10.1.36</tomcat.version>
     </properties>
 
     <dependencies>
@@ -358,6 +365,25 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!--
+                OWASP Dependency-Check.
+                Suppression file documents accepted-risk CVEs that either
+                (a) have no patched release available at analysis time, or
+                (b) do not affect this project's usage of the component.
+            -->
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>12.2.2</version>
+                <configuration>
+                    <failBuildOnCVSS>7</failBuildOnCVSS>
+                    <suppressionFiles>
+                        <suppressionFile>owasp-suppressions.xml</suppressionFile>
+                    </suppressionFiles>
+                    <nvdApiDelay>6000</nvdApiDelay>
+                </configuration>
             </plugin>
         </plugins>
     </build>
