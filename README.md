@@ -5,6 +5,21 @@
 
 ---
 
+## [2026-05-05] 빌드 품질 정비 (v7.0.1)
+
+### 정적 분석 완전 통합 (Checkstyle / PMD / SpotBugs)
+
+`mvn verify` 및 `mvn checkstyle:check pmd:check spotbugs:check` 가 완전히 통과하도록 빌드 파이프라인을 정비했습니다.
+
+| 항목 | 내용 |
+|---|---|
+| Checkstyle 39건 해소 | HiddenField(생성자 파라미터 리네임), UnusedImports, JavadocVariable/Method, MagicNumber(상수화), LineLength(80자 래핑), HideUtilityClassConstructor, JavadocPackage |
+| PMD 억제 | `GreetingContextCollector` — 의도된 RFC-1918 IP 풀에 `@SuppressWarnings("PMD.AvoidUsingHardCodedIP")` 추가 |
+| 플러그인 추가 | `pom.xml` 에 Checkstyle, PMD, SpotBugs 플러그인 정의 누락 → `mvn verify` 시 `NoPluginFoundForPrefixException` 오류 해소 |
+| 신규 파일 | `src/main/java/com/egds/mainframe/package-info.java` — JavadocPackage 규칙 준수 |
+
+---
+
 ## [2026-05-03] Phase 7 신규 아키텍처 컴포넌트 (v7.0.0 — V4.0 메타-엔터프라이즈 아키텍처)
 
 ### 1. Terraform 기반 1회용 인프라 (EphemeralTerraformAdapter, v7.0.0 신규)
