@@ -5,6 +5,61 @@
 
 ---
 
+## [2026-05-05] V5.0: IPFS 연동 및 우주 방사선 ECC 복구 아키텍처 (Phase 8)
+
+### 1. IPFS 콘텐츠 주소 기반 분산 저장 (`IpfsGreetingResolver`)
+
+인사말 데이터를 SHA-256 CID(Content Identifier)로 색인하는 로컬 IPFS 모킹 스토어를 구현했습니다.
+저장 시 Hamming(7,4) ECC 인코딩을 적용하여, 우주 방사선에 의해 비트가 반전되더라도 조회 시점에 자동 복구됩니다.
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `IpfsGreetingResolver` | `com.egds.ipfs` | SHA-256 CID 색인, ECC 인코딩/디코딩 래핑, 비트 플립 주입 인터페이스 제공 |
+
+### 2. 우주 방사선 비트 플립 시뮬레이터 및 ECC 자동 복구
+
+우주 방사선 단일 이벤트 업셋(SEU)을 데몬 스레드로 시뮬레이션하고, Hamming(7,4) 코드로 출력 직전 자동 복구합니다.
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `CosmicRaySimulator` | `com.egds.chaos` | 3–8초 랜덤 주기로 IPFS ECC 바이트에 1비트 반전 주입하는 데몬 스레드 |
+| `EccRecoveryFilter` | `com.egds.chaos` | Hamming(7,4) 인코드/디코드, 니블당 7비트 코드워드로 1비트 오류 검출·정정 |
+
+```
+store("Hello, World!")
+  → ECC encode (1 byte → 2 Hamming bytes)
+  → ConcurrentHashMap[CID]
+
+CosmicRaySimulator daemon
+  → eccBytes[randomIdx] ^= (1 << randomBit)   ← 비트 반전
+
+resolve(CID)
+  → EccRecoveryFilter.decode()                 ← syndrome 계산 → 오류 비트 복구
+  → "Hello, World!"
+```
+
+### 3. 내장형 카오스 몽키 (`EmbeddedChaosMonkey`)
+
+Netflix Chaos Monkey 사상을 이어받아 `ConsoleOutputStrategy` 출력 경로에 주입했습니다.
+`unleash()` 호출마다 10% 확률로 `InterruptedException` 투척 또는 5초 지연 중 하나를 선택합니다.
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `EmbeddedChaosMonkey` | `com.egds.chaos` | 확률적 쓰레드 중단/지연 주입, `egds.chaos.enabled` 프로퍼티로 활성화 제어 |
+
+```
+ConsoleOutputStrategy.output(entity)
+  → chaosMonkey.unleash()
+      10% 확률:  roll < 5  → InterruptedException (→ MessageDeliveryFailureException)
+                 roll < 10 → Thread.sleep(5000ms)
+  → integrityVerifier.verify(...)
+  → System.out.println(...)
+```
+
+> 테스트 환경에서는 `egds.chaos.enabled=false`로 비활성화됩니다.
+
+---
+
 ## [2026-05-05] 빌드 품질 정비 (v7.0.1)
 
 ### 정적 분석 완전 통합 (Checkstyle / PMD / SpotBugs)

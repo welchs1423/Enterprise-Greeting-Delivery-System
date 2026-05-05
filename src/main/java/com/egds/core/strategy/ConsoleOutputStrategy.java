@@ -2,6 +2,7 @@ package com.egds.core.strategy;
 
 import com.egds.blockchain.BlockchainIntegrityException;
 import com.egds.blockchain.GreetingIntegrityVerifier;
+import com.egds.chaos.EmbeddedChaosMonkey;
 import com.egds.core.entity.MessageEntity;
 import com.egds.core.enums.DeliveryStatus;
 import com.egds.core.exception.MessageDeliveryFailureException;
@@ -66,15 +67,21 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
     /** Blockchain verifier for pre-output content integrity checks. */
     private final GreetingIntegrityVerifier integrityVerifier;
 
+    /** Chaos monkey injected into the output path for resilience testing. */
+    private final EmbeddedChaosMonkey chaosMonkey;
+
     /**
-     * @param tracerBean the Micrometer Tracing tracer for span creation
-     * @param verifier   the blockchain integrity verifier
+     * @param tracerBean  the Micrometer Tracing tracer for span creation
+     * @param verifier    the blockchain integrity verifier
+     * @param chaosMonkey the embedded chaos monkey for disruption injection
      */
     public ConsoleOutputStrategy(
             final Tracer tracerBean,
-            final GreetingIntegrityVerifier verifier) {
+            final GreetingIntegrityVerifier verifier,
+            final EmbeddedChaosMonkey chaosMonkey) {
         this.tracer = tracerBean;
         this.integrityVerifier = verifier;
+        this.chaosMonkey = chaosMonkey;
     }
 
     /**
@@ -114,6 +121,16 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
                     "UNKNOWN",
                     "ERR_NULL_ENTITY"
             );
+        }
+        try {
+            chaosMonkey.unleash();
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw new MessageDeliveryFailureException(
+                "ChaosMonkey interrupted delivery thread.",
+                messageEntity.getCorrelationId(),
+                "ERR_CHAOS_INTERRUPT",
+                ie);
         }
         Span span = tracer.nextSpan()
                 .name(SPAN_NAME)
