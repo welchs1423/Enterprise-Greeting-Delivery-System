@@ -1,7 +1,77 @@
 # Enterprise Greeting Delivery System (EGDS)
 
-> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라, CQRS/이벤트 소싱, 블록체인 무결성 증명, 생성형 AI 문맥 라우팅, 양자 지연 시뮬레이션, GraphQL 슈퍼그래프, WASM 로깅 어댑터 통합 엔터프라이즈 인사 메시지 전달 플랫폼**
-> `v6.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | GraphQL | OpenTelemetry (Micrometer Tracing) | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio | **Web3j (Ethereum)** | **CQRS + MongoDB** | **LangChain4j (GPT-4o)** | **QuantumDelay** | **WASM JNI**
+> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라, CQRS/이벤트 소싱, 블록체인 무결성 증명, 생성형 AI 문맥 라우팅, 딥러닝 지연 최적화, GraphQL 슈퍼그래프, WASM 로깅 어댑터, Terraform 1회용 인프라, AS/400 메인프레임 이중 장부 통합 메타-엔터프라이즈 인사 메시지 전달 플랫폼**
+> `v7.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | GraphQL | OpenTelemetry (Micrometer Tracing) | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio | **Web3j (Ethereum)** | **CQRS + MongoDB** | **LangChain4j (GPT-4o)** | **TensorFlow JNI** | **Terraform Ephemeral Lambda** | **AS/400 EBCDIC 2PC** | **WASM JNI**
+
+---
+
+## [2026-05-03] Phase 7 신규 아키텍처 컴포넌트 (v7.0.0 — V4.0 메타-엔터프라이즈 아키텍처)
+
+### 1. Terraform 기반 1회용 인프라 (EphemeralTerraformAdapter, v7.0.0 신규)
+
+요청마다 AWS Lambda를 동적으로 프로비저닝하고, 응답 수신 즉시 인프라를 파기하는 자기분열형 파이프라인입니다. 프로덕션에서는 `terraform apply` / `terraform destroy` 프로세스를 직접 실행합니다.
+
+```
+AiGreetingService.generateContextualGreeting()
+  ├─ [1] EphemeralTerraformAdapter.provision(correlationId)
+  │       → terraform apply (mock) → Lambda ARN 획득
+  │
+  ├─ [2] AiGreetingAssistant.generateGreeting(context)
+  │       → LLM 응답 수신
+  │
+  ├─ [3] EphemeralTerraformAdapter.invoke(lambdaArn, greeting)
+  │       → Lambda invocation (mock) → greeting 반환
+  │
+  ├─ [4] As400MainframeEmulator.prepare() + commit()  ← 2PC 동기화
+  │
+  ├─ [5] TensorFlowDelayPredictor.applyPredictedDelay()
+  │
+  └─ [6] EphemeralTerraformAdapter.destroy(correlationId)
+          → terraform destroy (mock) → 인프라 즉시 파기
+```
+
+| 컴포넌트 | 클래스 | 설명 |
+|---|---|---|
+| Terraform 어댑터 | `EphemeralTerraformAdapter` | provision/invoke/destroy 3단계 Lambda 라이프사이클 모킹 |
+
+### 2. AS/400 메인프레임 이중 장부 (As400MainframeEmulator, v7.0.0 신규)
+
+블록체인 원장과 동기화되는 IBM AS/400 메인프레임 에뮬레이터입니다. 모든 레코드는 EBCDIC (IBM037) 인코딩으로 저장되며, 2단계 커밋(2PC) 프로토콜을 통해 원자적 일관성을 보장합니다.
+
+```
+As400MainframeEmulator
+  ├─ prepare(correlationId, greeting)
+  │   → EBCDIC (IBM037) 인코딩
+  │   → staging buffer 기록 (volatile)
+  │
+  ├─ commit(correlationId)
+  │   → staging → durable ledger 승격
+  │
+  └─ rollback(correlationId)
+      → staging buffer 폐기
+```
+
+| 컴포넌트 | 클래스 | 설명 |
+|---|---|---|
+| 메인프레임 에뮬레이터 | `As400MainframeEmulator` | EBCDIC IBM037 인코딩, 2PC prepare/commit/rollback, 인메모리 원장 |
+
+### 3. 딥러닝 기반 지연 시간 최적화 (TensorFlowDelayPredictor, v7.0.0 신규)
+
+Phase 6의 `QuantumDelayService` (Thread.sleep 기반 50% 확률 지연)를 대체합니다. TensorFlow JNI 모델 추론을 시뮬레이션하여 처리량, P99 레이턴시, 큐 깊이 피처 벡터로부터 최적 딜레이를 도출합니다.
+
+```
+TensorFlowDelayPredictor.applyPredictedDelay()
+  ├─ runMockInference()
+  │   → feature vector: [throughput, p99_latency, queue_depth]
+  │   → linear regression: bias + w1*f1 + w2*f2 + w3*f3
+  │   → clamp to [0, egds.tensorflow.max-predicted-delay-ms]
+  │
+  └─ Thread.sleep(predictedMs)
+```
+
+| 컴포넌트 | 클래스 | 설명 |
+|---|---|---|
+| TF 지연 예측기 | `TensorFlowDelayPredictor` | JNI 추론 모킹, 피처 기반 딜레이 도출, `egds.tensorflow.max-predicted-delay-ms` 설정 |
 
 ---
 
