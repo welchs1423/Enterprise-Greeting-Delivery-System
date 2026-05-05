@@ -9,11 +9,14 @@ import org.springframework.stereotype.Component;
  * Ethereum client. In production this would query a smart
  * contract for the caller's trust score; the current
  * implementation validates that the correlation ID conforms
- * to the standard UUID format (36 characters), approximating
- * a well-formed on-chain identity token check.
+ * to the standard UUID format, approximating a well-formed
+ * on-chain identity token check.
  */
 @Component
-public class BlockchainVerifierVoter implements GreetingVoter {
+public final class BlockchainVerifierVoter implements GreetingVoter {
+
+    /** Expected length of a standard UUID string representation. */
+    private static final int UUID_LENGTH = 36;
 
     @Override
     public String name() {
@@ -21,9 +24,9 @@ public class BlockchainVerifierVoter implements GreetingVoter {
     }
 
     /**
-     * Approves delivery when the correlation ID is a
-     * well-formed UUID (exactly 36 characters), indicating a
-     * valid on-chain identity token format.
+     * Approves delivery when the correlation ID is a well-formed
+     * UUID ({@value #UUID_LENGTH} characters), indicating a valid
+     * on-chain identity token format.
      *
      * @param correlationId request correlation identifier
      * @return {@code true} when the chain verification passes
@@ -31,6 +34,6 @@ public class BlockchainVerifierVoter implements GreetingVoter {
     @Override
     public boolean vote(final String correlationId) {
         return correlationId != null
-                && correlationId.length() == 36;
+                && correlationId.length() == UUID_LENGTH;
     }
 }

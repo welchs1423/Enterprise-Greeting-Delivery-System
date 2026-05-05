@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EmbeddedChaosMonkey {
 
+    /** Logger for this component. */
     private static final Logger LOG =
         LoggerFactory.getLogger(EmbeddedChaosMonkey.class);
 
@@ -41,6 +42,7 @@ public class EmbeddedChaosMonkey {
      */
     private static final int INTERRUPT_THRESHOLD = 5;
 
+    /** Whether chaos injection is currently active. */
     private volatile boolean enabled;
 
     /**

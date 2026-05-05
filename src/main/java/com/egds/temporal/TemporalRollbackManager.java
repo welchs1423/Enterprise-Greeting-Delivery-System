@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
  * greeting events (Chronos Predictive Routing subsystem).
  *
  * <p>When {@link PredictiveGreetingCronJob} pre-generates a
- * greeting that no client claims within {@value #CLAIM_MINUTES}
+ * greeting that no client claims within {@link #CLAIM_MINUTES}
  * minutes, this manager performs a rollback transaction to
  * prevent a temporal paradox: an effect (cached response)
  * with no cause (actual request).
@@ -21,15 +21,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class TemporalRollbackManager {
 
-    private static final Logger log =
+    /** Logger for this component. */
+    private static final Logger LOG =
             LoggerFactory.getLogger(
                     TemporalRollbackManager.class);
 
+    /** Number of minutes before an unclaimed prediction expires. */
     private static final long CLAIM_MINUTES = 5L;
 
+    /** Maximum unclaimed duration before rollback is triggered. */
     private static final Duration CLAIM_WINDOW =
             Duration.ofMinutes(CLAIM_MINUTES);
 
+    /** Thread-safe map of pending predictions keyed by correlationId. */
     private final ConcurrentMap<String, PredictedGreetingEntry>
             pending = new ConcurrentHashMap<>();
 
@@ -40,7 +44,7 @@ public class TemporalRollbackManager {
      */
     public void register(final PredictedGreetingEntry entry) {
         pending.put(entry.correlationId(), entry);
-        log.info(
+        LOG.info(
                 "Temporal register: correlationId={} at={}",
                 entry.correlationId(),
                 entry.predictedAt());
@@ -61,7 +65,7 @@ public class TemporalRollbackManager {
             return false;
         }
         pending.put(correlationId, entry.claim());
-        log.info(
+        LOG.info(
                 "Temporal claim: correlationId={}",
                 correlationId);
         return true;
@@ -82,7 +86,7 @@ public class TemporalRollbackManager {
             boolean expired = !entry.claimed()
                     && entry.predictedAt().isBefore(cutoff);
             if (expired) {
-                log.warn(
+                LOG.warn(
                         "Temporal rollback: correlationId={}",
                         entry.correlationId());
             }

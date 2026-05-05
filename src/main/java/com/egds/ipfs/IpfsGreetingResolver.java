@@ -21,19 +21,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class IpfsGreetingResolver {
 
+    /** Hash algorithm used to compute content identifiers. */
     private static final String HASH_ALGORITHM = "SHA-256";
 
+    /** Thread-safe content-addressed byte store keyed by CID. */
     private final ConcurrentHashMap<String, byte[]> store =
         new ConcurrentHashMap<>();
+
+    /** Hamming(7,4) codec used for ECC encoding and decoding. */
     private final EccRecoveryFilter eccFilter;
 
     /**
      * Constructs the resolver with the given ECC filter.
      *
-     * @param eccFilter Hamming(7,4) codec for encode and decode operations
+     * @param filter Hamming(7,4) codec for encode and decode operations
      */
-    public IpfsGreetingResolver(final EccRecoveryFilter eccFilter) {
-        this.eccFilter = eccFilter;
+    public IpfsGreetingResolver(final EccRecoveryFilter filter) {
+        this.eccFilter = filter;
     }
 
     /**

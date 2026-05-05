@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * the correlation ID must be in the range [0-9a-f].
  */
 @Component
-public class IpfsResolverVoter implements GreetingVoter {
+public final class IpfsResolverVoter implements GreetingVoter {
 
     @Override
     public String name() {

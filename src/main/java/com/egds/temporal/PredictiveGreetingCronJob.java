@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 /**
  * Scheduled component implementing Chronos Predictive Routing.
  *
- * <p>Every 60 seconds this job computes a probability score that
- * a greeting request will arrive in the next scheduling cycle.
- * When the score exceeds {@link #PREDICTION_THRESHOLD}, a
- * greeting is pre-generated and placed in the L1 cache under
- * {@link #CACHE_NAME} so that the subsequent HTTP request
- * receives a cache hit instead of triggering the full pipeline.
+ * <p>Every {@value #FIXED_RATE_MS} milliseconds this job computes
+ * a probability score that a greeting request will arrive in the
+ * next cycle. When the score exceeds {@link #PREDICTION_THRESHOLD},
+ * a greeting is pre-generated and placed in the L1 cache under
+ * {@link #CACHE_NAME} so that the subsequent HTTP request receives
+ * a hit rather than triggering the full pipeline.
  *
  * <p>Each pre-generated entry is registered with
  * {@link TemporalRollbackManager}. Predictions that are not
@@ -28,9 +28,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class PredictiveGreetingCronJob {
 
-    private static final Logger log =
+    /** Logger for this component. */
+    private static final Logger LOG =
             LoggerFactory.getLogger(
                     PredictiveGreetingCronJob.class);
+
+    /** Scheduler firing interval in milliseconds. */
+    private static final long FIXED_RATE_MS = 60_000L;
 
     /** Probability threshold above which a greeting is cached. */
     static final double PREDICTION_THRESHOLD = 0.65;
@@ -38,35 +42,55 @@ public class PredictiveGreetingCronJob {
     /** Spring cache region for pre-generated greetings. */
     static final String CACHE_NAME = "predictiveGreetings";
 
+    /** Minutes per hour, used to normalise time-of-day. */
+    private static final double MINS_PER_HOUR = 60.0;
+
+    /** Total minutes per day, used as the normalisation divisor. */
+    private static final double MINS_PER_DAY = 1440.0;
+
+    /** Hour of day for the morning request-rate peak. */
+    private static final double MORNING_PEAK_HOUR = 9.0;
+
+    /** Hour of day for the afternoon request-rate peak. */
+    private static final double AFTERNOON_PEAK_HOUR = 14.0;
+
+    /** Hours per day, used to convert peak hours to fractions. */
+    private static final double HOURS_PER_DAY = 24.0;
+
+    /** Standard deviation (sigma) of each Gaussian peak. */
+    private static final double GAUSSIAN_SIGMA = 0.05;
+
+    /** Spring cache manager used for L1 storage. */
     private final CacheManager cacheManager;
+
+    /** Temporal rollback coordinator. */
     private final TemporalRollbackManager rollbackManager;
 
     /**
      * Constructs the cron job with its required collaborators.
      *
-     * @param cacheManager    Spring cache manager for L1 storage
-     * @param rollbackManager temporal rollback coordinator
+     * @param cacheManagerBean    Spring cache manager for L1 storage
+     * @param rollbackManagerBean temporal rollback coordinator
      */
     public PredictiveGreetingCronJob(
-            final CacheManager cacheManager,
-            final TemporalRollbackManager rollbackManager) {
-        this.cacheManager = cacheManager;
-        this.rollbackManager = rollbackManager;
+            final CacheManager cacheManagerBean,
+            final TemporalRollbackManager rollbackManagerBean) {
+        this.cacheManager = cacheManagerBean;
+        this.rollbackManager = rollbackManagerBean;
     }
 
     /**
-     * Main prediction tick executed every 60 seconds.
+     * Main prediction tick executed every {@value #FIXED_RATE_MS} ms.
      *
      * <p>First triggers expired-entry rollback, then computes the
      * probability for the current minute and conditionally
-     * pre-caches a greeting and registers it for rollback
-     * tracking.
+     * pre-caches a greeting and registers it for rollback tracking.
      */
-    @Scheduled(fixedRate = 60_000)
+    @Scheduled(fixedRate = FIXED_RATE_MS)
     public void predictAndCache() {
         rollbackManager.rollbackExpired();
         double probability = computePredictionProbability();
-        log.info(
+        LOG.info(
                 "Chronos tick: probability={} threshold={}",
                 String.format("%.4f", probability),
                 PREDICTION_THRESHOLD);
@@ -81,7 +105,7 @@ public class PredictiveGreetingCronJob {
                 cache.put(id, entry);
             }
             rollbackManager.register(entry);
-            log.info(
+            LOG.info(
                     "Chronos predict: correlationId={} cached",
                     id);
         }
@@ -91,18 +115,25 @@ public class PredictiveGreetingCronJob {
      * Computes a time-of-day-weighted probability in [0.0, 1.0].
      *
      * <p>The model uses a bimodal Gaussian distribution peaking
-     * at 09:00 and 14:00, representing typical business-hour
-     * greeting request patterns.
+     * at {@value #MORNING_PEAK_HOUR}:00 and
+     * {@value #AFTERNOON_PEAK_HOUR}:00, representing typical
+     * business-hour greeting request patterns.
      *
      * @return predicted request probability for the current minute
      */
     double computePredictionProbability() {
         LocalTime now = LocalTime.now();
         double normalised =
-                (now.getHour() * 60.0 + now.getMinute())
-                        / 1440.0;
-        double peak1 = gaussian(normalised, 9.0 / 24.0, 0.05);
-        double peak2 = gaussian(normalised, 14.0 / 24.0, 0.05);
+                (now.getHour() * MINS_PER_HOUR + now.getMinute())
+                        / MINS_PER_DAY;
+        double peak1 = gaussian(
+                normalised,
+                MORNING_PEAK_HOUR / HOURS_PER_DAY,
+                GAUSSIAN_SIGMA);
+        double peak2 = gaussian(
+                normalised,
+                AFTERNOON_PEAK_HOUR / HOURS_PER_DAY,
+                GAUSSIAN_SIGMA);
         return Math.min(1.0, peak1 + peak2);
     }
 

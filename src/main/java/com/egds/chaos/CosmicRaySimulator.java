@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CosmicRaySimulator {
 
+    /** Logger for this component. */
     private static final Logger LOG =
         LoggerFactory.getLogger(CosmicRaySimulator.class);
 
@@ -37,8 +38,16 @@ public class CosmicRaySimulator {
     /** Number of valid bit positions within a 7-bit Hamming codeword. */
     private static final int HAMMING_BIT_COUNT = 7;
 
+    /** Number of CID characters logged per event for brevity. */
+    private static final int CID_LOG_PREFIX_LEN = 8;
+
+    /** IPFS store whose ECC bytes are corrupted by this daemon. */
     private final IpfsGreetingResolver resolver;
+
+    /** Executor running the single daemon simulation thread. */
     private final ScheduledExecutorService executor;
+
+    /** Cumulative count of bit-flip events since startup. */
     private final AtomicLong hitCount = new AtomicLong(0);
 
     /**
@@ -93,7 +102,8 @@ public class CosmicRaySimulator {
         hitCount.incrementAndGet();
         LOG.debug(
             "Cosmic ray: bit {} flipped in byte {} of CID {}",
-            bitIdx, byteIdx, cid.substring(0, 8));
+            bitIdx, byteIdx,
+            cid.substring(0, CID_LOG_PREFIX_LEN));
     }
 
     private void scheduleNext() {

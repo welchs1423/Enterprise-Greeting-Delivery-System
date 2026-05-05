@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  * hash of the correlation ID to approximate a 50% base rate.
  */
 @Component
-public class AiRouterVoter implements GreetingVoter {
+public final class AiRouterVoter implements GreetingVoter {
 
     @Override
     public String name() {

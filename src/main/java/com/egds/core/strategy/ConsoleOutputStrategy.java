@@ -71,17 +71,17 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
     private final EmbeddedChaosMonkey chaosMonkey;
 
     /**
-     * @param tracerBean  the Micrometer Tracing tracer for span creation
-     * @param verifier    the blockchain integrity verifier
-     * @param chaosMonkey the embedded chaos monkey for disruption injection
+     * @param tracerBean the Micrometer Tracing tracer for span creation
+     * @param verifier   the blockchain integrity verifier
+     * @param monkey     the embedded chaos monkey for disruption injection
      */
     public ConsoleOutputStrategy(
             final Tracer tracerBean,
             final GreetingIntegrityVerifier verifier,
-            final EmbeddedChaosMonkey chaosMonkey) {
+            final EmbeddedChaosMonkey monkey) {
         this.tracer = tracerBean;
         this.integrityVerifier = verifier;
-        this.chaosMonkey = chaosMonkey;
+        this.chaosMonkey = monkey;
     }
 
     /**

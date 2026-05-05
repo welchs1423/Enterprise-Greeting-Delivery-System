@@ -24,11 +24,30 @@ import org.springframework.stereotype.Component;
 @Component
 public class QuantumTesseractAdapter {
 
-    private static final Logger log =
+    /** Logger for this component. */
+    private static final Logger LOG =
             LoggerFactory.getLogger(
                     QuantumTesseractAdapter.class);
 
+    /** Whether the native quantum co-processor library was loaded. */
     private static final boolean NATIVE_AVAILABLE;
+
+    /** Spatial dimension of the tesseract (4D). */
+    private static final int DIM = 4;
+
+    /** Divisor for the XW rotation angle (yields PI/4 = 45 degrees). */
+    private static final int THETA_XW_DIVISOR = 4;
+
+    /** Divisor for the YZ rotation angle (yields PI/6 = 30 degrees). */
+    private static final int THETA_YZ_DIVISOR = 6;
+
+    /** Precomputed XW rotation angle in radians. */
+    private static final double THETA_XW =
+            Math.PI / THETA_XW_DIVISOR;
+
+    /** Precomputed YZ rotation angle in radians. */
+    private static final double THETA_YZ =
+            Math.PI / THETA_YZ_DIVISOR;
 
     static {
         boolean loaded = false;
@@ -65,56 +84,53 @@ public class QuantumTesseractAdapter {
      * @param message the greeting content to project
      */
     public void project(final String message) {
-        double thetaXW = Math.PI / 4.0;
-        double thetaYZ = Math.PI / 6.0;
         if (NATIVE_AVAILABLE) {
             double[] projected =
-                    projectNative(message, thetaXW, thetaYZ);
-            log.info(
+                    projectNative(message, THETA_XW, THETA_YZ);
+            LOG.info(
                     "Tesseract [native] W-shadow len={}",
                     projected.length);
         } else {
-            simulateProjection(message, thetaXW, thetaYZ);
+            simulateProjection(message);
         }
     }
 
-    private void simulateProjection(
-            final String message,
-            final double thetaXW,
-            final double thetaYZ) {
-        double[][] rXw = rotationXW(thetaXW);
-        double[][] rYz = rotationYZ(thetaYZ);
+    private void simulateProjection(final String message) {
+        double[][] rXw = rotationXW(THETA_XW);
+        double[][] rYz = rotationYZ(THETA_YZ);
         double[][] composed = multiply4x4(rXw, rYz);
-        log.info(
+        LOG.info(
                 "Tesseract [JVM] projecting \"{}\" "
                         + "thetaXW={} thetaYZ={}",
                 message,
-                String.format("%.4f", thetaXW),
-                String.format("%.4f", thetaYZ));
-        for (int row = 0; row < 4; row++) {
-            log.info(
+                String.format("%.4f", THETA_XW),
+                String.format("%.4f", THETA_YZ));
+        for (int row = 0; row < DIM; row++) {
+            LOG.info(
                     "  R[{}] = [{}, {}, {}, {}]",
                     row,
                     String.format("%.6f", composed[row][0]),
                     String.format("%.6f", composed[row][1]),
                     String.format("%.6f", composed[row][2]),
-                    String.format("%.6f", composed[row][3]));
+                    String.format("%.6f",
+                            composed[row][DIM - 1]));
         }
         byte[] bytes =
                 message.getBytes(StandardCharsets.UTF_8);
-        double[] vector = new double[4];
+        double[] vector = new double[DIM];
         for (int i = 0;
-                i < Math.min(bytes.length, 4); i++) {
+                i < Math.min(bytes.length, DIM); i++) {
             vector[i] = bytes[i];
         }
         double[] projected =
                 multiplyMatVec(composed, vector);
-        log.info(
+        LOG.info(
                 "  W-shadow = [{}, {}, {}, {}]",
                 String.format("%.4f", projected[0]),
                 String.format("%.4f", projected[1]),
                 String.format("%.4f", projected[2]),
-                String.format("%.4f", projected[3]));
+                String.format("%.4f",
+                        projected[DIM - 1]));
     }
 
     private static double[][] rotationXW(final double theta) {
@@ -142,10 +158,10 @@ public class QuantumTesseractAdapter {
     private static double[][] multiply4x4(
             final double[][] a,
             final double[][] b) {
-        double[][] result = new double[4][4];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                for (int k = 0; k < 4; k++) {
+        double[][] result = new double[DIM][DIM];
+        for (int i = 0; i < DIM; i++) {
+            for (int j = 0; j < DIM; j++) {
+                for (int k = 0; k < DIM; k++) {
                     result[i][j] += a[i][k] * b[k][j];
                 }
             }
@@ -156,9 +172,9 @@ public class QuantumTesseractAdapter {
     private static double[] multiplyMatVec(
             final double[][] m,
             final double[] v) {
-        double[] result = new double[4];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
+        double[] result = new double[DIM];
+        for (int i = 0; i < DIM; i++) {
+            for (int j = 0; j < DIM; j++) {
                 result[i] += m[i][j] * v[j];
             }
         }

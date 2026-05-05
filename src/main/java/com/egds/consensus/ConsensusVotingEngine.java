@@ -33,22 +33,26 @@ public class ConsensusVotingEngine {
     public static final String APPROVAL_MESSAGE =
             "Hello, World!";
 
-    private static final Logger log =
+    /** Logger for this component. */
+    private static final Logger LOG =
             LoggerFactory.getLogger(
                     ConsensusVotingEngine.class);
 
+    /** Parliament of all registered greeting voters. */
     private final List<GreetingVoter> voters;
+
+    /** Thread pool for concurrent voter dispatch. */
     private final ExecutorService executor;
 
     /**
      * Constructs the engine with the supplied voter parliament.
      *
-     * @param voters all {@link GreetingVoter} beans registered
-     *               in the Spring context
+     * @param parliament all {@link GreetingVoter} beans registered
+     *                   in the Spring context
      */
     public ConsensusVotingEngine(
-            final List<GreetingVoter> voters) {
-        this.voters = voters;
+            final List<GreetingVoter> parliament) {
+        this.voters = parliament;
         this.executor = Executors.newCachedThreadPool();
     }
 
@@ -78,7 +82,7 @@ public class ConsensusVotingEngine {
                 .collect(Collectors.toList());
 
         results.forEach(e ->
-                log.info(
+                LOG.info(
                         "Parliament vote: voter={} approved={}",
                         e.getKey(), e.getValue()));
 
@@ -86,7 +90,7 @@ public class ConsensusVotingEngine {
                 .map(Map.Entry::getValue)
                 .allMatch(Boolean::booleanValue);
 
-        log.info(
+        LOG.info(
                 "Parliament result: correlationId={} "
                         + "unanimous={}",
                 correlationId, unanimous);
