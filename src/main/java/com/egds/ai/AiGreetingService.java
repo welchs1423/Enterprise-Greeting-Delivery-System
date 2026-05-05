@@ -47,6 +47,7 @@ import java.util.UUID;
 @Service
 public class AiGreetingService {
 
+    /** Logger for this class. */
     private static final Logger LOG =
             LoggerFactory.getLogger(AiGreetingService.class);
 
@@ -82,20 +83,20 @@ public class AiGreetingService {
     private AiGreetingAssistant assistant;
 
     /**
-     * @param collector          the runtime context metadata collector
-     * @param delayPredictor     the TensorFlow-based delivery delay predictor
-     * @param terraformAdapter   the ephemeral Terraform Lambda lifecycle adapter
-     * @param mainframeEmulator  the AS/400 EBCDIC dual-ledger emulator
+     * @param collector  the runtime context metadata collector
+     * @param predictor  the TensorFlow-based delivery delay predictor
+     * @param terraform  the ephemeral Terraform Lambda lifecycle adapter
+     * @param mainframe  the AS/400 EBCDIC dual-ledger emulator
      */
     public AiGreetingService(
             final GreetingContextCollector collector,
-            final TensorFlowDelayPredictor delayPredictor,
-            final EphemeralTerraformAdapter terraformAdapter,
-            final As400MainframeEmulator mainframeEmulator) {
+            final TensorFlowDelayPredictor predictor,
+            final EphemeralTerraformAdapter terraform,
+            final As400MainframeEmulator mainframe) {
         this.contextCollector = collector;
-        this.delayPredictor = delayPredictor;
-        this.terraformAdapter = terraformAdapter;
-        this.mainframeEmulator = mainframeEmulator;
+        this.delayPredictor = predictor;
+        this.terraformAdapter = terraform;
+        this.mainframeEmulator = mainframe;
     }
 
     /**

@@ -32,8 +32,33 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class TensorFlowDelayPredictor {
 
+    /** Logger for this class. */
     private static final Logger LOG =
             LoggerFactory.getLogger(TensorFlowDelayPredictor.class);
+
+    /** Lower bound for the synthetic throughput feature (requests/ms). */
+    private static final double THROUGHPUT_MIN = 0.1;
+
+    /** Lower bound for the synthetic P99 latency feature (ms). */
+    private static final double P99_LATENCY_MIN = 10.0;
+
+    /** Upper bound for the synthetic P99 latency feature (ms). */
+    private static final double P99_LATENCY_MAX = 500.0;
+
+    /** Upper bound for the synthetic queue depth feature (messages). */
+    private static final double QUEUE_DEPTH_MAX = 50.0;
+
+    /** Regression bias term (ms). */
+    private static final double REGRESSION_BIAS = 120.0;
+
+    /** Regression weight for the throughput feature. */
+    private static final double WEIGHT_THROUGHPUT = -200.0;
+
+    /** Regression weight for the P99 latency feature. */
+    private static final double WEIGHT_P99_LATENCY = 0.8;
+
+    /** Regression weight for the queue depth feature. */
+    private static final double WEIGHT_QUEUE_DEPTH = 3.5;
 
     /**
      * Upper bound for the predicted delay in milliseconds.
@@ -100,15 +125,18 @@ public class TensorFlowDelayPredictor {
      * @return predicted delay in milliseconds
      */
     private long runMockInference() {
-        double throughput = ThreadLocalRandom.current().nextDouble(0.1, 1.0);
-        double p99Latency = ThreadLocalRandom.current().nextDouble(10.0, 500.0);
-        double queueDepth = ThreadLocalRandom.current().nextDouble(0.0, 50.0);
+        double throughput = ThreadLocalRandom.current()
+                .nextDouble(THROUGHPUT_MIN, 1.0);
+        double p99Latency = ThreadLocalRandom.current()
+                .nextDouble(P99_LATENCY_MIN, P99_LATENCY_MAX);
+        double queueDepth = ThreadLocalRandom.current()
+                .nextDouble(0.0, QUEUE_DEPTH_MAX);
 
         // Linear regression: bias + w1*throughput + w2*p99 + w3*queue
-        double raw = 120.0
-                + (-200.0 * throughput)
-                + (0.8 * p99Latency)
-                + (3.5 * queueDepth);
+        double raw = REGRESSION_BIAS
+                + (WEIGHT_THROUGHPUT * throughput)
+                + (WEIGHT_P99_LATENCY * p99Latency)
+                + (WEIGHT_QUEUE_DEPTH * queueDepth);
 
         long predicted = Math.max(0L,
                 Math.min(maxPredictedDelayMs, Math.round(raw)));

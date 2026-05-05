@@ -22,11 +22,16 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class EphemeralTerraformAdapter {
 
+    /** Logger for this class. */
     private static final Logger LOG =
             LoggerFactory.getLogger(EphemeralTerraformAdapter.class);
 
+    /** ARN template for provisioned ephemeral Lambda functions. */
     private static final String LAMBDA_ARN_TEMPLATE =
             "arn:aws:lambda:us-east-1:000000000000:function:egds-ephemeral-%s";
+
+    /** Maximum number of characters taken from the correlation ID suffix. */
+    private static final int ARN_SUFFIX_LENGTH = 12;
 
     /** Tracks active ephemeral deployments by correlationId. */
     private final ConcurrentHashMap<String, String> activeDeployments =
@@ -41,7 +46,8 @@ public class EphemeralTerraformAdapter {
     public String provision(final String correlationId) {
         String suffix = correlationId.replace("-", "");
         String lambdaArn = String.format(LAMBDA_ARN_TEMPLATE,
-                suffix.substring(0, Math.min(12, suffix.length())));
+                suffix.substring(
+                        0, Math.min(ARN_SUFFIX_LENGTH, suffix.length())));
         activeDeployments.put(correlationId, lambdaArn);
         LOG.info("[TERRAFORM] apply complete correlationId={} arn={}",
                 correlationId, lambdaArn);

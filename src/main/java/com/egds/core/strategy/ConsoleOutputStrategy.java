@@ -67,13 +67,13 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
     private final GreetingIntegrityVerifier integrityVerifier;
 
     /**
-     * @param tracer   the Micrometer Tracing tracer for span creation
-     * @param verifier the blockchain integrity verifier
+     * @param tracerBean the Micrometer Tracing tracer for span creation
+     * @param verifier   the blockchain integrity verifier
      */
     public ConsoleOutputStrategy(
-            final Tracer tracer,
+            final Tracer tracerBean,
             final GreetingIntegrityVerifier verifier) {
-        this.tracer = tracer;
+        this.tracer = tracerBean;
         this.integrityVerifier = verifier;
     }
 

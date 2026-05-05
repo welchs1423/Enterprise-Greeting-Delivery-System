@@ -4,8 +4,6 @@ import com.egds.core.dto.MessageContentDto;
 import com.egds.core.enums.MessagePriority;
 import com.egds.core.interfaces.IMessageOutputStrategy;
 import com.egds.core.interfaces.IMessageProvider;
-import com.egds.core.strategy.ConsoleOutputStrategy;
-
 import java.util.UUID;
 
 /**

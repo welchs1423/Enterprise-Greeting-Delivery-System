@@ -23,6 +23,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class QuantumDelayService {
 
+    /** Logger for this class. */
     private static final Logger LOG =
             LoggerFactory.getLogger(QuantumDelayService.class);
 
@@ -57,7 +58,8 @@ public class QuantumDelayService {
                 throw ie;
             }
         } else {
-            LOG.info("[QUANTUM] superposition collapsed to immediate eigenstate");
+            LOG.info("[QUANTUM] superposition collapsed"
+                    + " to immediate eigenstate");
         }
     }
 }

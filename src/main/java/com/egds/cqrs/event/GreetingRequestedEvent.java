@@ -29,25 +29,25 @@ public final class GreetingRequestedEvent {
     private final long requestedAtEpochMs;
 
     /**
-     * @param correlationId      the correlation identifier
-     * @param requestIp          the resolved client IP
-     * @param principalName      the authenticated principal name
-     * @param requestedAtEpochMs epoch ms timestamp of event creation
+     * @param id        the correlation identifier
+     * @param ip        the resolved client IP
+     * @param principal the authenticated principal name
+     * @param epochMs   epoch ms timestamp of event creation
      */
     @JsonCreator
     public GreetingRequestedEvent(
             @JsonProperty("correlationId")
-            final String correlationId,
+            final String id,
             @JsonProperty("requestIp")
-            final String requestIp,
+            final String ip,
             @JsonProperty("principalName")
-            final String principalName,
+            final String principal,
             @JsonProperty("requestedAtEpochMs")
-            final long requestedAtEpochMs) {
-        this.correlationId = correlationId;
-        this.requestIp = requestIp;
-        this.principalName = principalName;
-        this.requestedAtEpochMs = requestedAtEpochMs;
+            final long epochMs) {
+        this.correlationId = id;
+        this.requestIp = ip;
+        this.principalName = principal;
+        this.requestedAtEpochMs = epochMs;
     }
 
     /**

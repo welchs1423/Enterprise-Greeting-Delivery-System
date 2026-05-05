@@ -26,20 +26,20 @@ public final class GreetingContextMetadata {
     private final String serverLocale;
 
     /**
-     * @param virtualClientIp     virtual client IP address
-     * @param cpuTemperatureCelsius simulated CPU temperature in °C
-     * @param collectedAt         ISO-8601 collection timestamp
-     * @param serverLocale        JVM default locale tag
+     * @param ip        virtual client IP address
+     * @param cpuTemp   simulated CPU temperature in °C
+     * @param timestamp ISO-8601 collection timestamp
+     * @param locale    JVM default locale tag
      */
     public GreetingContextMetadata(
-            final String virtualClientIp,
-            final double cpuTemperatureCelsius,
-            final String collectedAt,
-            final String serverLocale) {
-        this.virtualClientIp = virtualClientIp;
-        this.cpuTemperatureCelsius = cpuTemperatureCelsius;
-        this.collectedAt = collectedAt;
-        this.serverLocale = serverLocale;
+            final String ip,
+            final double cpuTemp,
+            final String timestamp,
+            final String locale) {
+        this.virtualClientIp = ip;
+        this.cpuTemperatureCelsius = cpuTemp;
+        this.collectedAt = timestamp;
+        this.serverLocale = locale;
     }
 
     /**

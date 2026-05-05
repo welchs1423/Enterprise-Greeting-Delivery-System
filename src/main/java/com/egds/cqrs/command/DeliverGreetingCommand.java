@@ -21,17 +21,17 @@ public final class DeliverGreetingCommand {
     private final String principalName;
 
     /**
-     * @param correlationId the correlation identifier for this delivery
-     * @param requestIp     the resolved client IP address
-     * @param principalName the authenticated principal name
+     * @param id        the correlation identifier for this delivery
+     * @param ip        the resolved client IP address
+     * @param principal the authenticated principal name
      */
     public DeliverGreetingCommand(
-            final String correlationId,
-            final String requestIp,
-            final String principalName) {
-        this.correlationId = correlationId;
-        this.requestIp = requestIp;
-        this.principalName = principalName;
+            final String id,
+            final String ip,
+            final String principal) {
+        this.correlationId = id;
+        this.requestIp = ip;
+        this.principalName = principal;
     }
 
     /**

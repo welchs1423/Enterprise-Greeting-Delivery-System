@@ -37,6 +37,7 @@ import java.util.concurrent.ForkJoinPool;
 @Controller
 public class GreetingGraphQlController {
 
+    /** Logger for this class. */
     private static final Logger LOG =
             LoggerFactory.getLogger(GreetingGraphQlController.class);
 

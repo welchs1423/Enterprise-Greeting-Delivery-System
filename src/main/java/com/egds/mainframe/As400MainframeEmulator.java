@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class As400MainframeEmulator {
 
+    /** Logger for this class. */
     private static final Logger LOG =
             LoggerFactory.getLogger(As400MainframeEmulator.class);
 

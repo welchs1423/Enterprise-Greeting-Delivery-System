@@ -19,14 +19,14 @@ public final class BlockchainIntegrityException extends RuntimeException {
     /**
      * Constructs a new {@code BlockchainIntegrityException}.
      *
-     * @param message       description of the integrity violation
-     * @param correlationId correlation ID of the affected delivery cycle
+     * @param message description of the integrity violation
+     * @param id      correlation ID of the affected delivery cycle
      */
     public BlockchainIntegrityException(
             final String message,
-            final String correlationId) {
+            final String id) {
         super(message);
-        this.correlationId = correlationId;
+        this.correlationId = id;
     }
 
     /**

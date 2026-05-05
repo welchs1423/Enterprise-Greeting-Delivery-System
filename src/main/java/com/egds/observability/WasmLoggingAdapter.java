@@ -21,12 +21,13 @@ import org.springframework.stereotype.Component;
  * operational without the native artifact.
  *
  * <p>Production deployment instructions: place {@code libegds_wasm_logger.so}
- * (Linux) or {@code egds_wasm_logger.dll} (Windows) on {@code java.library.path}
- * before JVM startup.
+ * (Linux) or {@code egds_wasm_logger.dll} (Windows) on
+ * {@code java.library.path} before JVM startup.
  */
 @Component
 public class WasmLoggingAdapter {
 
+    /** SLF4J fallback logger used when the native WASM library is absent. */
     private static final Logger FALLBACK_LOG =
             LoggerFactory.getLogger(WasmLoggingAdapter.class);
 
