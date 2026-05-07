@@ -1,7 +1,62 @@
 # Enterprise Greeting Delivery System (EGDS)
 
 > **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라, CQRS/이벤트 소싱, 블록체인 무결성 증명, 생성형 AI 문맥 라우팅, 딥러닝 지연 최적화, GraphQL 슈퍼그래프, WASM 로깅 어댑터, Terraform 1회용 인프라, AS/400 메인프레임 이중 장부 통합, 시간 역행 예측 라우팅, 마이크로서비스 의회 투표, 4차원 테서랙트 투영 메타-엔터프라이즈 인사 메시지 전달 플랫폼**
-> `v8.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | GraphQL | OpenTelemetry (Micrometer Tracing) | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio | **Web3j (Ethereum)** | **CQRS + MongoDB** | **LangChain4j (GPT-4o)** | **TensorFlow JNI** | **Terraform Ephemeral Lambda** | **AS/400 EBCDIC 2PC** | **WASM JNI** | **Chronos Predictive Routing** | **Microservice Parliament** | **Quantum Tesseract JNI**
+> `v9.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | GraphQL | OpenTelemetry (Micrometer Tracing) | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio | **Web3j (Ethereum)** | **CQRS + MongoDB** | **LangChain4j (GPT-4o)** | **TensorFlow JNI** | **Terraform Ephemeral Lambda** | **AS/400 EBCDIC 2PC** | **WASM JNI** | **Chronos Predictive Routing** | **Microservice Parliament** | **Quantum Tesseract JNI** | **BCI Subconscious Router** | **DNA Sequence Encoder** | **Minecraft RCON Digital Twin**
+
+---
+
+## [2026-05-08] V7.0: 생체 신호 감지 및 DNA 기반 영속성 아키텍처 (Phase 10)
+
+### 1. 뇌-컴퓨터 인터페이스 서브컨셔스 라우터 (`BciSubconsciousRouter`)
+
+알파파(8-12 Hz)와 베타파(12-30 Hz) 스트림을 모킹하여 베타 대역 전력 비율로 의도 점수를 산출합니다.
+점수가 임계값(0.72)을 초과하면 사용자의 명시적 요청보다 500ms 앞서 이벤트를 예약 발송합니다.
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `BciSubconsciousRouter` | `com.egds.bci` | 뇌파 프레임 샘플링, 의도 점수 산출, 선제 이벤트 스케줄링 |
+
+```
+sampleBrainwaveFrame()
+  → alpha ∈ [8, 12) Hz, beta ∈ [12, 30) Hz (SecureRandom)
+  → score = beta / (alpha + beta)
+  → score >= 0.72
+      → scheduler.schedule(callback, 500ms)
+```
+
+### 2. DNA 서열 인코더 (`DnaSequenceEncoder`)
+
+문자열 데이터를 UTF-8 바이트로 변환한 뒤, 2비트 단위 다이비트를 염기(A/C/G/T)로 매핑하여
+FASTA 포맷 서열을 생성하고 인-메모리 맵에 영속합니다.
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `DnaSequenceEncoder` | `com.egds.dna` | 이진-염기서열 변환(00=A, 01=C, 10=G, 11=T), FASTA 저장/조회 |
+
+```
+encode(sequenceId, data)
+  → UTF-8 bytes → 2-bit dibits → NUCLEOTIDES[]
+  → buildFasta()  ← >EGDS-DNA|id=...|srcLen=...|nuclLen=...
+  → store.put(sequenceId, fasta)
+```
+
+### 3. 마인크래프트 RCON 디지털 트윈 어댑터 (`MinecraftRconAdapter`)
+
+인사말 최종 출력 시 Source RCON 프로토콜 패킷(리틀 엔디언)을 조립하고,
+가상 마인크래프트 서버 밤하늘 Y=200 레이어에 "Hello World" 블록 건축 이벤트를
+비동기 `CompletableFuture`로 발생시킵니다.
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `MinecraftRconAdapter` | `com.egds.metaverse` | RCON 패킷 조립, /fill 커맨드 생성, 비동기 디지털 트윈 동기화 |
+
+```
+buildHelloWorldAsync(correlationId)
+  → CompletableFuture.runAsync()
+      → assemblePacket(LOGIN)
+      → for each char in "Hello World"
+          → assemblePacket(COMMAND, /fill xOffset 200 0 ... white_wool)
+```
 
 ---
 
