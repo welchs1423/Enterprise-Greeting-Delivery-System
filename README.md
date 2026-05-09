@@ -5,6 +5,12 @@
 
 ---
 
+## [2026-05-10] 정적 분석 전면 수정: Checkstyle 제외 + SpotBugs 업그레이드 + 21개 위반 해결 / CI PMD 디버그 step 추가
+
+- CI 파이프라인(`pipeline.yml`) Stage 4 PMD 검사 실패 시 `target/pmd.xml` 전체 내용을 출력하는 디버그 step 추가 (`if: failure()`)
+
+---
+
 ## [2026-05-10] 정적 분석 전면 수정: Checkstyle 제외 + SpotBugs 업그레이드 + 21개 위반 해결
 
 - `pom.xml` Checkstyle 설정에 `<excludes>**/proto/*.java</excludes>` 및 `<sourceDirectories>` 추가: Protobuf 생성 파일 949개 위반 제거
