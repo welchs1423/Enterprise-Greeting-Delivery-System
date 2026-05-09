@@ -100,10 +100,12 @@ public class CosmicRaySimulator {
         eccBytes[byteIdx] ^= (byte) (1 << bitIdx);
         resolver.putRawEccBytes(cid, eccBytes);
         hitCount.incrementAndGet();
-        LOG.debug(
-            "Cosmic ray: bit {} flipped in byte {} of CID {}",
-            bitIdx, byteIdx,
-            cid.substring(0, CID_LOG_PREFIX_LEN));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(
+                "Cosmic ray: bit {} flipped in byte {} of CID {}",
+                bitIdx, byteIdx,
+                cid.substring(0, CID_LOG_PREFIX_LEN));
+        }
     }
 
     private void scheduleNext() {

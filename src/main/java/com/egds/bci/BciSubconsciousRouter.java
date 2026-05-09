@@ -68,12 +68,14 @@ public class BciSubconsciousRouter {
                 + random.nextDouble()
                 * (BETA_MAX_HZ - BETA_MIN_HZ);
         double score = beta / (alpha + beta);
-        LOG.debug(
-                "BCI frame alpha={} Hz beta={} Hz"
-                        + " intent={}",
-                String.format("%.2f", alpha),
-                String.format("%.2f", beta),
-                String.format("%.4f", score));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(
+                    "BCI frame alpha={} Hz beta={} Hz"
+                            + " intent={}",
+                    String.format("%.2f", alpha),
+                    String.format("%.2f", beta),
+                    String.format("%.4f", score));
+        }
         return score;
     }
 
@@ -104,11 +106,13 @@ public class BciSubconsciousRouter {
                     PRECOGNITION_DELAY_MS,
                     TimeUnit.MILLISECONDS);
         } else {
-            LOG.debug(
-                    "BCI intent below threshold "
-                            + "correlationId={} score={}",
-                    correlationId,
-                    String.format("%.4f", score));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(
+                        "BCI intent below threshold "
+                                + "correlationId={} score={}",
+                        correlationId,
+                        String.format("%.4f", score));
+            }
         }
     }
 

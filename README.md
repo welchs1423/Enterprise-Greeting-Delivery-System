@@ -5,6 +5,15 @@
 
 ---
 
+## [2026-05-09] PMD 수정: GuardLogStatement 위반 해결 (CosmicRaySimulator, BciSubconsciousRouter)
+
+- `CosmicRaySimulator.flipRandomBit()`: `LOG.debug()` 내 `cid.substring()` 호출을 `if (LOG.isDebugEnabled())` 가드로 감쌈
+- `BciSubconsciousRouter.sampleBrainwaveFrame()`: `String.format()` 호출 3개를 디버그 가드로 감쌈
+- `BciSubconsciousRouter.scanAndTrigger()`: `String.format()` 호출 1개를 디버그 가드로 감쌈
+- CI Java 17 환경에서 타입 해석 성공 시 `GuardLogStatement` 규칙이 해당 위반을 감지함
+
+---
+
 ## [2026-05-09] PMD 수정: generated-sources 제외 설정 추가
 
 - `pom.xml` PMD 설정에 `<excludeRoots>` 추가: `target/generated-sources` (Protobuf 자동 생성 코드) 스캔 제외
