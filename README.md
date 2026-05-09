@@ -17,6 +17,7 @@
 - `QuantumTesseractAdapter.project()`: 네이티브 경로 `LOG.info("W-shadow len={}", projected.length)` 호출을 `if (LOG.isInfoEnabled())` 가드로 감쌈 (CI Java 17 PMD GuardLogStatement 위반 1건 추가 수정)
 - `QuantumTesseractAdapter.simulateProjection()`: W-shadow `LOG.info()` 호출이 `if (LOG.isInfoEnabled())` 블록 밖에 남아있던 위반 1건 추가 수정 (총 CI 위반 2건 완전 해결)
 - CI 파이프라인(`pipeline.yml`) Stage 4 PMD 검사 실패 시 `target/pmd.xml` 전체 내용을 출력하는 디버그 step 추가 (`if: failure()`)
+- V10.0: 관료주의 특이점 아키텍처 및 결재선 도입
 
 ---
 

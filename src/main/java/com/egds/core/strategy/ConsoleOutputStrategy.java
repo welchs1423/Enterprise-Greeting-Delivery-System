@@ -1,12 +1,17 @@
 package com.egds.core.strategy;
 
 import com.egds.blockchain.BlockchainIntegrityException;
+import com.egds.blockchain.GreetingCoinMiner;
 import com.egds.blockchain.GreetingIntegrityVerifier;
 import com.egds.chaos.EmbeddedChaosMonkey;
 import com.egds.core.entity.MessageEntity;
 import com.egds.core.enums.DeliveryStatus;
+import com.egds.core.exception.BoardRejectionException;
 import com.egds.core.exception.MessageDeliveryFailureException;
+import com.egds.core.exception.PaperJamException;
 import com.egds.core.interfaces.IMessageOutputStrategy;
+import com.egds.governance.AiBoardApprovalService;
+import com.egds.legacy.DotMatrixPrinterAdapter;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -17,19 +22,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * {@link IMessageOutputStrategy} implementation targeting the standard
- * output stream. Delivers the formatted content of a
- * {@link MessageEntity} to {@code System.out}.
+ * {@link IMessageOutputStrategy} implementation that delivers a
+ * {@link MessageEntity} payload through a simulated dot-matrix printer.
  *
- * <p>Before writing to stdout, the formatted content of the entity is
- * verified against the Keccak-256 fingerprint stored in the mock
- * Ethereum smart contract via {@link GreetingIntegrityVerifier#verify}.
- * If the stored hash does not match the recomputed hash, a
+ * <p>Before printing, the formatted content is verified against the
+ * Keccak-256 fingerprint stored in the mock Ethereum smart contract
+ * registry via {@link GreetingIntegrityVerifier#verify}.  If the stored
+ * hash does not match the recomputed hash, a
  * {@link BlockchainIntegrityException} is thrown and the fallback emits
  * an integrity-violation marker instead of the tampered payload.
  *
+ * <p>Following integrity verification, the AI board of directors
+ * ({@link AiBoardApprovalService}) must reach unanimous approval.  A
+ * {@link GreetingCoinMiner} then mines a Proof-of-Work nonce before
+ * output.  The final payload is delivered character by character
+ * through a {@link DotMatrixPrinterAdapter} at a fixed inter-character
+ * delay.
+ *
  * <p>Each invocation is instrumented with an OpenTelemetry
- * {@link Span} to enable distributed trace correlation. The write path
+ * {@link Span} to enable distributed trace correlation.  The write path
  * is guarded by a Resilience4j Circuit Breaker (to prevent cascading
  * failures), Rate Limiter (to cap burst output throughput), and Retry
  * (to recover from transient write errors before tripping the breaker).
@@ -70,24 +81,44 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
     /** Chaos monkey injected into the output path for resilience testing. */
     private final EmbeddedChaosMonkey chaosMonkey;
 
+    /** AI board unanimous-approval gate invoked before output. */
+    private final AiBoardApprovalService boardApprovalService;
+
+    /** PoW miner simulating gas-fee payment before output. */
+    private final GreetingCoinMiner coinMiner;
+
+    /** Dot-matrix printer adapter for character-by-character output. */
+    private final DotMatrixPrinterAdapter dotMatrixPrinter;
+
     /**
-     * @param tracerBean the Micrometer Tracing tracer for span creation
-     * @param verifier   the blockchain integrity verifier
-     * @param monkey     the embedded chaos monkey for disruption injection
+     * @param tracerBean    the Micrometer Tracing tracer for span creation
+     * @param verifier      the blockchain integrity verifier
+     * @param monkey        the embedded chaos monkey for disruption injection
+     * @param boardApproval the AI board unanimous-approval gate
+     * @param miner         the PoW coin miner for gas-fee simulation
+     * @param printer       the dot-matrix printer adapter for output
      */
     public ConsoleOutputStrategy(
             final Tracer tracerBean,
             final GreetingIntegrityVerifier verifier,
-            final EmbeddedChaosMonkey monkey) {
+            final EmbeddedChaosMonkey monkey,
+            final AiBoardApprovalService boardApproval,
+            final GreetingCoinMiner miner,
+            final DotMatrixPrinterAdapter printer) {
         this.tracer = tracerBean;
         this.integrityVerifier = verifier;
         this.chaosMonkey = monkey;
+        this.boardApprovalService = boardApproval;
+        this.coinMiner = miner;
+        this.dotMatrixPrinter = printer;
     }
 
     /**
-     * Writes the formatted content of the supplied entity to stdout.
-     * Transitions the entity's delivery status to IN_TRANSIT prior to
-     * write and to DELIVERED on success, or FAILED on error.
+     * Delivers the formatted content of the supplied entity through the
+     * dot-matrix printer after passing the board-approval gate and
+     * completing a PoW mining round.  Transitions the entity status to
+     * IN_TRANSIT prior to delivery and to DELIVERED on success, or
+     * FAILED on error.
      *
      * <p>An OTel span is created for each invocation.  The span carries
      * {@code egds.correlationId} and {@code egds.deliveryStatus} tags.
@@ -105,10 +136,11 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
      *
      * @param messageEntity the finalized entity to deliver; must not be
      *                      null
-     * @throws MessageDeliveryFailureException if entity is null or the
-     *         output stream cannot be written to
+     * @throws MessageDeliveryFailureException if entity is null, the
+     *         printer encounters a paper jam, or the output write fails
      * @throws BlockchainIntegrityException if the entity's formatted
      *         content does not match the fingerprint in the mock contract
+     * @throws BoardRejectionException if the AI board rejects the delivery
      */
     @CircuitBreaker(name = RESILIENCE_NAME, fallbackMethod = "outputFallback")
     @RateLimiter(name = RESILIENCE_NAME, fallbackMethod = "outputFallback")
@@ -145,11 +177,21 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
                     messageEntity.getFormattedContent());
             span.tag("egds.blockchain.integrity", "VERIFIED");
 
-            LOG.info("[OUTPUT] Writing to stdout"
+            boardApprovalService.requestApproval(
+                    messageEntity.getCorrelationId());
+            span.tag("egds.board.approval", "GRANTED");
+
+            GreetingCoinMiner.MiningResult miningResult =
+                    coinMiner.mine(messageEntity.getCorrelationId());
+            span.tag("egds.miner.nonce",
+                    String.valueOf(miningResult.nonce()));
+
+            LOG.info("[OUTPUT] Writing to dot-matrix printer"
                     + " correlationId={} traceId={}",
                     messageEntity.getCorrelationId(),
                     span.context().traceId());
-            System.out.println(messageEntity.getFormattedContent());
+
+            dotMatrixPrinter.print(messageEntity.getFormattedContent());
             messageEntity.setDeliveryStatus(DeliveryStatus.DELIVERED);
             span.tag("egds.deliveryStatus", "DELIVERED");
         } catch (BlockchainIntegrityException e) {
@@ -161,6 +203,27 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
                     messageEntity.getCorrelationId());
             System.out.println(INTEGRITY_VIOLATION_MESSAGE);
             throw e;
+        } catch (BoardRejectionException e) {
+            messageEntity.setDeliveryStatus(DeliveryStatus.FAILED);
+            span.tag("egds.deliveryStatus", "FAILED");
+            span.error(e);
+            LOG.error(
+                    "[BOARD] Delivery rejected correlationId={} member={}",
+                    messageEntity.getCorrelationId(),
+                    e.getRejectingMember());
+            throw e;
+        } catch (PaperJamException e) {
+            messageEntity.setDeliveryStatus(DeliveryStatus.FAILED);
+            span.tag("egds.deliveryStatus", "FAILED");
+            span.error(e);
+            LOG.error("[PRINTER] Paper jam correlationId={} index={}",
+                    messageEntity.getCorrelationId(),
+                    e.getCharacterIndex());
+            throw new MessageDeliveryFailureException(
+                    "Dot-matrix printer paper jam halted delivery.",
+                    messageEntity.getCorrelationId(),
+                    "ERR_PAPER_JAM",
+                    e);
         } catch (Exception e) {
             messageEntity.setDeliveryStatus(DeliveryStatus.FAILED);
             span.tag("egds.deliveryStatus", "FAILED");
