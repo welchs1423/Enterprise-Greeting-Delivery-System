@@ -1067,6 +1067,7 @@ mvn test -Dtest="GreetingGrpcServiceIntegrationTest"
 ### [2026-05-10]
 
 - MultiverseClassLoader의 불필요한 정규화 이름 제거 (PMD 위반 2건 수정)
+- V12.0: 영지식 증명 및 주 52시간 스레드 구조조정 아키텍처 도입
 
 ### [2026-05-03] v5.0.0-RELEASE — Phase 5: V2.0 차세대 혼종 아키텍처 통합 (검증)
 
