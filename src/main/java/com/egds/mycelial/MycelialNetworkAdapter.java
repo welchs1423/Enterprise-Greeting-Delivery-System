@@ -60,7 +60,8 @@ public class MycelialNetworkAdapter {
         LOG.info("[MYCELIAL] broadcast initiated correlationId={}"
                 + " signal_count={} first_freq_hz={}",
                 correlationId, frequencies.size(),
-                frequencies.isEmpty() ? 0.0 : frequencies.get(0));
+                frequencies.isEmpty()
+                        ? Double.valueOf(0.0) : frequencies.get(0));
         LOG.debug("[MYCELIAL] full frequency sequence"
                 + " correlationId={} frequencies={}",
                 correlationId, frequencies);

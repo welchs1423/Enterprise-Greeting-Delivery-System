@@ -11,7 +11,7 @@ public final class TokenResponse {
     private final String token;
 
     /** Token type; always "Bearer" for JWT. */
-    private final String tokenType = "Bearer";
+    private static final String TOKEN_TYPE = "Bearer";
 
     /** Token expiration duration in milliseconds. */
     private final long expiresInMs;
@@ -43,7 +43,7 @@ public final class TokenResponse {
      * @return always "Bearer"
      */
     public String getTokenType() {
-        return tokenType;
+        return TOKEN_TYPE;
     }
 
     /**

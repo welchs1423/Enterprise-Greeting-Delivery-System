@@ -52,7 +52,7 @@ public class ConsensusVotingEngine {
      */
     public ConsensusVotingEngine(
             final List<GreetingVoter> parliament) {
-        this.voters = parliament;
+        this.voters = List.copyOf(parliament);
         this.executor = Executors.newCachedThreadPool();
     }
 

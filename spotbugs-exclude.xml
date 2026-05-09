@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SpotBugs exclusion filter.
+  Suppresses known false positives: generated Protobuf classes and
+  Spring-managed beans stored via constructor injection.
+-->
+<FindBugsFilter>
+
+    <!-- Generated Protobuf stubs: not hand-written code. -->
+    <Match>
+        <Package name="~com\.egds\.grpc\.proto"/>
+    </Match>
+
+    <!--
+      Spring constructor injection stores managed bean references by design.
+      EI_EXPOSE_REP2 is a false positive for framework-controlled dependencies.
+    -->
+    <Match>
+        <Class name="com.egds.chaos.CosmicRaySimulator"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="com.egds.config.SecurityConfig"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="com.egds.core.strategy.ConsoleOutputStrategy"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="com.egds.cqrs.command.GreetingCommandHandler"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="com.egds.messaging.GreetingEventPublisher"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="com.egds.security.JwtAuthenticationEntryPoint"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!--
+      MessageDeliveryResult intentionally returns the JPA entity reference;
+      callers require direct access to the delivered entity.
+    -->
+    <Match>
+        <Class name="com.egds.core.dto.MessageDeliveryResult"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+
+    <!--
+      GreetingFactoryProvider constructor delegates to registerFactory()
+      with a freshly constructed non-null argument; finalizer-attack risk
+      does not apply here.
+    -->
+    <Match>
+        <Class name="com.egds.core.factory.GreetingFactoryProvider"/>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
+
+</FindBugsFilter>

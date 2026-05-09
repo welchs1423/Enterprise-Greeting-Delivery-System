@@ -5,6 +5,17 @@
 
 ---
 
+## [2026-05-10] 정적 분석 전면 수정: Checkstyle 제외 + SpotBugs 업그레이드 + 21개 위반 해결
+
+- `pom.xml` Checkstyle 설정에 `<excludes>**/proto/*.java</excludes>` 및 `<sourceDirectories>` 추가: Protobuf 생성 파일 949개 위반 제거
+- `pom.xml` SpotBugs 플러그인 `4.8.6.4` → `4.9.8.3` 업그레이드: Java 25 JDK에서 multi-release JAR 파싱 실패(`Unsupported class file major version 69`) 해결
+- `spotbugs-exclude.xml` 생성: protobuf 생성 클래스(`com.egds.grpc.proto.*`) 및 Spring DI false positive(EI_EXPOSE_REP2) 제외
+- `ConsensusVotingEngine.java`: `this.voters = parliament` → `List.copyOf(parliament)` (EI_EXPOSE_REP2 실제 수정)
+- `TokenResponse.java`: `tokenType` 인스턴스 필드 → `TOKEN_TYPE` static final 상수로 변경 (SS_SHOULD_BE_STATIC 해결)
+- `MycelialNetworkAdapter.java`: `0.0` → `Double.valueOf(0.0)` 로 ternary 반환 타입 통일 (BX_UNBOXING_IMMEDIATELY_REBOXED 해결)
+
+---
+
 ## [2026-05-09] PMD 수정: GuardLogStatement 위반 해결 (BciSubconsciousRouter, PredictiveGreetingCronJob)
 
 - `BciSubconsciousRouter.scanAndTrigger()`: `LOG.info()` 내 `String.format()` 호출을 `if (LOG.isInfoEnabled())` 가드로 감쌈
