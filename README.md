@@ -5,6 +5,69 @@
 
 ---
 
+## [2026-05-09] V8.0: 다중 우주 일관성 및 열역학적 균사체 네트워크 연동 (Phase 11)
+
+### 1. 열역학적 엔트로피 오프셋 (`ThermodynamicEntropyBalancer` + `SmartHvacAdapter`)
+
+생성된 인사말 텍스트의 섀넌 엔트로피 H(X) = -∑ p_i · log₂(p_i)를 계산하고,
+그 정보량에 비례하는 냉각 오프셋(ENTROPY_COOLING_COEFFICIENT = 3.14e-5)을
+가상의 IoT 빌딩 관리 시스템 API에 ESG 보상 트랜잭션으로 커밋합니다.
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `ThermodynamicEntropyBalancer` | `com.egds.thermodynamics` | 문자 분포 기반 섀넌 엔트로피 계산, HVAC 오프셋 요청 |
+| `SmartHvacAdapter` | `com.egds.thermodynamics` | IoT 빌딩 관리 시스템 API 시뮬레이션 |
+
+```
+balanceEntropy(correlationId, greetingText)
+  → computeShannonEntropy()  ← H = -∑ p_i · log2(p_i)
+  → deltaCelsius = entropy * 3.14e-5
+  → SmartHvacAdapter.requestCoolingOffset(correlationId, deltaCelsius)
+```
+
+### 2. 지구 균사체 네트워크 연동 (`MycelialNetworkAdapter`)
+
+UTF-8 인코딩된 인사말 바이트를 글루타메이트 화학 신호 주파수
+(BASE_FREQ_HZ=20 Hz, FREQ_RANGE_HZ=256 Hz)로 변환하여
+지하 버섯 네트워크(Wood Wide Web)로 브로드캐스팅합니다.
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `MycelialNetworkAdapter` | `com.egds.mycelial` | 바이트-주파수 매핑, 균사체 신호 브로드캐스트 시뮬레이션 |
+
+```
+broadcast(correlationId, greetingText)
+  → UTF-8 bytes → encodeToFrequencies()
+      → freq = BASE_FREQ_HZ + (byteValue / 255.0) * FREQ_RANGE_HZ
+  → List<Double> frequencies  ← one per UTF-8 byte
+```
+
+### 3. 평행 우주 JVM 샌드박싱 (`MultiverseConsistencyManager`)
+
+격리된 커스텀 `MultiverseClassLoader`로 `GreetingHashService`를 별도
+클래스 네임스페이스에 로드하여 평행 우주 JVM 컨텍스트를 시뮬레이션합니다.
+양 우주에서 동일한 SHA-256 해시가 산출되면 일관성이 검증되며,
+해시가 다를 경우 `DimensionalRiftException`을 발생시킵니다.
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `MultiverseConsistencyManager` | `com.egds.multiverse` | 주 우주/평행 우주 해시 비교, 일관성 보증 |
+| `MultiverseClassLoader` | `com.egds.multiverse` | 부모 위임 우회 격리 클래스로더 |
+| `GreetingHashService` | `com.egds.multiverse` | SHA-256 해시 계산 (외부 의존성 없음) |
+| `DimensionalRiftException` | `com.egds.multiverse` | 우주 간 해시 발산 감지 예외 |
+
+```
+verifyConsistency(correlationId, greetingText)
+  → primaryHash  = GreetingHashService.computeHash(greetingText)
+  → parallelHash = MultiverseClassLoader → loadClass(GreetingHashService)
+                   → reflective invoke computeHash(greetingText)
+  → primaryHash.equals(parallelHash)
+      → true  : consistency verified
+      → false : throw DimensionalRiftException
+```
+
+---
+
 ## [2026-05-08] V7.0: 생체 신호 감지 및 DNA 기반 영속성 아키텍처 (Phase 10)
 
 ### 1. 뇌-컴퓨터 인터페이스 서브컨셔스 라우터 (`BciSubconsciousRouter`)

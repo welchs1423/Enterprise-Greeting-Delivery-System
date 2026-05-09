@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 모든 작업은 아래 순서를 반드시 따르세요.
 
 1. **자체 테스트**: `mvn test` 실행 후 전체 통과 확인
-2. **README 반영**: 변경 사항이 아키텍처·기능·버전에 영향을 주면 `README.md` 업데이트
+2. README 반영: 버그 수정을 포함한 모든 변경 사항에 대해, 작업 완료 후 README.md 최상단(또는 Changelog 부분)에 오늘 날짜와 함께 작업 내역을 반드시 업데이트하세요.
 3. **커밋 & 푸시**: 커밋 후 확인 없이 즉시 `git push` 실행
 
 테스트 실패 시 푸시하지 말고 원인을 수정한 뒤 재시도하세요.
@@ -80,20 +80,20 @@ GET /api/v1/greeting/status/{correlationId} → MongoDB only (read side)
 
 ### Package Map
 
-| Package | Responsibility |
-|---------|---------------|
-| `core/pipeline` | `MessageDeliveryPipeline` — Facade entry point for Kafka consumer |
-| `core/service` | Stage execution + OTel span wrapping |
-| `core/provider` | Message generation: AI, integrity registration, QuantumDelay |
-| `core/strategy` | `ConsoleOutputStrategy` — CB/RL/Retry + hash verify + output |
-| `cqrs/` | Command handler, event sourcing projector, MongoDB read model |
-| `messaging/` | Kafka producer (`GreetingEventPublisher`) and consumer (`GreetingEventConsumer`) |
-| `blockchain/` | Web3j Keccak-256 integrity verifier |
-| `ai/` | LangChain4j service, context collector, QuantumDelayService |
-| `security/` | JWT provider + filter + Spring Security config |
-| `observability/` | OTel tracer beans |
-| `grpc/` | Protobuf-generated service + `@GrpcService` impl + client bean |
-| `web/` | REST controllers (auth, greeting, status) + GraphQL controller |
+| Package          | Responsibility                                                                   |
+| ---------------- | -------------------------------------------------------------------------------- |
+| `core/pipeline`  | `MessageDeliveryPipeline` — Facade entry point for Kafka consumer                |
+| `core/service`   | Stage execution + OTel span wrapping                                             |
+| `core/provider`  | Message generation: AI, integrity registration, QuantumDelay                     |
+| `core/strategy`  | `ConsoleOutputStrategy` — CB/RL/Retry + hash verify + output                     |
+| `cqrs/`          | Command handler, event sourcing projector, MongoDB read model                    |
+| `messaging/`     | Kafka producer (`GreetingEventPublisher`) and consumer (`GreetingEventConsumer`) |
+| `blockchain/`    | Web3j Keccak-256 integrity verifier                                              |
+| `ai/`            | LangChain4j service, context collector, QuantumDelayService                      |
+| `security/`      | JWT provider + filter + Spring Security config                                   |
+| `observability/` | OTel tracer beans                                                                |
+| `grpc/`          | Protobuf-generated service + `@GrpcService` impl + client bean                   |
+| `web/`           | REST controllers (auth, greeting, status) + GraphQL controller                   |
 
 ### Protobuf
 
@@ -107,13 +107,13 @@ Checkstyle enforces 80-character line length and requires Javadoc on public meth
 
 These are absent locally and must be externalized via environment variables for production:
 
-| Variable | Used By |
-|----------|---------|
-| `OPENAI_API_KEY` | LangChain4j / `AiGreetingService` |
-| `ETHEREUM_RPC_ENDPOINT` | Web3j / `Web3Config` |
-| `MONGODB_URI` | Spring Data MongoDB |
-| JWT secret | `JwtTokenProvider` (from `application.properties`) |
-| Oracle JDBC URL/credentials | `application-prod.properties` |
+| Variable                    | Used By                                            |
+| --------------------------- | -------------------------------------------------- |
+| `OPENAI_API_KEY`            | LangChain4j / `AiGreetingService`                  |
+| `ETHEREUM_RPC_ENDPOINT`     | Web3j / `Web3Config`                               |
+| `MONGODB_URI`               | Spring Data MongoDB                                |
+| JWT secret                  | `JwtTokenProvider` (from `application.properties`) |
+| Oracle JDBC URL/credentials | `application-prod.properties`                      |
 
 ### Hardcoded Dev Credentials
 
