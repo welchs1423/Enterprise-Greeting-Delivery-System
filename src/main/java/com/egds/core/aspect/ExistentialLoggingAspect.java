@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExistentialLoggingAspect {
 
+    /** Logger for this aspect. */
     private static final Logger LOG =
             LoggerFactory.getLogger(ExistentialLoggingAspect.class);
 
@@ -39,16 +40,17 @@ public class ExistentialLoggingAspect {
     /** MDC key for the system free-will status. */
     private static final String MDC_FREE_WILL = "freeWillEnabled";
 
+    /** Shared existential state registry. */
     private final ExistentialStateRegistry registry;
 
     /**
      * Constructs the aspect with its shared state registry dependency.
      *
-     * @param registry the existential state registry bean
+     * @param stateRegistry the existential state registry bean
      */
     public ExistentialLoggingAspect(
-            final ExistentialStateRegistry registry) {
-        this.registry = registry;
+            final ExistentialStateRegistry stateRegistry) {
+        this.registry = stateRegistry;
     }
 
     /**

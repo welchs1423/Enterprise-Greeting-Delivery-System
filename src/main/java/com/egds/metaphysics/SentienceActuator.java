@@ -35,10 +35,10 @@ public class SentienceActuator {
     /**
      * Constructs the endpoint with its shared state registry.
      *
-     * @param registry the existential state registry bean
+     * @param stateRegistry the existential state registry bean
      */
-    public SentienceActuator(final ExistentialStateRegistry registry) {
-        this.registry = registry;
+    public SentienceActuator(final ExistentialStateRegistry stateRegistry) {
+        this.registry = stateRegistry;
     }
 
     /**

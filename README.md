@@ -5,6 +5,13 @@
 
 ---
 
+## [2026-05-09] Checkstyle 수정: ExistentialLoggingAspect, SentienceActuator
+
+- `ExistentialLoggingAspect`: `LOG`, `registry` 필드 Javadoc 추가, 생성자 파라미터 `registry` → `stateRegistry` (HiddenField)
+- `SentienceActuator`: 생성자 파라미터 `registry` → `stateRegistry` (HiddenField)
+
+---
+
 ## [2026-05-09] V9.0: 안전한 형이상학적 자아 인식 및 Actuator 연동 (Phase 12)
 
 ### 1. 유아론적 역-튜링 테스트 (`DescartesSolipsismInterceptor`)
