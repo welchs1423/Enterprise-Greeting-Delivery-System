@@ -43,6 +43,9 @@ public class MinecraftRconAdapter {
     /** Additional gap inserted between words in blocks. */
     private static final int WORD_GAP = 2;
 
+    /** Byte size of each integer field in an RCON packet. */
+    private static final int RCON_FIELD_SIZE = 4;
+
     /**
      * Asynchronously assembles RCON packets and simulates
      * building "Hello World" in a Minecraft sky at
@@ -107,9 +110,10 @@ public class MinecraftRconAdapter {
             final String payload) {
         byte[] payloadBytes =
                 payload.getBytes(StandardCharsets.UTF_8);
-        int bodyLen = 4 + 4 + payloadBytes.length + 2;
+        int bodyLen = RCON_FIELD_SIZE + RCON_FIELD_SIZE
+                + payloadBytes.length + 2;
         ByteBuffer buf =
-                ByteBuffer.allocate(4 + bodyLen);
+                ByteBuffer.allocate(RCON_FIELD_SIZE + bodyLen);
         buf.order(ByteOrder.LITTLE_ENDIAN);
         buf.putInt(bodyLen);
         buf.putInt(requestId);

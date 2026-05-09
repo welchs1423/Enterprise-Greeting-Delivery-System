@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SmartHvacAdapter {
 
+    /** Logger for this component. */
     private static final Logger LOG =
             LoggerFactory.getLogger(SmartHvacAdapter.class);
 
@@ -26,7 +27,7 @@ public class SmartHvacAdapter {
      *                      expected to be a small positive value
      */
     public void requestCoolingOffset(
-            String correlationId, double deltaCelsius) {
+            final String correlationId, final double deltaCelsius) {
         LOG.info("[HVAC] cooling offset requested"
                 + " correlationId={} deltaCelsius={}",
                 correlationId, deltaCelsius);

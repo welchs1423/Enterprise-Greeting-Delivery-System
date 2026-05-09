@@ -25,7 +25,7 @@ public final class GreetingHashService {
      * @return lowercase hex string of the SHA-256 digest
      * @throws IllegalStateException if the SHA-256 algorithm is unavailable
      */
-    public static String computeHash(String greeting) {
+    public static String computeHash(final String greeting) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(

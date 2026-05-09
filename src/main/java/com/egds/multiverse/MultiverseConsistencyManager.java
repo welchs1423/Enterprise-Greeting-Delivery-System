@@ -23,12 +23,15 @@ import java.lang.reflect.InvocationTargetException;
 @Service
 public class MultiverseConsistencyManager {
 
+    /** Logger for this service. */
     private static final Logger LOG =
             LoggerFactory.getLogger(MultiverseConsistencyManager.class);
 
+    /** Fully-qualified name of the hash service to load in isolation. */
     private static final String HASH_SERVICE_CLASS =
             "com.egds.multiverse.GreetingHashService";
 
+    /** Name of the static hash-computation method on the hash service. */
     private static final String COMPUTE_HASH_METHOD = "computeHash";
 
     /**
@@ -44,7 +47,7 @@ public class MultiverseConsistencyManager {
      *                                  from the primary-universe hash
      */
     public void verifyConsistency(
-            String correlationId, String greetingText) {
+            final String correlationId, final String greetingText) {
         String primaryHash = GreetingHashService.computeHash(greetingText);
         String parallelHash = computeInParallelUniverse(greetingText);
         LOG.info("[MULTIVERSE] consistency check correlationId={}"
@@ -69,7 +72,7 @@ public class MultiverseConsistencyManager {
      * @return SHA-256 hex digest produced by the isolated class instance
      * @throws DimensionalRiftException if classloading or reflection fails
      */
-    private String computeInParallelUniverse(String greetingText) {
+    private String computeInParallelUniverse(final String greetingText) {
         try {
             MultiverseClassLoader loader = new MultiverseClassLoader();
             Class<?> clazz = loader.loadClass(HASH_SERVICE_CLASS);

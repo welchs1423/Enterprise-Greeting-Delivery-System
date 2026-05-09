@@ -15,7 +15,7 @@ public class DimensionalRiftException extends RuntimeException {
      *
      * @param message description of the detected divergence
      */
-    public DimensionalRiftException(String message) {
+    public DimensionalRiftException(final String message) {
         super(message);
     }
 }

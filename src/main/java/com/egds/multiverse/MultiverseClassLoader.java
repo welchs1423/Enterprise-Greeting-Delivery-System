@@ -14,6 +14,7 @@ import java.io.InputStream;
  */
 class MultiverseClassLoader extends ClassLoader {
 
+    /** Fully-qualified class name loaded in the isolated namespace. */
     private static final String TARGET_CLASS =
             "com.egds.multiverse.GreetingHashService";
 
@@ -23,7 +24,7 @@ class MultiverseClassLoader extends ClassLoader {
     }
 
     @Override
-    protected Class<?> loadClass(String name, boolean resolve)
+    protected Class<?> loadClass(final String name, final boolean resolve)
             throws ClassNotFoundException {
         if (TARGET_CLASS.equals(name)) {
             return findClass(name);
@@ -33,7 +34,7 @@ class MultiverseClassLoader extends ClassLoader {
     }
 
     @Override
-    protected Class<?> findClass(String name)
+    protected Class<?> findClass(final String name)
             throws ClassNotFoundException {
         String resourcePath = name.replace('.', '/') + ".class";
         ClassLoader ctx =

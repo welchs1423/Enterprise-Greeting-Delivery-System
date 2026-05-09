@@ -30,6 +30,18 @@ public class DnaSequenceEncoder {
     /** FASTA sequence line width in nucleotide characters. */
     private static final int FASTA_LINE_WIDTH = 60;
 
+    /** Number of nucleotide symbols produced per input byte. */
+    private static final int NUCLEOTIDES_PER_BYTE = 4;
+
+    /** Mask to convert a signed byte to its unsigned value. */
+    private static final int BYTE_MASK = 0xFF;
+
+    /** Initial bit-shift for extracting the most-significant dibit. */
+    private static final int INITIAL_SHIFT = 6;
+
+    /** Mask to isolate a 2-bit dibit after shifting. */
+    private static final int DIBIT_MASK = 0x3;
+
     /** In-memory store keyed by sequence ID. */
     private final ConcurrentMap<String, String> store =
             new ConcurrentHashMap<>();
@@ -71,11 +83,11 @@ public class DnaSequenceEncoder {
         byte[] bytes =
                 data.getBytes(StandardCharsets.UTF_8);
         StringBuilder sb =
-                new StringBuilder(bytes.length * 4);
+                new StringBuilder(bytes.length * NUCLEOTIDES_PER_BYTE);
         for (byte b : bytes) {
-            int unsigned = b & 0xFF;
-            for (int shift = 6; shift >= 0; shift -= 2) {
-                int dibit = (unsigned >> shift) & 0x3;
+            int unsigned = b & BYTE_MASK;
+            for (int shift = INITIAL_SHIFT; shift >= 0; shift -= 2) {
+                int dibit = (unsigned >> shift) & DIBIT_MASK;
                 sb.append(NUCLEOTIDES[dibit]);
             }
         }

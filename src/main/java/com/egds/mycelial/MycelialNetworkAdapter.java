@@ -28,6 +28,7 @@ import java.util.List;
 @Component
 public class MycelialNetworkAdapter {
 
+    /** Logger for this component. */
     private static final Logger LOG =
             LoggerFactory.getLogger(MycelialNetworkAdapter.class);
 
@@ -36,6 +37,12 @@ public class MycelialNetworkAdapter {
 
     /** Frequency range mapped across the [0, 255] byte value space. */
     static final double FREQ_RANGE_HZ = 256.0;
+
+    /** Mask to convert a signed byte to its unsigned integer value. */
+    private static final int UNSIGNED_BYTE_MASK = 0xFF;
+
+    /** Maximum unsigned byte value, used as the frequency divisor. */
+    private static final double UNSIGNED_BYTE_MAX = 255.0;
 
     /**
      * Encodes {@code greetingText} as glutamate signal frequencies and
@@ -47,7 +54,7 @@ public class MycelialNetworkAdapter {
      *         one entry per UTF-8 byte of the input
      */
     public List<Double> broadcast(
-            String correlationId, String greetingText) {
+            final String correlationId, final String greetingText) {
         byte[] bytes = greetingText.getBytes(StandardCharsets.UTF_8);
         List<Double> frequencies = encodeToFrequencies(bytes);
         LOG.info("[MYCELIAL] broadcast initiated correlationId={}"
@@ -66,12 +73,12 @@ public class MycelialNetworkAdapter {
      * @param bytes raw UTF-8 bytes of the greeting
      * @return ordered list of frequencies; one per input byte
      */
-    List<Double> encodeToFrequencies(byte[] bytes) {
+    List<Double> encodeToFrequencies(final byte[] bytes) {
         List<Double> result = new ArrayList<>(bytes.length);
         for (byte b : bytes) {
-            int unsigned = b & 0xFF;
+            int unsigned = b & UNSIGNED_BYTE_MASK;
             double freq = BASE_FREQ_HZ
-                    + (unsigned / 255.0) * FREQ_RANGE_HZ;
+                    + (unsigned / UNSIGNED_BYTE_MAX) * FREQ_RANGE_HZ;
             result.add(freq);
         }
         return result;

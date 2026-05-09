@@ -23,6 +23,7 @@ import java.util.Map;
 @Service
 public class ThermodynamicEntropyBalancer {
 
+    /** Logger for this service. */
     private static final Logger LOG =
             LoggerFactory.getLogger(ThermodynamicEntropyBalancer.class);
 
@@ -33,15 +34,16 @@ public class ThermodynamicEntropyBalancer {
      */
     static final double ENTROPY_COOLING_COEFFICIENT = 3.14e-5;
 
+    /** HVAC adapter used to issue server-room cooling offsets. */
     private final SmartHvacAdapter hvacAdapter;
 
     /**
      * Constructs the balancer with the required HVAC adapter.
      *
-     * @param hvacAdapter adapter for server-room cooling control
+     * @param adapter adapter for server-room cooling control
      */
-    public ThermodynamicEntropyBalancer(SmartHvacAdapter hvacAdapter) {
-        this.hvacAdapter = hvacAdapter;
+    public ThermodynamicEntropyBalancer(final SmartHvacAdapter adapter) {
+        this.hvacAdapter = adapter;
     }
 
     /**
@@ -53,7 +55,7 @@ public class ThermodynamicEntropyBalancer {
      * @return computed Shannon entropy in bits per character
      */
     public double balanceEntropy(
-            String correlationId, String greetingText) {
+            final String correlationId, final String greetingText) {
         double entropy = computeShannonEntropy(greetingText);
         double deltaCelsius = entropy * ENTROPY_COOLING_COEFFICIENT;
         LOG.info("[ENTROPY] shannon_entropy={} delta_celsius={}"
@@ -70,7 +72,7 @@ public class ThermodynamicEntropyBalancer {
      * @param text input string; returns 0.0 for null or empty input
      * @return entropy in bits per character
      */
-    double computeShannonEntropy(String text) {
+    double computeShannonEntropy(final String text) {
         if (text == null || text.isEmpty()) {
             return 0.0;
         }
