@@ -103,6 +103,9 @@ jobs:
         run: mvn checkstyle:check -B -q
       - name: "[Stage 4] Run PMD"
         run: mvn pmd:check -B -q
+      - name: "[Stage 4] Print PMD XML on failure"
+        if: failure()
+        run: cat target/pmd.xml
       - name: "[Stage 4] Run SpotBugs"
         run: mvn spotbugs:check -B -q
 
