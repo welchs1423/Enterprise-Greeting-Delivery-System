@@ -78,7 +78,7 @@ public class MycelialNetworkAdapter {
         for (byte b : bytes) {
             int unsigned = b & UNSIGNED_BYTE_MASK;
             double freq = BASE_FREQ_HZ
-                    + (unsigned / UNSIGNED_BYTE_MAX) * FREQ_RANGE_HZ;
+                    + unsigned / UNSIGNED_BYTE_MAX * FREQ_RANGE_HZ;
             result.add(freq);
         }
         return result;

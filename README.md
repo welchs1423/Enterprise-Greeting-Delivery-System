@@ -5,6 +5,13 @@
 
 ---
 
+## [2026-05-09] PMD 수정: CosmicRaySimulator, MycelialNetworkAdapter
+
+- `CosmicRaySimulator.tick()`: 메서드 참조(`this::tick`)로 사용되나 PMD가 미인식 → `@SuppressWarnings("PMD.UnusedPrivateMethod")` 추가
+- `MycelialNetworkAdapter.encodeToFrequencies()`: 불필요한 괄호 제거 (`(unsigned / UNSIGNED_BYTE_MAX)`)
+
+---
+
 ## [2026-05-09] Checkstyle 수정: ExistentialLoggingAspect, SentienceActuator
 
 - `ExistentialLoggingAspect`: `LOG`, `registry` 필드 Javadoc 추가, 생성자 파라미터 `registry` → `stateRegistry` (HiddenField)

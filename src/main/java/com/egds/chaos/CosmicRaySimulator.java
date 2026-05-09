@@ -112,6 +112,7 @@ public class CosmicRaySimulator {
         executor.schedule(this::tick, delay, TimeUnit.MILLISECONDS);
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void tick() {
         try {
             String[] cids = resolver.listCids();
