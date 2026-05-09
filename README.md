@@ -14,6 +14,8 @@
 - `TokenResponse.java`: `tokenType` 인스턴스 필드 → `TOKEN_TYPE` static final 상수로 변경 (SS_SHOULD_BE_STATIC 해결)
 - `MycelialNetworkAdapter.java`: `0.0` → `Double.valueOf(0.0)` 로 ternary 반환 타입 통일 (BX_UNBOXING_IMMEDIATELY_REBOXED 해결)
 - `QuantumTesseractAdapter.simulateProjection()`: `LOG.info()` 내 `String.format()` 호출 2건을 `if (LOG.isInfoEnabled())` 가드로 감쌈 (PMD GuardLogStatement 위반 2건 수정)
+- `QuantumTesseractAdapter.project()`: 네이티브 경로 `LOG.info("W-shadow len={}", projected.length)` 호출을 `if (LOG.isInfoEnabled())` 가드로 감쌈 (CI Java 17 PMD GuardLogStatement 위반 1건 추가 수정)
+- `QuantumTesseractAdapter.simulateProjection()`: W-shadow `LOG.info()` 호출이 `if (LOG.isInfoEnabled())` 블록 밖에 남아있던 위반 1건 추가 수정 (총 CI 위반 2건 완전 해결)
 
 ---
 

@@ -87,9 +87,11 @@ public class QuantumTesseractAdapter {
         if (NATIVE_AVAILABLE) {
             double[] projected =
                     projectNative(message, THETA_XW, THETA_YZ);
-            LOG.info(
-                    "Tesseract [native] W-shadow len={}",
-                    projected.length);
+            if (LOG.isInfoEnabled()) {
+                LOG.info(
+                        "Tesseract [native] W-shadow len={}",
+                        projected.length);
+            }
         } else {
             simulateProjection(message);
         }
@@ -126,13 +128,15 @@ public class QuantumTesseractAdapter {
         }
         double[] projected =
                 multiplyMatVec(composed, vector);
-        LOG.info(
-                "  W-shadow = [{}, {}, {}, {}]",
-                String.format("%.4f", projected[0]),
-                String.format("%.4f", projected[1]),
-                String.format("%.4f", projected[2]),
-                String.format("%.4f",
-                        projected[DIM - 1]));
+        if (LOG.isInfoEnabled()) {
+            LOG.info(
+                    "  W-shadow = [{}, {}, {}, {}]",
+                    String.format("%.4f", projected[0]),
+                    String.format("%.4f", projected[1]),
+                    String.format("%.4f", projected[2]),
+                    String.format("%.4f",
+                            projected[DIM - 1]));
+        }
     }
 
     private static double[][] rotationXW(final double theta) {
