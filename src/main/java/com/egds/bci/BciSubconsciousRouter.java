@@ -93,13 +93,15 @@ public class BciSubconsciousRouter {
             final Consumer<String> onSubconsciousIntent) {
         double score = sampleBrainwaveFrame();
         if (score >= INTENT_THRESHOLD) {
-            LOG.info(
-                    "BCI subconscious intent detected "
-                            + "correlationId={} score={}"
-                            + " schedulingIn={}ms",
-                    correlationId,
-                    String.format("%.4f", score),
-                    PRECOGNITION_DELAY_MS);
+            if (LOG.isInfoEnabled()) {
+                LOG.info(
+                        "BCI subconscious intent detected "
+                                + "correlationId={} score={}"
+                                + " schedulingIn={}ms",
+                        correlationId,
+                        String.format("%.4f", score),
+                        PRECOGNITION_DELAY_MS);
+            }
             scheduler.schedule(
                     () -> onSubconsciousIntent.accept(
                             correlationId),

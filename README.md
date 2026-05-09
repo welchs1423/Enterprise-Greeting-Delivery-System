@@ -5,6 +5,14 @@
 
 ---
 
+## [2026-05-09] PMD 수정: GuardLogStatement 위반 해결 (BciSubconsciousRouter, PredictiveGreetingCronJob)
+
+- `BciSubconsciousRouter.scanAndTrigger()`: `LOG.info()` 내 `String.format()` 호출을 `if (LOG.isInfoEnabled())` 가드로 감쌈
+- `PredictiveGreetingCronJob.predictAndCache()`: `LOG.info()` 내 `String.format()` 호출을 `if (LOG.isInfoEnabled())` 가드로 감쌈
+- 이전 커밋에서 `LOG.debug()` 가드만 추가하고 `LOG.info()` 가드는 누락된 2개 위반 해결
+
+---
+
 ## [2026-05-09] PMD 수정: GuardLogStatement 위반 해결 (CosmicRaySimulator, BciSubconsciousRouter)
 
 - `CosmicRaySimulator.flipRandomBit()`: `LOG.debug()` 내 `cid.substring()` 호출을 `if (LOG.isDebugEnabled())` 가드로 감쌈

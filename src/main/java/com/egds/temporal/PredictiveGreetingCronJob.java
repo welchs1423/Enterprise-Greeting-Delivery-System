@@ -90,10 +90,12 @@ public class PredictiveGreetingCronJob {
     public void predictAndCache() {
         rollbackManager.rollbackExpired();
         double probability = computePredictionProbability();
-        LOG.info(
-                "Chronos tick: probability={} threshold={}",
-                String.format("%.4f", probability),
-                PREDICTION_THRESHOLD);
+        if (LOG.isInfoEnabled()) {
+            LOG.info(
+                    "Chronos tick: probability={} threshold={}",
+                    String.format("%.4f", probability),
+                    PREDICTION_THRESHOLD);
+        }
         if (probability >= PREDICTION_THRESHOLD) {
             String id = UUID.randomUUID().toString();
             PredictedGreetingEntry entry =
