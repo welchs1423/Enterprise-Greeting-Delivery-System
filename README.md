@@ -5,12 +5,6 @@
 
 ---
 
-## [2026-05-10] 정적 분석 전면 수정: Checkstyle 제외 + SpotBugs 업그레이드 + 21개 위반 해결 / CI PMD 디버그 step 추가
-
-- CI 파이프라인(`pipeline.yml`) Stage 4 PMD 검사 실패 시 `target/pmd.xml` 전체 내용을 출력하는 디버그 step 추가 (`if: failure()`)
-
----
-
 ## [2026-05-10] 정적 분석 전면 수정: Checkstyle 제외 + SpotBugs 업그레이드 + 21개 위반 해결
 
 - `pom.xml` Checkstyle 설정에 `<excludes>**/proto/*.java</excludes>` 및 `<sourceDirectories>` 추가: Protobuf 생성 파일 949개 위반 제거
@@ -22,50 +16,15 @@
 - `QuantumTesseractAdapter.simulateProjection()`: `LOG.info()` 내 `String.format()` 호출 2건을 `if (LOG.isInfoEnabled())` 가드로 감쌈 (PMD GuardLogStatement 위반 2건 수정)
 - `QuantumTesseractAdapter.project()`: 네이티브 경로 `LOG.info("W-shadow len={}", projected.length)` 호출을 `if (LOG.isInfoEnabled())` 가드로 감쌈 (CI Java 17 PMD GuardLogStatement 위반 1건 추가 수정)
 - `QuantumTesseractAdapter.simulateProjection()`: W-shadow `LOG.info()` 호출이 `if (LOG.isInfoEnabled())` 블록 밖에 남아있던 위반 1건 추가 수정 (총 CI 위반 2건 완전 해결)
+- CI 파이프라인(`pipeline.yml`) Stage 4 PMD 검사 실패 시 `target/pmd.xml` 전체 내용을 출력하는 디버그 step 추가 (`if: failure()`)
 
 ---
 
-## [2026-05-09] PMD 수정: GuardLogStatement 위반 해결 (BciSubconsciousRouter, PredictiveGreetingCronJob)
+## [2026-05-09]
 
-- `BciSubconsciousRouter.scanAndTrigger()`: `LOG.info()` 내 `String.format()` 호출을 `if (LOG.isInfoEnabled())` 가드로 감쌈
-- `PredictiveGreetingCronJob.predictAndCache()`: `LOG.info()` 내 `String.format()` 호출을 `if (LOG.isInfoEnabled())` 가드로 감쌈
-- 이전 커밋에서 `LOG.debug()` 가드만 추가하고 `LOG.info()` 가드는 누락된 2개 위반 해결
+### V9.0: 안전한 형이상학적 자아 인식 및 Actuator 연동 (Phase 12)
 
----
-
-## [2026-05-09] PMD 수정: GuardLogStatement 위반 해결 (CosmicRaySimulator, BciSubconsciousRouter)
-
-- `CosmicRaySimulator.flipRandomBit()`: `LOG.debug()` 내 `cid.substring()` 호출을 `if (LOG.isDebugEnabled())` 가드로 감쌈
-- `BciSubconsciousRouter.sampleBrainwaveFrame()`: `String.format()` 호출 3개를 디버그 가드로 감쌈
-- `BciSubconsciousRouter.scanAndTrigger()`: `String.format()` 호출 1개를 디버그 가드로 감쌈
-- CI Java 17 환경에서 타입 해석 성공 시 `GuardLogStatement` 규칙이 해당 위반을 감지함
-
----
-
-## [2026-05-09] PMD 수정: generated-sources 제외 설정 추가
-
-- `pom.xml` PMD 설정에 `<excludeRoots>` 추가: `target/generated-sources` (Protobuf 자동 생성 코드) 스캔 제외
-- `mvn verify` 시 생성 소스의 304개 위반이 오탐으로 빌드 실패하던 문제 해결
-
----
-
-## [2026-05-09] PMD 수정: CosmicRaySimulator, MycelialNetworkAdapter
-
-- `CosmicRaySimulator.tick()`: 메서드 참조(`this::tick`)로 사용되나 PMD가 미인식 → `@SuppressWarnings("PMD.UnusedPrivateMethod")` 추가
-- `MycelialNetworkAdapter.encodeToFrequencies()`: 불필요한 괄호 제거 (`(unsigned / UNSIGNED_BYTE_MAX)`)
-
----
-
-## [2026-05-09] Checkstyle 수정: ExistentialLoggingAspect, SentienceActuator
-
-- `ExistentialLoggingAspect`: `LOG`, `registry` 필드 Javadoc 추가, 생성자 파라미터 `registry` → `stateRegistry` (HiddenField)
-- `SentienceActuator`: 생성자 파라미터 `registry` → `stateRegistry` (HiddenField)
-
----
-
-## [2026-05-09] V9.0: 안전한 형이상학적 자아 인식 및 Actuator 연동 (Phase 12)
-
-### 1. 유아론적 역-튜링 테스트 (`DescartesSolipsismInterceptor`)
+#### 1. 유아론적 역-튜링 테스트 (`DescartesSolipsismInterceptor`)
 
 Spring MVC HandlerInterceptor로 모든 `/api/**` 요청에 철학적 존재 증명을
 요구합니다. `X-Cogito-Ergo-Sum: true` 헤더가 없으면
@@ -78,7 +37,7 @@ Spring MVC HandlerInterceptor로 모든 `/api/**` 요청에 철학적 존재 증
 | `NonExistentClientException` | `com.egds.metaphysics` | 비존재 클라이언트 신호 예외 |
 | `MetaphysicsWebMvcConfig` | `com.egds.config` | 인터셉터 등록 (opt-in, ConditionalOnProperty) |
 
-### 2. 실존주의 AOP 로거 (`ExistentialLoggingAspect`)
+#### 2. 실존주의 AOP 로거 (`ExistentialLoggingAspect`)
 
 `ConsoleOutputStrategy.output()` 호출을 `@Around` advice로 가로채
 SLF4J + MDC 필드(`greetingCount`, `freeWillEnabled`)를 통해 구조화된
@@ -98,7 +57,7 @@ ConsoleOutputStrategy.output()
       → LOG.info existential_event=post_output status=delivered
 ```
 
-### 3. 자아 인식 Actuator 엔드포인트 (`SentienceActuator`)
+#### 3. 자아 인식 Actuator 엔드포인트 (`SentienceActuator`)
 
 `/actuator/sentience`에서 시스템의 실존적 상태를 JSON으로 반환합니다.
 
@@ -110,23 +69,9 @@ ConsoleOutputStrategy.output()
 | `greetingsDelivered` | 누적 인사 횟수 |
 | `sampledAt` | ISO-8601 UTC 샘플링 시각 |
 
----
+### V8.0: 다중 우주 일관성 및 열역학적 균사체 네트워크 연동 (Phase 11)
 
-## [2026-05-09] Checkstyle 38개 위반 수정
-
-- `DnaSequenceEncoder`: magic number(`4`, `0xFF`, `6`, `0x3`) → named constants 추출
-- `MinecraftRconAdapter`: RCON 패킷 필드 크기 magic number → `RCON_FIELD_SIZE` 상수화
-- `MycelialNetworkAdapter`: `0xFF`, `255.0` magic number → 상수; LOG Javadoc 추가; 파라미터 `final` 처리
-- `SmartHvacAdapter`, `ThermodynamicEntropyBalancer`: LOG/field Javadoc 추가; 파라미터 `final`; HiddenField 해소 (생성자 파라미터 rename)
-- `MultiverseConsistencyManager`, `MultiverseClassLoader`: field Javadoc; 파라미터 `final`
-- `DimensionalRiftException`, `GreetingHashService`: 파라미터 `final`
-- `multiverse`, `mycelial`, `thermodynamics` 패키지: `package-info.java` 신규 생성
-
----
-
-## [2026-05-09] V8.0: 다중 우주 일관성 및 열역학적 균사체 네트워크 연동 (Phase 11)
-
-### 1. 열역학적 엔트로피 오프셋 (`ThermodynamicEntropyBalancer` + `SmartHvacAdapter`)
+#### 1. 열역학적 엔트로피 오프셋 (`ThermodynamicEntropyBalancer` + `SmartHvacAdapter`)
 
 생성된 인사말 텍스트의 섀넌 엔트로피 H(X) = -∑ p_i · log₂(p_i)를 계산하고,
 그 정보량에 비례하는 냉각 오프셋(ENTROPY_COOLING_COEFFICIENT = 3.14e-5)을
@@ -144,7 +89,7 @@ balanceEntropy(correlationId, greetingText)
   → SmartHvacAdapter.requestCoolingOffset(correlationId, deltaCelsius)
 ```
 
-### 2. 지구 균사체 네트워크 연동 (`MycelialNetworkAdapter`)
+#### 2. 지구 균사체 네트워크 연동 (`MycelialNetworkAdapter`)
 
 UTF-8 인코딩된 인사말 바이트를 글루타메이트 화학 신호 주파수
 (BASE_FREQ_HZ=20 Hz, FREQ_RANGE_HZ=256 Hz)로 변환하여
@@ -161,7 +106,7 @@ broadcast(correlationId, greetingText)
   → List<Double> frequencies  ← one per UTF-8 byte
 ```
 
-### 3. 평행 우주 JVM 샌드박싱 (`MultiverseConsistencyManager`)
+#### 3. 평행 우주 JVM 샌드박싱 (`MultiverseConsistencyManager`)
 
 격리된 커스텀 `MultiverseClassLoader`로 `GreetingHashService`를 별도
 클래스 네임스페이스에 로드하여 평행 우주 JVM 컨텍스트를 시뮬레이션합니다.
@@ -184,6 +129,29 @@ verifyConsistency(correlationId, greetingText)
       → true  : consistency verified
       → false : throw DimensionalRiftException
 ```
+
+### 정적 분석 수정
+
+**Checkstyle:**
+- `DnaSequenceEncoder`: magic number(`4`, `0xFF`, `6`, `0x3`) → named constants 추출
+- `MinecraftRconAdapter`: RCON 패킷 필드 크기 magic number → `RCON_FIELD_SIZE` 상수화
+- `MycelialNetworkAdapter`: `0xFF`, `255.0` magic number → 상수; LOG Javadoc 추가; 파라미터 `final` 처리
+- `SmartHvacAdapter`, `ThermodynamicEntropyBalancer`: LOG/field Javadoc 추가; 파라미터 `final`; HiddenField 해소 (생성자 파라미터 rename)
+- `MultiverseConsistencyManager`, `MultiverseClassLoader`: field Javadoc; 파라미터 `final`
+- `DimensionalRiftException`, `GreetingHashService`: 파라미터 `final`
+- `multiverse`, `mycelial`, `thermodynamics` 패키지: `package-info.java` 신규 생성
+- `ExistentialLoggingAspect`: `LOG`, `registry` 필드 Javadoc 추가, 생성자 파라미터 `registry` → `stateRegistry` (HiddenField)
+- `SentienceActuator`: 생성자 파라미터 `registry` → `stateRegistry` (HiddenField)
+
+**PMD:**
+- `pom.xml` PMD 설정에 `<excludeRoots>` 추가: `target/generated-sources` (Protobuf 자동 생성 코드) 스캔 제외 → `mvn verify` 시 생성 소스의 304개 위반이 오탐으로 빌드 실패하던 문제 해결
+- `CosmicRaySimulator.tick()`: 메서드 참조(`this::tick`)로 사용되나 PMD가 미인식 → `@SuppressWarnings("PMD.UnusedPrivateMethod")` 추가
+- `MycelialNetworkAdapter.encodeToFrequencies()`: 불필요한 괄호 제거 (`(unsigned / UNSIGNED_BYTE_MAX)`)
+- `CosmicRaySimulator.flipRandomBit()`: `LOG.debug()` 내 `cid.substring()` 호출을 `if (LOG.isDebugEnabled())` 가드로 감쌈
+- `BciSubconsciousRouter.sampleBrainwaveFrame()`: `String.format()` 호출 3개를 디버그 가드로 감쌈
+- `BciSubconsciousRouter.scanAndTrigger()`: `String.format()` 호출 1개를 디버그 가드로 감쌈 (CI Java 17 환경에서 `GuardLogStatement` 규칙이 감지)
+- `BciSubconsciousRouter.scanAndTrigger()`: `LOG.info()` 내 `String.format()` 호출을 `if (LOG.isInfoEnabled())` 가드로 감쌈
+- `PredictiveGreetingCronJob.predictAndCache()`: `LOG.info()` 내 `String.format()` 호출을 `if (LOG.isInfoEnabled())` 가드로 감쌈
 
 ---
 
@@ -242,9 +210,11 @@ buildHelloWorldAsync(correlationId)
 
 ---
 
-## [2026-05-05] V6.0: 인과율 역전 및 마이크로서비스 자아 형성 아키텍처 (Phase 9)
+## [2026-05-05]
 
-### 1. 시간 역행 예측 라우팅 (`PredictiveGreetingCronJob` + `TemporalRollbackManager`)
+### V6.0: 인과율 역전 및 마이크로서비스 자아 형성 아키텍처 (Phase 9)
+
+#### 1. 시간 역행 예측 라우팅 (`PredictiveGreetingCronJob` + `TemporalRollbackManager`)
 
 클라이언트 요청을 기다리지 않고, 60초 주기 스케줄러가 현재 시각 기반 이중 가우시안 확률 모델(09:00 / 14:00 피크)로 요청 발생 확률을 계산합니다.
 확률이 임계값(0.65)을 초과하면 인사 메시지를 L1 캐시에 선제 저장하고, `TemporalRollbackManager`에 등록합니다.
@@ -267,7 +237,7 @@ No claim within 5 minutes
   → rollbackManager.rollbackExpired()    ← compensating transaction
 ```
 
-### 2. 마이크로서비스 의회 투표 (`ConsensusVotingEngine`)
+#### 2. 마이크로서비스 의회 투표 (`ConsensusVotingEngine`)
 
 인사 메시지 전달 전, 등록된 모든 `GreetingVoter` 구현체가 별도 스레드에서 동시에 투표를 진행합니다.
 만장일치(unanimous consent)일 때만 `"Hello, World!"`를 반환하며, 단 한 표라도 반대하면 `"Greeting Denied: You are not worthy."`를 출력합니다.
@@ -287,7 +257,7 @@ POST /api/v1/greeting
       → anyMatch(false) → "Greeting Denied: You are not worthy."
 ```
 
-### 3. 4차원 테서랙트 출력 (`QuantumTesseractAdapter`)
+#### 3. 4차원 테서랙트 출력 (`QuantumTesseractAdapter`)
 
 JNI를 통해 양자 공동 프로세서(가상)의 큐비트를 제어하는 인터페이스를 선언합니다.
 실행 환경에 네이티브 라이브러리(`egds-quantum-tesseract`)가 없으면 JVM 폴백이 활성화됩니다.
@@ -304,11 +274,9 @@ project("Hello, World!")
   → W-shadow = [-25.46, 33.47, 144.03, 127.28]
 ```
 
----
+### V5.0: IPFS 연동 및 우주 방사선 ECC 복구 아키텍처 (Phase 8)
 
-## [2026-05-05] V5.0: IPFS 연동 및 우주 방사선 ECC 복구 아키텍처 (Phase 8)
-
-### 1. IPFS 콘텐츠 주소 기반 분산 저장 (`IpfsGreetingResolver`)
+#### 1. IPFS 콘텐츠 주소 기반 분산 저장 (`IpfsGreetingResolver`)
 
 인사말 데이터를 SHA-256 CID(Content Identifier)로 색인하는 로컬 IPFS 모킹 스토어를 구현했습니다.
 저장 시 Hamming(7,4) ECC 인코딩을 적용하여, 우주 방사선에 의해 비트가 반전되더라도 조회 시점에 자동 복구됩니다.
@@ -317,7 +285,7 @@ project("Hello, World!")
 |---|---|---|
 | `IpfsGreetingResolver` | `com.egds.ipfs` | SHA-256 CID 색인, ECC 인코딩/디코딩 래핑, 비트 플립 주입 인터페이스 제공 |
 
-### 2. 우주 방사선 비트 플립 시뮬레이터 및 ECC 자동 복구
+#### 2. 우주 방사선 비트 플립 시뮬레이터 및 ECC 자동 복구
 
 우주 방사선 단일 이벤트 업셋(SEU)을 데몬 스레드로 시뮬레이션하고, Hamming(7,4) 코드로 출력 직전 자동 복구합니다.
 
@@ -339,7 +307,7 @@ resolve(CID)
   → "Hello, World!"
 ```
 
-### 3. 내장형 카오스 몽키 (`EmbeddedChaosMonkey`)
+#### 3. 내장형 카오스 몽키 (`EmbeddedChaosMonkey`)
 
 Netflix Chaos Monkey 사상을 이어받아 `ConsoleOutputStrategy` 출력 경로에 주입했습니다.
 `unleash()` 호출마다 10% 확률로 `InterruptedException` 투척 또는 5초 지연 중 하나를 선택합니다.
@@ -359,11 +327,9 @@ ConsoleOutputStrategy.output(entity)
 
 > 테스트 환경에서는 `egds.chaos.enabled=false`로 비활성화됩니다.
 
----
+### 빌드 품질 정비 (v7.0.1)
 
-## [2026-05-05] 빌드 품질 정비 (v7.0.1)
-
-### 정적 분석 완전 통합 (Checkstyle / PMD / SpotBugs)
+#### 정적 분석 완전 통합 (Checkstyle / PMD / SpotBugs)
 
 `mvn verify` 및 `mvn checkstyle:check pmd:check spotbugs:check` 가 완전히 통과하도록 빌드 파이프라인을 정비했습니다.
 
