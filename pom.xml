@@ -380,6 +380,9 @@
                     <failOnViolation>true</failOnViolation>
                     <printFailingErrors>true</printFailingErrors>
                     <targetJdk>${java.version}</targetJdk>
+                    <excludeRoots>
+                        <excludeRoot>${project.build.directory}/generated-sources</excludeRoot>
+                    </excludeRoots>
                 </configuration>
                 <executions>
                     <execution>

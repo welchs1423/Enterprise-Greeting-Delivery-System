@@ -5,6 +5,13 @@
 
 ---
 
+## [2026-05-09] PMD 수정: generated-sources 제외 설정 추가
+
+- `pom.xml` PMD 설정에 `<excludeRoots>` 추가: `target/generated-sources` (Protobuf 자동 생성 코드) 스캔 제외
+- `mvn verify` 시 생성 소스의 304개 위반이 오탐으로 빌드 실패하던 문제 해결
+
+---
+
 ## [2026-05-09] PMD 수정: CosmicRaySimulator, MycelialNetworkAdapter
 
 - `CosmicRaySimulator.tick()`: 메서드 참조(`this::tick`)로 사용되나 PMD가 미인식 → `@SuppressWarnings("PMD.UnusedPrivateMethod")` 추가
