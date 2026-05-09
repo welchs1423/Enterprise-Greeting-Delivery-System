@@ -99,21 +99,23 @@ public class QuantumTesseractAdapter {
         double[][] rXw = rotationXW(THETA_XW);
         double[][] rYz = rotationYZ(THETA_YZ);
         double[][] composed = multiply4x4(rXw, rYz);
-        LOG.info(
-                "Tesseract [JVM] projecting \"{}\" "
-                        + "thetaXW={} thetaYZ={}",
-                message,
-                String.format("%.4f", THETA_XW),
-                String.format("%.4f", THETA_YZ));
-        for (int row = 0; row < DIM; row++) {
+        if (LOG.isInfoEnabled()) {
             LOG.info(
-                    "  R[{}] = [{}, {}, {}, {}]",
-                    row,
-                    String.format("%.6f", composed[row][0]),
-                    String.format("%.6f", composed[row][1]),
-                    String.format("%.6f", composed[row][2]),
-                    String.format("%.6f",
-                            composed[row][DIM - 1]));
+                    "Tesseract [JVM] projecting \"{}\" "
+                            + "thetaXW={} thetaYZ={}",
+                    message,
+                    String.format("%.4f", THETA_XW),
+                    String.format("%.4f", THETA_YZ));
+            for (int row = 0; row < DIM; row++) {
+                LOG.info(
+                        "  R[{}] = [{}, {}, {}, {}]",
+                        row,
+                        String.format("%.6f", composed[row][0]),
+                        String.format("%.6f", composed[row][1]),
+                        String.format("%.6f", composed[row][2]),
+                        String.format("%.6f",
+                                composed[row][DIM - 1]));
+            }
         }
         byte[] bytes =
                 message.getBytes(StandardCharsets.UTF_8);
