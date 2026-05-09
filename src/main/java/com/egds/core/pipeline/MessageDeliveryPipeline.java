@@ -1,5 +1,6 @@
 package com.egds.core.pipeline;
 
+import com.egds.agile.ScrumMasterDaemon;
 import com.egds.core.dto.MessageDeliveryResult;
 import com.egds.core.service.MessageDeliveryService;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,9 @@ import org.springframework.stereotype.Component;
  * by the IoC container via constructor injection. The factory-based
  * wiring present in v1.0 is superseded by Spring DI; factory classes
  * are retained for non-Spring environments.
+ *
+ * <p>Each execution cycle is preceded by a mandatory daily standup
+ * ceremony enforced by {@link ScrumMasterDaemon}.
  */
 @Component
 public class MessageDeliveryPipeline {
@@ -20,24 +24,32 @@ public class MessageDeliveryPipeline {
     /** The delivery service orchestrating the full pipeline lifecycle. */
     private final MessageDeliveryService deliveryService;
 
+    /** Daemon that enforces daily standup ceremonies before delivery. */
+    private final ScrumMasterDaemon scrumMasterDaemon;
+
     /**
-     * Constructs a {@code MessageDeliveryPipeline} with a Spring-managed
-     * {@link MessageDeliveryService}.
+     * Constructs a {@code MessageDeliveryPipeline} with all collaborators.
      *
-     * @param service the delivery service for the full pipeline lifecycle
+     * @param service     the delivery service for the full pipeline lifecycle
+     * @param scrumMaster the daemon enforcing daily standup ceremonies
      */
-    public MessageDeliveryPipeline(final MessageDeliveryService service) {
+    public MessageDeliveryPipeline(
+            final MessageDeliveryService service,
+            final ScrumMasterDaemon scrumMaster) {
         this.deliveryService = service;
+        this.scrumMasterDaemon = scrumMaster;
     }
 
     /**
      * Initiates pipeline execution and returns the delivery result.
-     * Delegates to the underlying {@link MessageDeliveryService} and
-     * emits a structured completion report to the standard error stream.
+     * A mandatory standup ceremony is conducted before delegating to the
+     * underlying {@link MessageDeliveryService}. Emits a structured
+     * completion report to the standard error stream.
      *
      * @return the {@link MessageDeliveryResult} produced by the service
      */
     public MessageDeliveryResult execute() {
+        scrumMasterDaemon.conductDailyStandup();
         MessageDeliveryResult result = deliveryService.deliver();
         System.err.printf(
                 "[EGDS] Pipeline execution complete."

@@ -1,5 +1,6 @@
 package com.egds.messaging;
 
+import com.egds.chaos.KafkaChaosMonkey;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -67,18 +68,24 @@ public class GreetingEventPublisher {
     /** Tracer used to create and manage publish spans. */
     private final Tracer tracer;
 
+    /** Chaos interceptor that stochastically drops outbound events. */
+    private final KafkaChaosMonkey chaosMonkey;
+
     /**
-     * @param template the Kafka template for producing messages
-     * @param topic    the greeting event topic name
-     * @param otelTracer the Micrometer Tracing tracer
+     * @param template       the Kafka template for producing messages
+     * @param topic          the greeting event topic name
+     * @param otelTracer     the Micrometer Tracing tracer
+     * @param kafkaChaosMonkey the chaos interceptor for event dropping
      */
     public GreetingEventPublisher(
             final KafkaTemplate<String, GreetingEvent> template,
             @Value("${egds.kafka.topic.greeting}") final String topic,
-            final Tracer otelTracer) {
+            final Tracer otelTracer,
+            final KafkaChaosMonkey kafkaChaosMonkey) {
         this.kafkaTemplate = template;
         this.greetingTopic = topic;
         this.tracer = otelTracer;
+        this.chaosMonkey = kafkaChaosMonkey;
     }
 
     /**
@@ -101,6 +108,9 @@ public class GreetingEventPublisher {
     @Retry(name = RESILIENCE_NAME)
     public CompletableFuture<SendResult<String, GreetingEvent>> publish(
             final GreetingEvent event) {
+        if (chaosMonkey.shouldDrop(event.getCorrelationId())) {
+            return new CompletableFuture<>();
+        }
         Span span = tracer.nextSpan()
                 .name(SPAN_NAME)
                 .tag("messaging.system", "kafka")

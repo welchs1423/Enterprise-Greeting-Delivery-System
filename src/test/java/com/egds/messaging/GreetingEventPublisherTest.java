@@ -1,5 +1,6 @@
 package com.egds.messaging;
 
+import com.egds.chaos.KafkaChaosMonkey;
 import io.micrometer.tracing.Span;
 import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.Tracer;
@@ -48,6 +49,9 @@ class GreetingEventPublisherTest {
     @Mock
     private TraceContext traceContext;
 
+    @Mock
+    private KafkaChaosMonkey chaosMonkey;
+
     private GreetingEventPublisher publisher;
 
     @BeforeEach
@@ -59,8 +63,10 @@ class GreetingEventPublisherTest {
         when(tracer.withSpan(any(Span.class))).thenReturn(spanInScope);
         when(span.context()).thenReturn(traceContext);
         when(traceContext.traceId()).thenReturn("test-trace-id");
+        when(chaosMonkey.shouldDrop(anyString())).thenReturn(false);
 
-        publisher = new GreetingEventPublisher(kafkaTemplate, TOPIC, tracer);
+        publisher = new GreetingEventPublisher(
+                kafkaTemplate, TOPIC, tracer, chaosMonkey);
     }
 
     @Test

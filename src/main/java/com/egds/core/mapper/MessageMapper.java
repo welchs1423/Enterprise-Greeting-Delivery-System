@@ -2,6 +2,7 @@ package com.egds.core.mapper;
 
 import com.egds.core.dto.MessageContentDto;
 import com.egds.core.entity.MessageEntity;
+import com.egds.frontend.Vue3VirtualDomRenderer;
 import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.UUID;
@@ -12,9 +13,20 @@ import java.util.UUID;
  * {@link MessageEntity} instances.
  * Enforces a strict separation between the transport layer (DTO) and the
  * domain representation (Entity) within the EGDS pipeline.
+ * Content is serialized as a Vue 3 Virtual DOM node tree before storage.
  */
 @Component
 public class MessageMapper {
+
+    /** Vue 3 Virtual DOM renderer applied during content formatting. */
+    private final Vue3VirtualDomRenderer vDomRenderer;
+
+    /**
+     * @param renderer the Vue 3 Virtual DOM renderer for content wrapping
+     */
+    public MessageMapper(final Vue3VirtualDomRenderer renderer) {
+        this.vDomRenderer = renderer;
+    }
 
     /**
      * Maps a {@link MessageContentDto} to a new {@link MessageEntity}.
@@ -44,16 +56,19 @@ public class MessageMapper {
     }
 
     /**
-     * Applies output-layer formatting to the raw message content.
-     * Incorporates the DTO's priority and locale metadata as prefixes.
+     * Applies output-layer formatting to the raw message content and
+     * serializes the result as a Vue 3 Virtual DOM node tree JSON string.
+     * Incorporates the DTO's priority and locale metadata as prefixes
+     * before wrapping in the VNode structure.
      *
      * @param dto the source DTO from which formatted content is derived
-     * @return a formatted string suitable for the output channel
+     * @return a VNode-wrapped JSON string suitable for the output channel
      */
     private String formatContent(final MessageContentDto dto) {
-        return String.format("[%s][%s] %s",
+        String formatted = String.format("[%s][%s] %s",
                 dto.getPriority().name(),
                 dto.getLocale(),
                 dto.getContent());
+        return vDomRenderer.render(formatted);
     }
 }
