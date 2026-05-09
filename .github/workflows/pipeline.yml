@@ -604,7 +604,7 @@ jobs:
       # Notify on success or failure
       - name: "[Stage 20] Notify Slack on success"
         if: success()
-        uses: slackapi/slack-github-action@v1
+        uses: slackapi/slack-github-action@v2
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
@@ -615,7 +615,7 @@ jobs:
 
       - name: "[Stage 20] Notify Slack on failure"
         if: failure()
-        uses: slackapi/slack-github-action@v1
+        uses: slackapi/slack-github-action@v2
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
