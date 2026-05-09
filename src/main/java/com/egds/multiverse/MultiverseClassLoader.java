@@ -30,7 +30,7 @@ class MultiverseClassLoader extends ClassLoader {
             return findClass(name);
         }
         return Class.forName(
-                name, resolve, ClassLoader.getSystemClassLoader());
+                name, resolve, getSystemClassLoader());
     }
 
     @Override
@@ -41,7 +41,7 @@ class MultiverseClassLoader extends ClassLoader {
                 Thread.currentThread().getContextClassLoader();
         InputStream is = (ctx != null)
                 ? ctx.getResourceAsStream(resourcePath)
-                : ClassLoader.getSystemResourceAsStream(resourcePath);
+                : getSystemResourceAsStream(resourcePath);
         if (is == null) {
             throw new ClassNotFoundException(name);
         }
