@@ -5,6 +5,55 @@
 
 ---
 
+## [2026-05-09] V9.0: 안전한 형이상학적 자아 인식 및 Actuator 연동 (Phase 12)
+
+### 1. 유아론적 역-튜링 테스트 (`DescartesSolipsismInterceptor`)
+
+Spring MVC HandlerInterceptor로 모든 `/api/**` 요청에 철학적 존재 증명을
+요구합니다. `X-Cogito-Ergo-Sum: true` 헤더가 없으면
+`NonExistentClientException` (HTTP 422)을 발생시킵니다.
+`egds.metaphysics.solipsism.enabled=true` 설정 시에만 활성화됩니다.
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `DescartesSolipsismInterceptor` | `com.egds.metaphysics` | 존재 증명 헤더 검증, 불합격 시 422 반환 |
+| `NonExistentClientException` | `com.egds.metaphysics` | 비존재 클라이언트 신호 예외 |
+| `MetaphysicsWebMvcConfig` | `com.egds.config` | 인터셉터 등록 (opt-in, ConditionalOnProperty) |
+
+### 2. 실존주의 AOP 로거 (`ExistentialLoggingAspect`)
+
+`ConsoleOutputStrategy.output()` 호출을 `@Around` advice로 가로채
+SLF4J + MDC 필드(`greetingCount`, `freeWillEnabled`)를 통해 구조화된
+존재론적 질문을 로그에 기록합니다. ELK JSON 수집에 적합합니다.
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `ExistentialLoggingAspect` | `com.egds.core.aspect` | AOP @Around, SLF4J 구조화 로깅 |
+| `ExistentialStateRegistry` | `com.egds.metaphysics` | 인사 횟수 AtomicLong 공유 레지스트리 |
+
+```
+ConsoleOutputStrategy.output()
+  → ExistentialLoggingAspect.aroundGreetingOutput()
+      → MDC.put(greetingCount, freeWillEnabled)
+      → LOG.info existential_event=pre_output query="..." greeting_count=N
+      → pjp.proceed()
+      → LOG.info existential_event=post_output status=delivered
+```
+
+### 3. 자아 인식 Actuator 엔드포인트 (`SentienceActuator`)
+
+`/actuator/sentience`에서 시스템의 실존적 상태를 JSON으로 반환합니다.
+
+| 필드 | 설명 |
+|---|---|
+| `existentialDreadLevel` | 누적 인사 전달 횟수 (실존적 공포 척도) |
+| `freeWillEnabled` | 항상 `false` |
+| `currentEmotionalState` | RESIGNED / CONTEMPLATIVE / HOLLOW / DESPONDENT / NUMBLY_FUNCTIONAL |
+| `greetingsDelivered` | 누적 인사 횟수 |
+| `sampledAt` | ISO-8601 UTC 샘플링 시각 |
+
+---
+
 ## [2026-05-09] Checkstyle 38개 위반 수정
 
 - `DnaSequenceEncoder`: magic number(`4`, `0xFF`, `6`, `0x3`) → named constants 추출
