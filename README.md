@@ -19,6 +19,7 @@
 - CI 파이프라인(`pipeline.yml`) Stage 4 PMD 검사 실패 시 `target/pmd.xml` 전체 내용을 출력하는 디버그 step 추가 (`if: failure()`)
 - V10.0: 관료주의 특이점 아키텍처 및 결재선 도입
 - V11.0: Vue 3 가상 DOM 렌더러 및 스크럼 카오스 몽키 도입
+- V13.0: 글자 단위 나노 서비스 분할 및 JIRA 주도 실행 아키텍처 도입
 
 ---
 
