@@ -42,6 +42,18 @@
             CVE-2025-31650/CVE-2025-31651 fixed in 10.1.36.
         -->
         <tomcat.version>10.1.36</tomcat.version>
+        <!--
+            Override Spring Boot managed Log4j2 version.
+            CVE-2026-34479 fixed in 2.24.3; spring-boot-parent exposes
+            log4j2.version as a documented override property.
+        -->
+        <log4j2.version>2.24.3</log4j2.version>
+        <!--
+            OpenNLP version override.
+            CVE-2026-40682 (9.1), CVE-2026-42440 (7.5), CVE-2026-42027 (9.8)
+            fixed in 2.3.3; pinned via dependencyManagement below.
+        -->
+        <opennlp.version>2.3.3</opennlp.version>
     </properties>
 
     <dependencyManagement>
@@ -85,6 +97,17 @@
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-java-util</artifactId>
                 <version>${protobuf.version}</version>
+            </dependency>
+            <!--
+                Explicit opennlp-tools version lock.
+                CVE-2026-40682 (9.1), CVE-2026-42440 (7.5), CVE-2026-42027 (9.8)
+                fixed in 2.3.3. Transitive pull via langchain4j resolves 1.9.4
+                without this override.
+            -->
+            <dependency>
+                <groupId>org.apache.opennlp</groupId>
+                <artifactId>opennlp-tools</artifactId>
+                <version>${opennlp.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

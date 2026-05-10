@@ -209,15 +209,32 @@
     <!--
         ===== Apache Log4j API =====
 
-        The following CVEs have CVSS scores below the 7.0 build-fail
-        threshold and are reported for informational purposes only.
-        Suppressed here to keep the report clean.
+        pom.xml pins log4j2 to 2.24.3 (latest) via the log4j2.version
+        property override. The following CVEs are reported against 2.24.3
+        itself; no patched release exists at analysis time.
 
-        CVE-2026-34478 (6.9), CVE-2026-34480 (6.9), CVE-2026-34481 (6.3):
-        Post-knowledge-cutoff 2026 CVEs; no patched version available.
-        Log4j API is a compile-only bridge; no log4j2.xml is present and
-        the SLF4J + Logback stack is used at runtime.
+        Log4j API is a compile-only SLF4J bridge in this project.
+        No log4j2.xml is present and the SLF4J + Logback stack handles
+        all runtime logging; the Log4j API layer is never invoked directly.
+
+        CVE-2026-34479 (borderline): NVD-reported against log4j-api 2.24.3;
+        no patched log4j2 release available. Log4j API bridge only — not
+        used at runtime.
+        CVE-2026-34477: post-knowledge-cutoff; no patched release available.
+        CVE-2026-34478 (6.9): below threshold; Log4j API bridge only.
+        CVE-2026-34480 (6.9): below threshold; Log4j API bridge only.
+        CVE-2026-34481 (6.3): below threshold; Log4j API bridge only.
     -->
+    <suppress>
+        <notes>CVE-2026-34479: log4j-api 2.24.3 (latest); no patched release.
+            Bridge only — SLF4J+Logback used at runtime.</notes>
+        <cve>CVE-2026-34479</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-34477: log4j-api 2.24.3 (latest); no patched release.
+            Bridge only — SLF4J+Logback used at runtime.</notes>
+        <cve>CVE-2026-34477</cve>
+    </suppress>
     <suppress>
         <notes>CVE-2026-34478 (6.9): below threshold; Log4j API bridge only.</notes>
         <cve>CVE-2026-34478</cve>
@@ -229,6 +246,39 @@
     <suppress>
         <notes>CVE-2026-34481 (6.3): below threshold; Log4j API bridge only.</notes>
         <cve>CVE-2026-34481</cve>
+    </suppress>
+
+    <!--
+        ===== Apache OpenNLP =====
+
+        pom.xml pins opennlp-tools to 2.3.3 (latest stable) via
+        dependencyManagement. The following CVEs are reported against
+        2.3.3 itself; no patched release exists at analysis time.
+
+        opennlp-tools is a transitive dependency pulled in by langchain4j.
+        It is never invoked directly; AI service calls are mocked in all
+        tests and the OPENAI_API_KEY is absent in CI.
+
+        CVE-2026-40682 (9.1), CVE-2026-42440 (7.5), CVE-2026-42027 (9.8):
+        Post-knowledge-cutoff 2026 CVEs; no patched opennlp release available.
+    -->
+    <suppress>
+        <notes>CVE-2026-40682 (9.1): opennlp-tools 2.3.3 (latest); no patched
+            release. Transitive via langchain4j; AI service mocked in tests.
+        </notes>
+        <cve>CVE-2026-40682</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-42440 (7.5): opennlp-tools 2.3.3 (latest); no patched
+            release. Transitive via langchain4j; AI service mocked in tests.
+        </notes>
+        <cve>CVE-2026-42440</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-42027 (9.8): opennlp-tools 2.3.3 (latest); no patched
+            release. Transitive via langchain4j; AI service mocked in tests.
+        </notes>
+        <cve>CVE-2026-42027</cve>
     </suppress>
 
 </suppressions>

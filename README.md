@@ -7,6 +7,7 @@
 
 ## [2026-05-10] 정적 분석 전면 수정: Checkstyle 제외 + SpotBugs 업그레이드 + 21개 위반 해결
 
+- OWASP 의존성 취약점 조치 (log4j, opennlp-tools 버전업)
 - `pom.xml` Checkstyle 설정에 `<excludes>**/proto/*.java</excludes>` 및 `<sourceDirectories>` 추가: Protobuf 생성 파일 949개 위반 제거
 - `pom.xml` SpotBugs 플러그인 `4.8.6.4` → `4.9.8.3` 업그레이드: Java 25 JDK에서 multi-release JAR 파싱 실패(`Unsupported class file major version 69`) 해결
 - `spotbugs-exclude.xml` 생성: protobuf 생성 클래스(`com.egds.grpc.proto.*`) 및 Spring DI false positive(EI_EXPOSE_REP2) 제외
