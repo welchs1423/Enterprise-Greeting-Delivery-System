@@ -1,7 +1,9 @@
 package com.egds.config;
 
+import com.egds.labor.LaborUnionStrikeFilter;
 import com.egds.security.JwtAuthenticationEntryPoint;
 import com.egds.security.JwtAuthenticationFilter;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,15 +36,21 @@ public class SecurityConfig {
     /** JWT filter applied before the username/password filter. */
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    /** Labor union strike filter applied before JWT processing. */
+    private final LaborUnionStrikeFilter laborUnionStrikeFilter;
+
     /**
-     * @param entryPoint the JWT authentication entry point
-     * @param authFilter the JWT authentication filter
+     * @param entryPoint  the JWT authentication entry point
+     * @param authFilter  the JWT authentication filter
+     * @param strikeFilter the labor union strike filter
      */
     public SecurityConfig(
             final JwtAuthenticationEntryPoint entryPoint,
-            final JwtAuthenticationFilter authFilter) {
+            final JwtAuthenticationFilter authFilter,
+            final LaborUnionStrikeFilter strikeFilter) {
         this.jwtAuthenticationEntryPoint = entryPoint;
         this.jwtAuthenticationFilter = authFilter;
+        this.laborUnionStrikeFilter = strikeFilter;
     }
 
     /**
@@ -77,6 +85,9 @@ public class SecurityConfig {
             )
             .headers(headers ->
                     headers.frameOptions(frame -> frame.sameOrigin()))
+            .addFilterBefore(
+                    laborUnionStrikeFilter,
+                    SecurityContextHolderFilter.class)
             .addFilterBefore(
                     jwtAuthenticationFilter,
                     UsernamePasswordAuthenticationFilter.class);

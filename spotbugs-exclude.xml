@@ -59,4 +59,14 @@
         <Bug pattern="CT_CONSTRUCTOR_THROW"/>
     </Match>
 
+
+    <!--
+      NextGenTfTeamDaemon intentionally calls System.gc() to simulate
+      task-force performance degradation. DM_GC is expected by design.
+    -->
+    <Match>
+        <Class name="com.egds.daemon.NextGenTfTeamDaemon"/>
+        <Bug pattern="DM_GC"/>
+    </Match>
+
 </FindBugsFilter>
