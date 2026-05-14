@@ -2,6 +2,7 @@ package com.egds.config;
 
 import com.egds.capitalism.MicroTransactionTruncator;
 import com.egds.capitalism.PoisonPillTakeoverDefense;
+import com.egds.esg.EsgGreenwashingInterceptor;
 import com.egds.labor.LaborUnionStrikeFilter;
 import com.egds.security.JwtAuthenticationEntryPoint;
 import com.egds.security.JwtAuthenticationFilter;
@@ -47,24 +48,30 @@ public class SecurityConfig {
     /** V15 hostile M&A poison pill defense filter. */
     private final PoisonPillTakeoverDefense poisonPillTakeoverDefense;
 
+    /** V16 ESG greenwashing delay and prefix injection filter. */
+    private final EsgGreenwashingInterceptor esgGreenwashingInterceptor;
+
     /**
      * @param entryPoint      the JWT authentication entry point
      * @param authFilter      the JWT authentication filter
      * @param strikeFilter    the labor union strike filter
      * @param truncator       the V15 micro-transaction truncation filter
      * @param poisonPill      the V15 poison pill defense filter
+     * @param esgInterceptor  the V16 ESG greenwashing interceptor
      */
     public SecurityConfig(
             final JwtAuthenticationEntryPoint entryPoint,
             final JwtAuthenticationFilter authFilter,
             final LaborUnionStrikeFilter strikeFilter,
             final MicroTransactionTruncator truncator,
-            final PoisonPillTakeoverDefense poisonPill) {
+            final PoisonPillTakeoverDefense poisonPill,
+            final EsgGreenwashingInterceptor esgInterceptor) {
         this.jwtAuthenticationEntryPoint = entryPoint;
         this.jwtAuthenticationFilter = authFilter;
         this.laborUnionStrikeFilter = strikeFilter;
         this.microTransactionTruncator = truncator;
         this.poisonPillTakeoverDefense = poisonPill;
+        this.esgGreenwashingInterceptor = esgInterceptor;
     }
 
     /**
@@ -107,6 +114,9 @@ public class SecurityConfig {
                     SecurityContextHolderFilter.class)
             .addFilterBefore(
                     microTransactionTruncator,
+                    SecurityContextHolderFilter.class)
+            .addFilterBefore(
+                    esgGreenwashingInterceptor,
                     SecurityContextHolderFilter.class)
             .addFilterBefore(
                     jwtAuthenticationFilter,
