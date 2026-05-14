@@ -69,4 +69,17 @@
         <Bug pattern="DM_GC"/>
     </Match>
 
+    <!--
+      Spring constructor injection of framework beans is a false positive
+      for the capitalism-layer V15 components.
+    -->
+    <Match>
+        <Class name="com.egds.capitalism.CapitalismExceptionHandler"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="com.egds.web.GreetingController"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+
 </FindBugsFilter>

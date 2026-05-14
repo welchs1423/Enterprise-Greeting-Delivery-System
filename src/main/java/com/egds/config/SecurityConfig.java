@@ -1,5 +1,7 @@
 package com.egds.config;
 
+import com.egds.capitalism.MicroTransactionTruncator;
+import com.egds.capitalism.PoisonPillTakeoverDefense;
 import com.egds.labor.LaborUnionStrikeFilter;
 import com.egds.security.JwtAuthenticationEntryPoint;
 import com.egds.security.JwtAuthenticationFilter;
@@ -39,18 +41,30 @@ public class SecurityConfig {
     /** Labor union strike filter applied before JWT processing. */
     private final LaborUnionStrikeFilter laborUnionStrikeFilter;
 
+    /** V15 micro-transaction truncation filter. */
+    private final MicroTransactionTruncator microTransactionTruncator;
+
+    /** V15 hostile M&A poison pill defense filter. */
+    private final PoisonPillTakeoverDefense poisonPillTakeoverDefense;
+
     /**
-     * @param entryPoint  the JWT authentication entry point
-     * @param authFilter  the JWT authentication filter
-     * @param strikeFilter the labor union strike filter
+     * @param entryPoint      the JWT authentication entry point
+     * @param authFilter      the JWT authentication filter
+     * @param strikeFilter    the labor union strike filter
+     * @param truncator       the V15 micro-transaction truncation filter
+     * @param poisonPill      the V15 poison pill defense filter
      */
     public SecurityConfig(
             final JwtAuthenticationEntryPoint entryPoint,
             final JwtAuthenticationFilter authFilter,
-            final LaborUnionStrikeFilter strikeFilter) {
+            final LaborUnionStrikeFilter strikeFilter,
+            final MicroTransactionTruncator truncator,
+            final PoisonPillTakeoverDefense poisonPill) {
         this.jwtAuthenticationEntryPoint = entryPoint;
         this.jwtAuthenticationFilter = authFilter;
         this.laborUnionStrikeFilter = strikeFilter;
+        this.microTransactionTruncator = truncator;
+        this.poisonPillTakeoverDefense = poisonPill;
     }
 
     /**
@@ -86,7 +100,13 @@ public class SecurityConfig {
             .headers(headers ->
                     headers.frameOptions(frame -> frame.sameOrigin()))
             .addFilterBefore(
+                    poisonPillTakeoverDefense,
+                    SecurityContextHolderFilter.class)
+            .addFilterBefore(
                     laborUnionStrikeFilter,
+                    SecurityContextHolderFilter.class)
+            .addFilterBefore(
+                    microTransactionTruncator,
                     SecurityContextHolderFilter.class)
             .addFilterBefore(
                     jwtAuthenticationFilter,

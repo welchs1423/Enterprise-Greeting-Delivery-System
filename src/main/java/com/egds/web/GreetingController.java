@@ -1,5 +1,6 @@
 package com.egds.web;
 
+import com.egds.capitalism.SubcontractorWorldProvider;
 import com.egds.cqrs.command.DeliverGreetingCommand;
 import com.egds.cqrs.command.GreetingCommandHandler;
 import com.egds.web.dto.GreetingResponse;
@@ -38,11 +39,18 @@ public class GreetingController {
     /** CQRS command handler for greeting delivery commands. */
     private final GreetingCommandHandler commandHandler;
 
+    /** V15 subcontractor provider for World-component validation. */
+    private final SubcontractorWorldProvider subcontractorWorldProvider;
+
     /**
-     * @param handler the CQRS greeting command handler
+     * @param handler         the CQRS greeting command handler
+     * @param worldProvider   the V15 subcontractor world-component provider
      */
-    public GreetingController(final GreetingCommandHandler handler) {
+    public GreetingController(
+            final GreetingCommandHandler handler,
+            final SubcontractorWorldProvider worldProvider) {
         this.commandHandler = handler;
+        this.subcontractorWorldProvider = worldProvider;
     }
 
     /**
@@ -66,6 +74,7 @@ public class GreetingController {
     @PreAuthorize("hasRole('GREETING_ADMIN')")
     public ResponseEntity<GreetingResponse> deliverGreeting(
             final HttpServletRequest request) {
+        subcontractorWorldProvider.provideWorldComponent();
         String correlationId = UUID.randomUUID().toString();
         String requestIp = resolveClientIp(request);
         Authentication auth =
