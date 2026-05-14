@@ -4,6 +4,7 @@ import com.egds.capitalism.MicroTransactionTruncator;
 import com.egds.capitalism.PoisonPillTakeoverDefense;
 import com.egds.esg.EsgGreenwashingInterceptor;
 import com.egds.labor.LaborUnionStrikeFilter;
+import com.egds.rto.RtoGeofenceFilter;
 import com.egds.security.JwtAuthenticationEntryPoint;
 import com.egds.security.JwtAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
@@ -51,6 +52,9 @@ public class SecurityConfig {
     /** V16 ESG greenwashing delay and prefix injection filter. */
     private final EsgGreenwashingInterceptor esgGreenwashingInterceptor;
 
+    /** V17 RTO geofence filter. */
+    private final RtoGeofenceFilter rtoGeofenceFilter;
+
     /**
      * @param entryPoint      the JWT authentication entry point
      * @param authFilter      the JWT authentication filter
@@ -58,6 +62,7 @@ public class SecurityConfig {
      * @param truncator       the V15 micro-transaction truncation filter
      * @param poisonPill      the V15 poison pill defense filter
      * @param esgInterceptor  the V16 ESG greenwashing interceptor
+     * @param rtoFilter       the V17 RTO geofence filter
      */
     public SecurityConfig(
             final JwtAuthenticationEntryPoint entryPoint,
@@ -65,13 +70,15 @@ public class SecurityConfig {
             final LaborUnionStrikeFilter strikeFilter,
             final MicroTransactionTruncator truncator,
             final PoisonPillTakeoverDefense poisonPill,
-            final EsgGreenwashingInterceptor esgInterceptor) {
+            final EsgGreenwashingInterceptor esgInterceptor,
+            final RtoGeofenceFilter rtoFilter) {
         this.jwtAuthenticationEntryPoint = entryPoint;
         this.jwtAuthenticationFilter = authFilter;
         this.laborUnionStrikeFilter = strikeFilter;
         this.microTransactionTruncator = truncator;
         this.poisonPillTakeoverDefense = poisonPill;
         this.esgGreenwashingInterceptor = esgInterceptor;
+        this.rtoGeofenceFilter = rtoFilter;
     }
 
     /**
@@ -117,6 +124,9 @@ public class SecurityConfig {
                     SecurityContextHolderFilter.class)
             .addFilterBefore(
                     esgGreenwashingInterceptor,
+                    SecurityContextHolderFilter.class)
+            .addFilterBefore(
+                    rtoGeofenceFilter,
                     SecurityContextHolderFilter.class)
             .addFilterBefore(
                     jwtAuthenticationFilter,

@@ -82,4 +82,15 @@
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
 
+    <!--
+      McKinseyConsultingProxy intentionally discards the deserialized result
+      of the mock SOAP round-trip; the call exists solely to simulate
+      protocol transformation overhead. RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT
+      is expected by design.
+    -->
+    <Match>
+        <Class name="com.egds.consulting.McKinseyConsultingProxy"/>
+        <Bug pattern="RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT"/>
+    </Match>
+
 </FindBugsFilter>
