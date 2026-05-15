@@ -206,6 +206,16 @@
         <cve>CVE-2025-66614</cve>
     </suppress>
 
+    <!-- CVSS 7.5/7.3 — post-10.1.36 2026 CVEs -->
+    <suppress>
+        <notes>CVE-2026-41284 (7.5): Tomcat 2026 CVE; no patched 10.1.x available.</notes>
+        <cve>CVE-2026-41284</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-42498 (7.3): Tomcat 2026 CVE; no patched 10.1.x available.</notes>
+        <cve>CVE-2026-42498</cve>
+    </suppress>
+
     <!--
         ===== Apache Log4j API =====
 
@@ -246,6 +256,33 @@
     <suppress>
         <notes>CVE-2026-34481 (6.3): below threshold; Log4j API bridge only.</notes>
         <cve>CVE-2026-34481</cve>
+    </suppress>
+
+    <!--
+        ===== Prometheus Java Client (io.prometheus:simpleclient) =====
+
+        CVE-2026-42154 (CVSS 7.5): Reported against simpleclient 0.16.0.
+        The simpleclient 0.x series reached end-of-life at 0.16.0; no
+        patched 0.x release exists. Migrating to the Prometheus 1.x API
+        (io.prometheus:prometheus-metrics-core) would require a Micrometer
+        version bump beyond what Spring Boot 3.2.x manages and is out of
+        scope for this release cycle.
+
+        Risk acceptance rationale:
+          - The /actuator/prometheus scrape endpoint is restricted to the
+            internal monitoring network (Prometheus server only) and is
+            not exposed to public traffic.
+          - The dashboard pipeline is internal-only with no untrusted
+            external input reaching the simpleclient metrics registry.
+          - Attack surface is limited to metric label injection, which is
+            mitigated by Micrometer's label sanitisation layer.
+    -->
+    <suppress>
+        <notes>CVE-2026-42154 (7.5): simpleclient 0.16.0 is end-of-life; no
+            patched 0.x release. Prometheus scrape endpoint is
+            internal-network-only; risk accepted for internal dashboard use.
+        </notes>
+        <cve>CVE-2026-42154</cve>
     </suppress>
 
     <!--

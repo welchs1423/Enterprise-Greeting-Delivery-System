@@ -459,6 +459,8 @@
                         <suppressionFile>owasp-suppressions.xml</suppressionFile>
                     </suppressionFiles>
                     <nvdApiDelay>6000</nvdApiDelay>
+                    <!-- Pure Java project: .NET assembly analyzer is not applicable -->
+                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
                 </configuration>
             </plugin>
         </plugins>

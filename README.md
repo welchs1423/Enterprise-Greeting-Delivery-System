@@ -765,7 +765,7 @@ readinessProbe: periodSeconds=5, failureThreshold=3, successThreshold=2
 | 1–3 | `prepare` | Checkout, JDK 17 셋업, Maven 의존성 캐시 워밍 |
 | 4 | `code-quality` | Checkstyle, PMD, SpotBugs |
 | 5 | `sast-codeql` | GitHub CodeQL 정적 분석 (security-and-quality 쿼리) |
-| 6 | `dependency-audit` | OWASP Dependency-Check (CVSS ≥ 7 빌드 실패) |
+| 6 | `dependency-audit` | OWASP Dependency-Check (CVSS ≥ 7 빌드 실패); 순수 Java 프로젝트이므로 `.NET AssemblyAnalyzer` 비활성화; 패치 버전 없는 CVE(Prometheus `simpleclient` CVE-2026-42154 포함)는 `owasp-suppressions.xml`에 리스크 수용 사유 명시 후 억제 |
 | 7 | `compile` | Protobuf 소스 생성 + javac 컴파일 |
 | 8 | `unit-test` | 단위 테스트 (JWT, Kafka Publisher) |
 | 9 | `integration-test` | 통합 테스트 (Security, JPA, Cache, Kafka E2E) |
