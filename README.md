@@ -824,7 +824,7 @@ readinessProbe: periodSeconds=5, failureThreshold=3, successThreshold=2
 
 | 단계 | Job | 내용 |
 |---|---|---|
-| 1–3 | `prepare` | Checkout, JDK 17 셋업, Maven 의존성 캐시 워밍 |
+| 1–3 | `prepare` | Checkout, JDK 17 셋업, Gradle 의존성 캐시 워밍 (`gradle/actions/setup-gradle`) |
 | 4 | `code-quality` | Checkstyle, PMD, SpotBugs |
 | 5 | `sast-codeql` | GitHub CodeQL 정적 분석 (security-and-quality 쿼리) |
 | 6 | `dependency-audit` | OWASP Dependency-Check (CVSS ≥ 7 빌드 실패); 순수 Java 프로젝트이므로 `.NET AssemblyAnalyzer` 비활성화; 패치 버전 없는 CVE(Prometheus `simpleclient` CVE-2026-42154 포함)는 `owasp-suppressions.xml`에 리스크 수용 사유 명시 후 억제 |
@@ -867,7 +867,7 @@ readinessProbe: periodSeconds=5, failureThreshold=3, successThreshold=2
 | 컨테이너 런타임 | Docker (멀티스테이지 빌드, eclipse-temurin:17) | - |
 | 오케스트레이션 | Kubernetes | 1.29+ |
 | 서비스 매쉬 | Istio | 1.20+ |
-| 빌드 | Apache Maven | 3.8+ |
+| 빌드 | **Gradle** (Wrapper 8.8) | V20.0에서 외부 컨설팅 펌의 권고로 Maven에서 전면 교체 |
 | CI/CD | GitHub Actions | - |
 
 ---
@@ -899,7 +899,7 @@ readinessProbe: periodSeconds=5, failureThreshold=3, successThreshold=2
 | 항목 | 요구 버전 | 비고 |
 |---|---|---|
 | JDK | 17 이상 | 빌드 및 로컬 테스트 |
-| Apache Maven | 3.8 이상 | 빌드 |
+| Gradle | Wrapper 사용 (`./gradlew`) | 별도 설치 불필요; `gradlew` 스크립트가 자동으로 8.8 다운로드 |
 | Docker | 24+ | 컨테이너 이미지 빌드 |
 | Kubernetes | 1.29+ | 운영 배포 |
 | Istio | 1.20+ | 서비스 매쉬 (운영) |
@@ -909,15 +909,20 @@ readinessProbe: periodSeconds=5, failureThreshold=3, successThreshold=2
 
 ### Protobuf 소스 생성 및 빌드
 
+> **V20.0 빌드 시스템 마이그레이션**: 컨설팅 펌의 권고로 인해 예산을 낭비하며 V20.0에서 Maven에서 Gradle로 전면 마이그레이션됨. `pom.xml`은 역사의 뒤안길로 사라졌으며 이제 `./gradlew`가 그 자리를 대신한다.
+
 ```bash
 # proto 파일에서 Java 소스를 생성한 후 컴파일
-mvn generate-sources compile
+./gradlew classes
 
 # 전체 빌드 + 정적 분석 (Checkstyle, PMD, SpotBugs)
-mvn clean verify
+./gradlew clean build
 
 # 테스트 제외 패키징
-mvn clean package -DskipTests
+./gradlew bootJar -x check -x test
+
+# OWASP 의존성 취약점 스캔
+./gradlew dependencyCheckAnalyze
 ```
 
 ### Kubernetes 클러스터 배포

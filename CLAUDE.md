@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 모든 작업은 아래 순서를 반드시 따르세요.
 
-1. **자체 테스트 및 정적 분석**: `mvn clean verify` 실행 후 빌드 성공 및 정적 분석(Checkstyle, PMD, SpotBugs) 통과 확인
+1. **자체 테스트 및 정적 분석**: `./gradlew clean build` 실행 후 빌드 성공 및 정적 분석(Checkstyle, PMD, SpotBugs) 통과 확인
 2. **README 반영**: 모든 작업 완료 후 `README.md`를 반드시 업데이트하세요.
    [README 최신화 원칙 - 날짜별 기록 절대 금지]
    - `## [YYYY-MM-DD]` 형태의 날짜별 릴리스 노트나 단순 변경 이력(Changelog) 나열 방식은 더 이상 사용하지 마세요.
@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - README는 변경 이력서가 아닌, '현재 이 웅장한 시스템이 어떤 사상과 구조로 동작하는지'를 설명하는 하나의 완벽하고 깔끔한 기술 문서(Manual) 형태로 유지되어야 합니다.
 3. **커밋 & 푸시**: 커밋 후 확인 없이 즉시 `git push` 실행
 
-테스트나 정적 분석(PMD, Checkstyle 등)에서 에러나 위반(Violation)이 발생할 경우 절대 푸시하지 마세요. 반드시 콘솔의 에러 원인을 스스로 파악하고 코드를 수정한 뒤, `mvn clean verify`를 재실행하여 100% 통과할 때까지 이 과정을 반복하세요.
+테스트나 정적 분석(PMD, Checkstyle 등)에서 에러나 위반(Violation)이 발생할 경우 절대 푸시하지 마세요. 반드시 콘솔의 에러 원인을 스스로 파악하고 코드를 수정한 뒤, `./gradlew clean build`를 재실행하여 100% 통과할 때까지 이 과정을 반복하세요.
 
 ## Git Push 자동화
 
@@ -23,22 +23,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build & Test
 
     # Compile (includes Protobuf code generation)
-    mvn clean generate-sources compile
+    ./gradlew classes
 
     # Run all tests
-    mvn test
+    ./gradlew test
 
     # Run a single test class
-    mvn test -Dtest=GreetingGrpcServiceIntegrationTest
+    ./gradlew test --tests "com.egds.grpc.GreetingGrpcServiceIntegrationTest"
 
-    # Package JAR (skip tests)
-    mvn clean package -DskipTests
+    # Package fat JAR (skip tests and static analysis)
+    ./gradlew bootJar -x check -x test
 
-    # Full verification with static analysis
-    mvn clean verify
+    # Full build with tests and static analysis
+    ./gradlew clean build
 
     # Static analysis only
-    mvn checkstyle:check pmd:check spotbugs:check
+    ./gradlew checkstyleMain pmdMain spotbugsMain
+
+    # OWASP dependency vulnerability scan (requires NVD API key in env)
+    ./gradlew dependencyCheckAnalyze
 
 Local dev requires no external services: H2 in-memory DB (Oracle compatibility mode), `ConcurrentMapCacheManager` (no Redis), and `@EmbeddedKafka` for Kafka in tests. MongoDB and AI calls are mocked or absent in unit tests.
 
@@ -108,11 +111,13 @@ The system delivers `Hello, World!` through accumulated phases of enterprise inf
 
 ### Protobuf
 
-Sources are in `src/main/proto/greeting.proto`. The Maven plugin (`ascopes protobuf-maven-plugin`) generates Java stubs into `target/generated-sources/protobuf` during `generate-sources`. Always run `mvn generate-sources` before editing gRPC code in an IDE.
+Sources are in `src/main/proto/greeting.proto`. The Gradle Protobuf plugin (`com.google.protobuf`) generates Java stubs into `build/generated/source/proto/main` during the `generateProto` task. Always run `./gradlew generateProto` before editing gRPC code in an IDE.
 
 ### Static Analysis Constraints
 
-Checkstyle enforces 80-character line length and requires Javadoc on **all** fields (including private `LOG` constants) and public methods. PMD and SpotBugs run as part of `mvn verify`. `mvn clean package -DskipTests` skips these; `mvn clean verify` enforces them.
+Checkstyle enforces 80-character line length and requires Javadoc on **all** fields (including private `LOG` constants) and public methods. PMD and SpotBugs run as part of `./gradlew build`. `./gradlew bootJar -x check -x test` skips these; `./gradlew clean build` enforces them.
+
+**PMD ruleset**: `pmd-ruleset.xml` in the project root mirrors the Maven PMD plugin default ruleset (pre-PMD-6 java-basic/empty/imports/unusedcode rules). PMD only analyzes main sources; test analysis is disabled to match Maven behaviour.
 
 **Common PMD violations to avoid**:
 - `GuardLogStatement`: PMD flags `log.info(String.format(...))` or multi-arg SLF4J calls. Wrap with `if (LOG.isInfoEnabled())` when passing non-constant arguments, or use the `LOG.info("msg {}", constantField)` pattern for single constants.

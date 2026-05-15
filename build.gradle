@@ -1,0 +1,290 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.5'
+    id 'com.google.protobuf' version '0.9.4'
+    id 'checkstyle'
+    id 'pmd'
+    id 'com.github.spotbugs' version '6.0.18'
+    id 'jacoco'
+    id 'org.owasp.dependencycheck' version '12.1.0'
+}
+
+group = 'com.egds'
+version = '5.0.0-RELEASE'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    jjwtVersion = '0.12.5'
+    grpcSpringBootVersion = '3.1.0.RELEASE'
+    grpcVersion = '1.61.1'
+    protobufVersion = '3.25.5'
+    resilience4jVersion = '2.2.0'
+    web3jVersion = '4.10.3'
+    langchain4jVersion = '0.31.0'
+    tomcatVersion = '10.1.36'
+    opennlpVersion = '2.3.3'
+}
+
+dependencyManagement {
+    dependencies {
+        // CVE-2024-34750/38286/56337/24813/31650/31651 fixed in 10.1.36
+        dependency "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+        dependency "org.apache.tomcat.embed:tomcat-embed-el:${tomcatVersion}"
+        dependency "org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}"
+        // CVE-2024-7254 fixed in 3.25.5
+        dependency "com.google.protobuf:protobuf-java:${protobufVersion}"
+        dependency "com.google.protobuf:protobuf-java-util:${protobufVersion}"
+        // CVE-2026-40682/42440/42027 fixed in 2.3.3
+        dependency "org.apache.opennlp:opennlp-tools:${opennlpVersion}"
+    }
+}
+
+configurations.configureEach {
+    resolutionStrategy.eachDependency { details ->
+        // Override Spring Boot managed Log4j2 — CVE-2026-34479 fixed in 2.24.3
+        if (details.requested.group == 'org.apache.logging.log4j') {
+            details.useVersion '2.24.3'
+            details.because 'CVE-2026-34479 fixed in 2.24.3'
+        }
+    }
+}
+
+dependencies {
+    // Web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // GraphQL
+    implementation 'org.springframework.boot:spring-boot-starter-graphql'
+
+    // Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // JPA
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Cache
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+    // Validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    // JWT (jjwt 0.12.x)
+    implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
+
+    // H2 in-memory database (local dev / CI; production targets Oracle 19c+)
+    runtimeOnly 'com.h2database:h2'
+
+    // Actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Prometheus metrics (runtime)
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
+    // Micrometer Tracing OTel bridge
+    implementation 'io.micrometer:micrometer-tracing-bridge-otel'
+
+    // Resilience4j Spring Boot 3 starter
+    implementation "io.github.resilience4j:resilience4j-spring-boot3:${resilience4jVersion}"
+
+    // AOP support for Resilience4j annotations
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    // gRPC Spring Boot Starter
+    implementation "net.devh:grpc-spring-boot-starter:${grpcSpringBootVersion}"
+
+    // javax.annotation-api: required by gRPC-generated stub code (removed from JDK 9+)
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+
+    // MongoDB: CQRS read-model
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
+    // Web3j Ethereum client
+    implementation "org.web3j:core:${web3jVersion}"
+
+    // LangChain4j core
+    implementation "dev.langchain4j:langchain4j:${langchain4jVersion}"
+
+    // LangChain4j OpenAI provider
+    implementation "dev.langchain4j:langchain4j-open-ai:${langchain4jVersion}"
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.graphql:spring-graphql-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+    testImplementation "io.grpc:grpc-testing:${grpcVersion}"
+
+    // SpotBugs annotations for @SuppressFBWarnings
+    compileOnly 'com.github.spotbugs:spotbugs-annotations:4.8.6'
+    testCompileOnly 'com.github.spotbugs:spotbugs-annotations:4.8.6'
+}
+
+// ─── Protobuf / gRPC ───────────────────────────────────────────────────────
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
+
+// ─── Checkstyle ────────────────────────────────────────────────────────────
+
+// Extract sun_checks.xml from the Checkstyle JAR and inject a SuppressionFilter,
+// replicating Maven's <suppressionsLocation> behaviour which Gradle does not provide natively.
+def sunChecksWithSuppressions = layout.buildDirectory.file('tmp/checkstyle/checkstyle.xml')
+
+tasks.register('generateCheckstyleConfig') {
+    description = 'Extracts sun_checks.xml from the Checkstyle JAR and injects a SuppressionFilter'
+    outputs.file(sunChecksWithSuppressions)
+    doFirst {
+        def jar = configurations.checkstyle.files.find { f ->
+            f.name.contains('checkstyle') && !f.name.contains('addons')
+        }
+        def content = new java.util.zip.ZipFile(jar).withCloseable { zip ->
+            new String(zip.getInputStream(zip.getEntry('sun_checks.xml')).bytes, 'UTF-8')
+        }
+        // Inject SuppressionFilter before the closing </module> of the root Checker.
+        // quoteReplacement prevents Matcher from treating ${suppressionFile} as a group ref.
+        def suppressionBlock = '    <module name="SuppressionFilter">\n' +
+            '        <property name="file" value="${suppressionFile}"/>\n' +
+            '        <property name="optional" value="true"/>\n' +
+            '    </module>\n</module>'
+        def modified = content.replaceAll('(?s)</module>\\s*$',
+            java.util.regex.Matcher.quoteReplacement(suppressionBlock))
+        def out = sunChecksWithSuppressions.get().asFile
+        out.parentFile.mkdirs()
+        out.text = modified
+    }
+}
+
+checkstyle {
+    toolVersion = '10.17.0'
+    configFile = sunChecksWithSuppressions.get().asFile
+    configProperties['suppressionFile'] = file('checkstyle-suppressions.xml').absolutePath
+    maxWarnings = 0
+    ignoreFailures = false
+}
+
+tasks.withType(Checkstyle).configureEach {
+    dependsOn 'generateCheckstyleConfig'
+    exclude '**/proto/**'
+    source = fileTree('src/main/java')
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+// ─── PMD ───────────────────────────────────────────────────────────────────
+
+pmd {
+    toolVersion = '7.3.0'
+    // Use exact Maven PMD plugin default ruleset (pre-PMD-6 java-basic/empty/imports/etc.)
+    ruleSetFiles = files('pmd-ruleset.xml')
+    ruleSets = []
+    ignoreFailures = false
+    consoleOutput = true
+}
+
+tasks.withType(Pmd).configureEach {
+    exclude '**/proto/**'
+    // Exclude Protobuf-generated Java sources
+    exclude { it.file.absolutePath.contains('generated') }
+}
+
+// Maven PMD only analyzes main sources by default; disable test analysis to match
+tasks.named('pmdTest').configure { enabled = false }
+
+// ─── SpotBugs ──────────────────────────────────────────────────────────────
+
+spotbugs {
+    toolVersion = '4.8.6'
+    excludeFilter = file('spotbugs-exclude.xml')
+    ignoreFailures = false
+}
+
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach { task ->
+    task.reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+// Maven SpotBugs by default does not fail the build on test-class violations
+tasks.named('spotbugsTest').configure { enabled = false }
+
+// ─── JaCoCo ────────────────────────────────────────────────────────────────
+
+jacoco {
+    toolVersion = '0.8.12'
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                counter = 'INSTRUCTION'
+                value = 'COVEREDRATIO'
+                minimum = 0.00
+            }
+        }
+    }
+}
+
+// ─── OWASP Dependency-Check ────────────────────────────────────────────────
+
+dependencyCheck {
+    failBuildOnCVSS = 7
+    suppressionFile = 'owasp-suppressions.xml'
+    nvd {
+        delay = 6000
+    }
+    analyzers {
+        assemblyEnabled = false
+    }
+}
+
+// ─── Test configuration ────────────────────────────────────────────────────
+
+test {
+    useJUnitPlatform()
+    jvmArgs '-Dnet.bytebuddy.experimental=true'
+    finalizedBy jacocoTestReport
+}
+
+// ─── check task wiring ─────────────────────────────────────────────────────
+
+check.dependsOn jacocoTestCoverageVerification
