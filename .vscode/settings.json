@@ -1,4 +1,11 @@
 {
   "java.compile.nullAnalysis.mode": "automatic",
-  "java.configuration.updateBuildConfiguration": "automatic"
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "github-actions.org-secrets": [
+    "GHCR_TOKEN",
+    "COSIGN_PRIVATE_KEY",
+    "COSIGN_PASSWORD",
+    "STAGING_KUBECONFIG",
+    "SLACK_WEBHOOK_URL"
+  ]
 }

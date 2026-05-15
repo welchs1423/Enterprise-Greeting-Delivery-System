@@ -5,9 +5,11 @@ import com.egds.capitalism.PoisonPillTakeoverDefense;
 import com.egds.drm.VendorLockInDrmFilter;
 import com.egds.esg.EsgGreenwashingInterceptor;
 import com.egds.labor.LaborUnionStrikeFilter;
+import com.egds.monetization.UnskippableAdFilter;
 import com.egds.rto.RtoGeofenceFilter;
 import com.egds.security.JwtAuthenticationEntryPoint;
 import com.egds.security.JwtAuthenticationFilter;
+import com.egds.tos.TosDarkPatternFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,6 +61,12 @@ public class SecurityConfig {
     /** V18 vendor lock-in DRM evaluation watermark filter. */
     private final VendorLockInDrmFilter vendorLockInDrmFilter;
 
+    /** V21 ToS dark pattern enforcement filter. */
+    private final TosDarkPatternFilter tosDarkPatternFilter;
+
+    /** V21 unskippable advertisement delay filter. */
+    private final UnskippableAdFilter unskippableAdFilter;
+
     /**
      * @param entryPoint      the JWT authentication entry point
      * @param authFilter      the JWT authentication filter
@@ -68,6 +76,8 @@ public class SecurityConfig {
      * @param esgInterceptor  the V16 ESG greenwashing interceptor
      * @param rtoFilter       the V17 RTO geofence filter
      * @param drmFilter       the V18 vendor lock-in DRM filter
+     * @param tosFilter       the V21 ToS dark pattern filter
+     * @param adFilter        the V21 unskippable advertisement filter
      */
     public SecurityConfig(
             final JwtAuthenticationEntryPoint entryPoint,
@@ -77,7 +87,9 @@ public class SecurityConfig {
             final PoisonPillTakeoverDefense poisonPill,
             final EsgGreenwashingInterceptor esgInterceptor,
             final RtoGeofenceFilter rtoFilter,
-            final VendorLockInDrmFilter drmFilter) {
+            final VendorLockInDrmFilter drmFilter,
+            final TosDarkPatternFilter tosFilter,
+            final UnskippableAdFilter adFilter) {
         this.jwtAuthenticationEntryPoint = entryPoint;
         this.jwtAuthenticationFilter = authFilter;
         this.laborUnionStrikeFilter = strikeFilter;
@@ -86,6 +98,8 @@ public class SecurityConfig {
         this.esgGreenwashingInterceptor = esgInterceptor;
         this.rtoGeofenceFilter = rtoFilter;
         this.vendorLockInDrmFilter = drmFilter;
+        this.tosDarkPatternFilter = tosFilter;
+        this.unskippableAdFilter = adFilter;
     }
 
     /**
@@ -137,6 +151,12 @@ public class SecurityConfig {
                     SecurityContextHolderFilter.class)
             .addFilterBefore(
                     vendorLockInDrmFilter,
+                    SecurityContextHolderFilter.class)
+            .addFilterBefore(
+                    tosDarkPatternFilter,
+                    SecurityContextHolderFilter.class)
+            .addFilterBefore(
+                    unskippableAdFilter,
                     SecurityContextHolderFilter.class)
             .addFilterBefore(
                     jwtAuthenticationFilter,

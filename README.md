@@ -1,8 +1,8 @@
 # Enterprise Greeting Delivery System (EGDS)
 
-> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라, CQRS/이벤트 소싱, 블록체인 무결성 증명, 생성형 AI 문맥 라우팅, 딥러닝 지연 최적화, GraphQL 슈퍼그래프, WASM 로깅 어댑터, Terraform 1회용 인프라, AS/400 메인프레임 이중 장부 통합, 시간 역행 예측 라우팅, 마이크로서비스 의회 투표, 4차원 테서랙트 투영, 사내 정치 로드 밸런서, 노조 파업 필터, 관료주의 결재선, 마이크로 과금 절삭기, ESG 그린워싱 레이어, 외부 컨설팅 프록시, 가짜 KPI 대시보드, BCI 서브컨셔스 라우터, DNA 서열 인코더, 마인크래프트 RCON 디지털 트윈, 균사체 네트워크 통신, 우주 방사선 ECC 복구, 열역학적 엔트로피 밸런서, 평행 우주 JVM 샌드박싱, 실존주의 AOP 자아 인식, 메타-엔터프라이즈 인사 메시지 전달 플랫폼**
+> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라, CQRS/이벤트 소싱, 블록체인 무결성 증명, 생성형 AI 문맥 라우팅, 딥러닝 지연 최적화, GraphQL 슈퍼그래프, WASM 로깅 어댑터, Terraform 1회용 인프라, AS/400 메인프레임 이중 장부 통합, 시간 역행 예측 라우팅, 마이크로서비스 의회 투표, 4차원 테서랙트 투영, 사내 정치 로드 밸런서, 노조 파업 필터, 관료주의 결재선, 마이크로 과금 절삭기, ESG 그린워싱 레이어, 외부 컨설팅 프록시, 가짜 KPI 대시보드, BCI 서브컨셔스 라우터, DNA 서열 인코더, 마인크래프트 RCON 디지털 트윈, 균사체 네트워크 통신, 우주 방사선 ECC 복구, 열역학적 엔트로피 밸런서, 평행 우주 JVM 샌드박싱, 실존주의 AOP 자아 인식, **확률형 인사말 가챠**, **강제 광고 시청 필터**, **영혼 귀속 약관 다크 패턴**, 메타-엔터프라이즈 인사 메시지 전달 플랫폼**
 
-> `v18.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | GraphQL | OpenTelemetry | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio | **Web3j (Ethereum)** | **CQRS + MongoDB** | **LangChain4j (GPT-4o)** | **TensorFlow JNI** | **Terraform Ephemeral Lambda** | **AS/400 EBCDIC 2PC** | **WASM JNI** | **Chronos Predictive Routing** | **Microservice Parliament** | **Quantum Tesseract JNI** | **BCI Subconscious Router** | **DNA Sequence Encoder** | **Minecraft RCON Digital Twin** | **GenAI Hallucination Decorator** | **Virtual Pizza Party Leak** | **Vendor Lock-In DRM**
+> `v21.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | GraphQL | OpenTelemetry | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio | **Web3j (Ethereum)** | **CQRS + MongoDB** | **LangChain4j (GPT-4o)** | **TensorFlow JNI** | **Terraform Ephemeral Lambda** | **AS/400 EBCDIC 2PC** | **WASM JNI** | **Chronos Predictive Routing** | **Microservice Parliament** | **Quantum Tesseract JNI** | **BCI Subconscious Router** | **DNA Sequence Encoder** | **Minecraft RCON Digital Twin** | **GenAI Hallucination Decorator** | **Virtual Pizza Party Leak** | **Vendor Lock-In DRM** | **Lootbox Gacha** | **Unskippable Ads** | **ToS Dark Pattern**
 
 ---
 
@@ -62,13 +62,18 @@ EGDS는 단 하나의 인사 메시지를 전달하기 위해 아래의 모든 �
 | `genai/` | `GenAiHallucinationDecorator` — 20% 확률 버즈워드 콘텐츠 치환 |
 | `compensation/` | `VirtualPizzaPartyCompensation` — 전달 완료 스레드 보상 + 의도적 힙 누수 |
 | `drm/` | `VendorLockInDrmFilter` — 동글 키 미제출 요청에 평가판 워터마크 삽입 |
+| `lootbox/` | `GreetingLootboxProvider` — 80%/19%/1% 극악 확률 인사말 가챠 (`@Primary`) |
+| `monetization/` | `UnskippableAdFilter` — 비프리미엄 유저 5초 강제 광고 시청 필터 |
+| `tos/` | `TosDarkPatternFilter` — 영혼 귀속 약관 21.0 강제 동의 필터 |
 
-### 전체 요청 처리 흐름 (V17 완성 경로)
+### 전체 요청 처리 흐름 (V21 완성 경로)
 
 ```
 POST /api/v1/auth/token          → JwtTokenProvider → Bearer JWT
 GET  /api/v1/greeting [Bearer]
   → LaborUnionStrikeFilter (15% 확률 → HTTP 451, 인증/액추에이터 경로 바이패스)
+  → TosDarkPatternFilter (X-Accept-ToS-Version != 21.0 → HTTP 451 + 영혼 귀속 메시지)
+  → UnskippableAdFilter (비프리미엄 유저 → 5초 광고 강제 시청)
   → JwtAuthenticationFilter → GreetingCommandHandler
   → Kafka: egds.greeting.requested (이벤트 소싱 로그)
   → Kafka: egds.greeting.events   (비동기 전달 트리거)
@@ -76,7 +81,9 @@ GET  /api/v1/greeting [Bearer]
 
 egds.greeting.requested → GreetingProjector → MongoDB (CQRS 읽기 모델)
 egds.greeting.events    → GreetingEventConsumer → MessageDeliveryPipeline
-  → HelloWorldMessageProvider (AI 컨텍스트 + GenAiHallucination(20%) + Keccak-256 사전 해싱)
+  → GreetingLootboxProvider [@Primary] (80% "Hi" | 19% "Hello" | 1% 잭팟 위임)
+      잭팟 시 → CeosNephewGreetingService → HelloWorldMessageProvider
+                (AI 컨텍스트 + GenAiHallucination(20%) + Keccak-256 사전 해싱)
   → MessageContentValidator
   → MessageMapper
   → ConsoleOutputStrategy (CB + RL + Retry + 무결성 검증 → 도트매트릭스 출력
@@ -757,6 +764,46 @@ ConsoleOutputStrategy.output(entity)
 ```
 
 `egds.drm.enabled=false`로 테스트 환경에서 비활성화합니다.
+
+### V21 수익화 & 다크 패턴 레이어
+
+경영진의 지시에 따라 게임 업계 BM을 이식했습니다. "Hello, World!" 한 마디를 온전히 받으려면 약관에 동의하고, 광고를 시청하고, 1% 확률 가챠를 이겨야 합니다.
+
+#### 확률형 인사말 가챠 (`GreetingLootboxProvider`)
+
+기존 `CeosNephewGreetingService`를 래핑하는 `@Primary` `IMessageProvider`입니다. 매 메시지 전달 시 ThreadLocalRandom으로 주사위를 굴려 80%는 "Hi", 19%는 "Hello", 단 1%만 온전한 "Hello, World!"를 반환합니다. 비당첨 결과도 Keccak-256 해시를 등록하여 무결성 파이프라인을 우회하지 않습니다.
+
+```
+GreetingLootboxProvider.provideMessage()
+  ├─ roll 0–79  (80%): "Hi"    → integrityVerifier.register() → DTO 반환
+  ├─ roll 80–98 (19%): "Hello" → integrityVerifier.register() → DTO 반환
+  └─ roll 99     (1%): JACKPOT → CeosNephewGreetingService.provideMessage() 위임
+```
+
+`egds.lootbox.enabled=false`로 테스트에서 비활성화하면 항상 `CeosNephewGreetingService`에 위임합니다.
+
+#### 강제 광고 시청 필터 (`UnskippableAdFilter`)
+
+`OncePerRequestFilter`를 상속한 V21 수익화 필터입니다. `X-Premium-Subscription: true` 헤더가 없는 모든 사용자는 `Thread.sleep(5000)`으로 5초간 광고에 강제 노출됩니다. 인증 및 액추에이터 경로는 광고 필터에서 제외됩니다. `egds.ads.enabled=false`로 테스트에서 비활성화합니다.
+
+```
+요청 수신
+  → shouldNotFilter? (/api/v1/auth/**, /actuator/**) → 통과
+  → X-Premium-Subscription: true? → 즉시 통과
+  → [광고 시청 중...] 기업용 슬러시를 구매하세요! → Thread.sleep(5000)
+  → filterChain.doFilter() 계속
+```
+
+#### 약관 강제 동의 다크 패턴 필터 (`TosDarkPatternFilter`)
+
+`X-Accept-ToS-Version: 21.0` 헤더가 없거나 버전이 다르면 HTTP 451과 함께 영혼 귀속 조항 동의 요청 메시지를 반환합니다. 인증 및 액추에이터 경로는 약관 검사에서 제외됩니다. `egds.tos.enabled=false`로 테스트에서 비활성화합니다.
+
+```
+요청 수신
+  → shouldNotFilter? (/api/v1/auth/**, /actuator/**) → 통과
+  → X-Accept-ToS-Version == "21.0"? → 통과
+  → HTTP 451: {"error":"고객님의 영혼 귀속을 포함한 신규 약관 21.0에 동의해야 합니다."}
+```
 
 ### 카오스 & 데몬
 

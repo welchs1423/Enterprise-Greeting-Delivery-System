@@ -8,22 +8,20 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 /**
  * {@link IMessageProvider} implementation representing the CEO's
- * nephew, injected as the primary bean through executive mandate.
+ * nephew, injected through executive mandate.
  *
- * <p>Annotated {@link Primary} to take precedence over
- * {@link HelloWorldMessageProvider} at all unqualified injection sites.
- * Delegates to the standard provider for most requests but substitutes
+ * <p>Delegates to the standard provider for most requests but substitutes
  * a nepotism greeting with 30% probability when enabled.
+ * Wrapped by {@link com.egds.lootbox.GreetingLootboxProvider} (V21),
+ * which holds the {@code @Primary} designation in the delivery chain.
  *
  * <p>Set {@code egds.nepotism.enabled=false} to disable the substitution
  * in test environments.
  */
-@Primary
 @Component
 public class CeosNephewGreetingService implements IMessageProvider {
 
