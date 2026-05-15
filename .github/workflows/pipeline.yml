@@ -157,7 +157,7 @@ jobs:
         run: |
           mvn org.owasp:dependency-check-maven:check \
             -DfailBuildOnCVSS=7 \
-            -DsuppressionFile=.owasp-suppressions.xml \
+            -DsuppressionFile=owasp-suppressions.xml \
             -B -q
       - name: "[Stage 6] Upload dependency-check report"
         if: always()
