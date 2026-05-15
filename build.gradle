@@ -128,6 +128,7 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.kafka:spring-kafka-test'
     testImplementation "io.grpc:grpc-testing:${grpcVersion}"
+    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.24.0'
 
     // SpotBugs annotations for @SuppressFBWarnings
     compileOnly 'com.github.spotbugs:spotbugs-annotations:4.8.6'
