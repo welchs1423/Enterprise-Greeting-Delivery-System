@@ -108,6 +108,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: wrapper
+      - name: "[Stage 4] Grant execute permission to Gradle wrapper"
+        run: chmod +x ./gradlew
       - name: "[Stage 4] Run Checkstyle"
         run: ./gradlew checkstyleMain
       - name: "[Stage 4] Run PMD"
@@ -138,6 +140,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: wrapper
+      - name: "[Stage 5] Grant execute permission to Gradle wrapper"
+        run: chmod +x ./gradlew
       - name: "[Stage 5] Initialize CodeQL"
         uses: github/codeql-action/init@v3
         with:
@@ -166,6 +170,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: wrapper
+      - name: "[Stage 6] Grant execute permission to Gradle wrapper"
+        run: chmod +x ./gradlew
       - name: "[Stage 6] OWASP Dependency-Check"
         run: ./gradlew dependencyCheckAnalyze
       - name: "[Stage 6] Upload dependency-check report"
@@ -192,6 +198,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: wrapper
+      - name: "[Stage 7] Grant execute permission to Gradle wrapper"
+        run: chmod +x ./gradlew
       - name: "[Stage 7] Generate protobuf sources and compile"
         run: ./gradlew classes
       - name: "[Stage 7] Cache compiled classes"
@@ -220,6 +228,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: wrapper
+      - name: "[Stage 8] Grant execute permission to Gradle wrapper"
+        run: chmod +x ./gradlew
       - name: "[Stage 8] Run unit tests"
         run: |
           ./gradlew test --tests "com.egds.security.JwtTokenProviderTest" \
@@ -252,6 +262,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: wrapper
+      - name: "[Stage 9] Grant execute permission to Gradle wrapper"
+        run: chmod +x ./gradlew
       - name: "[Stage 9] Run integration tests"
         run: |
           ./gradlew test \
@@ -288,6 +300,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: wrapper
+      - name: "[Stage 10] Grant execute permission to Gradle wrapper"
+        run: chmod +x ./gradlew
       - name: "[Stage 10] Run gRPC integration tests"
         run: |
           ./gradlew test \
@@ -316,6 +330,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: wrapper
+      - name: "[Stage 11] Grant execute permission to Gradle wrapper"
+        run: chmod +x ./gradlew
       - name: "[Stage 11] Run all tests with JaCoCo coverage"
         run: ./gradlew test jacocoTestReport jacocoTestCoverageVerification -x check
       - name: "[Stage 11] Upload coverage report"
@@ -341,6 +357,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: wrapper
+      - name: "[Stage 12] Grant execute permission to Gradle wrapper"
+        run: chmod +x ./gradlew
       - name: "[Stage 12] Package fat JAR"
         run: ./gradlew bootJar -x check -x test
       - name: "[Stage 12] Upload JAR artifact"
@@ -366,6 +384,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: wrapper
+      - name: "[Stage 13] Grant execute permission to Gradle wrapper"
+        run: chmod +x ./gradlew
       - name: "[Stage 13] Generate CycloneDX SBOM"
         run: ./gradlew cyclonedxBom -x check -x test
       - name: "[Stage 13] Upload SBOM"
@@ -530,6 +550,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: wrapper
+      - name: "[Stage 18] Grant execute permission to Gradle wrapper"
+        run: chmod +x ./gradlew
       - name: "[Stage 18] Run JMH benchmarks (warmup=1, measurement=3)"
         run: |
           ./gradlew jmh \
