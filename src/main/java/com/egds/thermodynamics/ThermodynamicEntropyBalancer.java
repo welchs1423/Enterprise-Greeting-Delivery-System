@@ -78,7 +78,7 @@ public class ThermodynamicEntropyBalancer {
         }
         Map<Character, Integer> freq = new HashMap<>();
         for (char c : text.toCharArray()) {
-            freq.merge(c, 1, Integer::sum);
+            freq.merge(c, 1, (a, b) -> a + b);
         }
         int len = text.length();
         double entropy = 0.0;
