@@ -7,11 +7,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 모든 작업은 아래 순서를 반드시 따르세요.
 
 1. **자체 테스트 및 정적 분석**: `mvn clean verify` 실행 후 빌드 성공 및 정적 분석(Checkstyle, PMD, SpotBugs) 통과 확인
-2. **README 반영**: 버그 수정을 포함한 모든 변경 사항에 대해 작업 완료 후 `README.md`의 Changelog(릴리스 노트) 부분을 반드시 업데이트하세요.
-   [README 업데이트 알고리즘 - 절대 준수]
-   Step 1. README.md 파일을 읽어 오늘 날짜(예: `## [2026-05-11]`) 헤더가 이미 존재하는지 먼저 검색한다.
-   Step 2. (존재하는 경우) 절대 새 날짜 헤더를 만들지 말고, 기존에 있는 오늘 날짜 헤더 바로 아래에 새로운 불릿 포인트(`-`)로 이번 작업 내역을 추가한다.
-   Step 3. (존재하지 않는 경우) 최상단 날짜 항목 위에 새 `## [YYYY-MM-DD]` 헤더를 생성하고 `---` 구분선을 앞에 붙인 뒤 그 아래에 불릿 포인트로 작업 내역을 작성한다.
+2. **README 반영**: 모든 작업 완료 후 `README.md`를 반드시 업데이트하세요.
+   [README 최신화 원칙 - 날짜별 기록 절대 금지]
+   - `## [YYYY-MM-DD]` 형태의 날짜별 릴리스 노트나 단순 변경 이력(Changelog) 나열 방식은 더 이상 사용하지 마세요.
+   - 새로 추가된 기능이나 아키텍처 변경 사항은 README의 '시스템 전체 구조(Architecture Overview)', 'Request Flow', '핵심 설계(Key Design Decisions)' 등의 섹션에 컨텍스트에 맞게 자연스럽게 통합하여 작성하세요.
+   - README는 변경 이력서가 아닌, '현재 이 웅장한 시스템이 어떤 사상과 구조로 동작하는지'를 설명하는 하나의 완벽하고 깔끔한 기술 문서(Manual) 형태로 유지되어야 합니다.
 3. **커밋 & 푸시**: 커밋 후 확인 없이 즉시 `git push` 실행
 
 테스트나 정적 분석(PMD, Checkstyle 등)에서 에러나 위반(Violation)이 발생할 경우 절대 푸시하지 마세요. 반드시 콘솔의 에러 원인을 스스로 파악하고 코드를 수정한 뒤, `mvn clean verify`를 재실행하여 100% 통과할 때까지 이 과정을 반복하세요.

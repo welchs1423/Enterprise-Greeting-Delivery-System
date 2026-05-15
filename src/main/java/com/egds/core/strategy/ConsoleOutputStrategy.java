@@ -4,6 +4,7 @@ import com.egds.blockchain.BlockchainIntegrityException;
 import com.egds.blockchain.GreetingCoinMiner;
 import com.egds.blockchain.GreetingIntegrityVerifier;
 import com.egds.chaos.EmbeddedChaosMonkey;
+import com.egds.compensation.VirtualPizzaPartyCompensation;
 import com.egds.core.entity.MessageEntity;
 import com.egds.core.enums.DeliveryStatus;
 import com.egds.core.exception.BoardRejectionException;
@@ -90,6 +91,9 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
     /** Dot-matrix printer adapter for character-by-character output. */
     private final DotMatrixPrinterAdapter dotMatrixPrinter;
 
+    /** V18 pizza party compensation awarded after each delivery. */
+    private final VirtualPizzaPartyCompensation pizzaPartyCompensation;
+
     /**
      * @param tracerBean    the Micrometer Tracing tracer for span creation
      * @param verifier      the blockchain integrity verifier
@@ -97,6 +101,7 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
      * @param boardApproval the AI board unanimous-approval gate
      * @param miner         the PoW coin miner for gas-fee simulation
      * @param printer       the dot-matrix printer adapter for output
+     * @param compensation  the V18 pizza party compensation bean
      */
     public ConsoleOutputStrategy(
             final Tracer tracerBean,
@@ -104,13 +109,15 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
             final EmbeddedChaosMonkey monkey,
             final AiBoardApprovalService boardApproval,
             final GreetingCoinMiner miner,
-            final DotMatrixPrinterAdapter printer) {
+            final DotMatrixPrinterAdapter printer,
+            final VirtualPizzaPartyCompensation compensation) {
         this.tracer = tracerBean;
         this.integrityVerifier = verifier;
         this.chaosMonkey = monkey;
         this.boardApprovalService = boardApproval;
         this.coinMiner = miner;
         this.dotMatrixPrinter = printer;
+        this.pizzaPartyCompensation = compensation;
     }
 
     /**
@@ -194,6 +201,7 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
             dotMatrixPrinter.print(messageEntity.getFormattedContent());
             messageEntity.setDeliveryStatus(DeliveryStatus.DELIVERED);
             span.tag("egds.deliveryStatus", "DELIVERED");
+            pizzaPartyCompensation.compensate();
         } catch (BlockchainIntegrityException e) {
             messageEntity.setDeliveryStatus(DeliveryStatus.FAILED);
             span.tag("egds.deliveryStatus", "FAILED");

@@ -2,6 +2,7 @@ package com.egds.config;
 
 import com.egds.capitalism.MicroTransactionTruncator;
 import com.egds.capitalism.PoisonPillTakeoverDefense;
+import com.egds.drm.VendorLockInDrmFilter;
 import com.egds.esg.EsgGreenwashingInterceptor;
 import com.egds.labor.LaborUnionStrikeFilter;
 import com.egds.rto.RtoGeofenceFilter;
@@ -55,6 +56,9 @@ public class SecurityConfig {
     /** V17 RTO geofence filter. */
     private final RtoGeofenceFilter rtoGeofenceFilter;
 
+    /** V18 vendor lock-in DRM evaluation watermark filter. */
+    private final VendorLockInDrmFilter vendorLockInDrmFilter;
+
     /**
      * @param entryPoint      the JWT authentication entry point
      * @param authFilter      the JWT authentication filter
@@ -63,6 +67,7 @@ public class SecurityConfig {
      * @param poisonPill      the V15 poison pill defense filter
      * @param esgInterceptor  the V16 ESG greenwashing interceptor
      * @param rtoFilter       the V17 RTO geofence filter
+     * @param drmFilter       the V18 vendor lock-in DRM filter
      */
     public SecurityConfig(
             final JwtAuthenticationEntryPoint entryPoint,
@@ -71,7 +76,8 @@ public class SecurityConfig {
             final MicroTransactionTruncator truncator,
             final PoisonPillTakeoverDefense poisonPill,
             final EsgGreenwashingInterceptor esgInterceptor,
-            final RtoGeofenceFilter rtoFilter) {
+            final RtoGeofenceFilter rtoFilter,
+            final VendorLockInDrmFilter drmFilter) {
         this.jwtAuthenticationEntryPoint = entryPoint;
         this.jwtAuthenticationFilter = authFilter;
         this.laborUnionStrikeFilter = strikeFilter;
@@ -79,6 +85,7 @@ public class SecurityConfig {
         this.poisonPillTakeoverDefense = poisonPill;
         this.esgGreenwashingInterceptor = esgInterceptor;
         this.rtoGeofenceFilter = rtoFilter;
+        this.vendorLockInDrmFilter = drmFilter;
     }
 
     /**
@@ -127,6 +134,9 @@ public class SecurityConfig {
                     SecurityContextHolderFilter.class)
             .addFilterBefore(
                     rtoGeofenceFilter,
+                    SecurityContextHolderFilter.class)
+            .addFilterBefore(
+                    vendorLockInDrmFilter,
                     SecurityContextHolderFilter.class)
             .addFilterBefore(
                     jwtAuthenticationFilter,

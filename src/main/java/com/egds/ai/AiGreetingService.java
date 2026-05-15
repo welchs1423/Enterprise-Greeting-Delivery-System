@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
+import java.time.Duration;
 import java.util.UUID;
 
 /**
@@ -64,6 +65,15 @@ public class AiGreetingService {
     @Value("${langchain4j.open-ai.chat-model.temperature:0.7}")
     private double temperature;
 
+    /**
+     * Per-request timeout for OpenAI API calls in milliseconds.
+     * Configurable via {@code egds.ai.timeout-ms}; defaults to 10 000.
+     * Set to a small value (e.g. 500) in test profiles to prevent
+     * integration tests from hanging on network timeouts.
+     */
+    @Value("${egds.ai.timeout-ms:10000}")
+    private long aiTimeoutMs;
+
     /** Collector supplying runtime context metadata for the prompt. */
     private final GreetingContextCollector contextCollector;
 
@@ -109,6 +119,7 @@ public class AiGreetingService {
                 .apiKey(openAiApiKey)
                 .modelName(modelName)
                 .temperature(temperature)
+                .timeout(Duration.ofMillis(aiTimeoutMs))
                 .build();
         this.assistant = AiServices.builder(AiGreetingAssistant.class)
                 .chatLanguageModel(model)

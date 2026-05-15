@@ -5,11 +5,11 @@ import com.egds.blockchain.GreetingIntegrityVerifier;
 import com.egds.core.dto.MessageContentDto;
 import com.egds.core.enums.MessagePriority;
 import com.egds.core.interfaces.IMessageProvider;
+import com.egds.genai.GenAiHallucinationDecorator;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 /**
  * {@link IMessageProvider} implementation backed by the LangChain4j
@@ -51,15 +51,21 @@ public class HelloWorldMessageProvider implements IMessageProvider {
     /** Blockchain verifier for pre-delivery content fingerprinting. */
     private final GreetingIntegrityVerifier integrityVerifier;
 
+    /** V18 hallucination decorator applied before hash registration. */
+    private final GenAiHallucinationDecorator hallucinationDecorator;
+
     /**
-     * @param aiService          the generative AI greeting service
-     * @param verifier           the blockchain integrity verifier
+     * @param aiService    the generative AI greeting service
+     * @param verifier     the blockchain integrity verifier
+     * @param decorator    the V18 hallucination decorator
      */
     public HelloWorldMessageProvider(
             final AiGreetingService aiService,
-            final GreetingIntegrityVerifier verifier) {
+            final GreetingIntegrityVerifier verifier,
+            final GenAiHallucinationDecorator decorator) {
         this.aiGreetingService = aiService;
         this.integrityVerifier = verifier;
+        this.hallucinationDecorator = decorator;
     }
 
     /**
@@ -86,6 +92,7 @@ public class HelloWorldMessageProvider implements IMessageProvider {
         String correlationId = UUID.randomUUID().toString();
 
         String content = aiGreetingService.generateContextualGreeting();
+        content = hallucinationDecorator.decorate(content);
 
         // Pre-compute the formatted string MessageMapper will produce
         // to register the exact bytes that ConsoleOutputStrategy will verify.
