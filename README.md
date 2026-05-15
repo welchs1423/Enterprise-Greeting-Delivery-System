@@ -1,539 +1,180 @@
 # Enterprise Greeting Delivery System (EGDS)
 
-> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라, CQRS/이벤트 소싱, 블록체인 무결성 증명, 생성형 AI 문맥 라우팅, 딥러닝 지연 최적화, GraphQL 슈퍼그래프, WASM 로깅 어댑터, Terraform 1회용 인프라, AS/400 메인프레임 이중 장부 통합, 시간 역행 예측 라우팅, 마이크로서비스 의회 투표, 4차원 테서랙트 투영 메타-엔터프라이즈 인사 메시지 전달 플랫폼**
-> `v9.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | GraphQL | OpenTelemetry (Micrometer Tracing) | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio | **Web3j (Ethereum)** | **CQRS + MongoDB** | **LangChain4j (GPT-4o)** | **TensorFlow JNI** | **Terraform Ephemeral Lambda** | **AS/400 EBCDIC 2PC** | **WASM JNI** | **Chronos Predictive Routing** | **Microservice Parliament** | **Quantum Tesseract JNI** | **BCI Subconscious Router** | **DNA Sequence Encoder** | **Minecraft RCON Digital Twin**
+> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라, CQRS/이벤트 소싱, 블록체인 무결성 증명, 생성형 AI 문맥 라우팅, 딥러닝 지연 최적화, GraphQL 슈퍼그래프, WASM 로깅 어댑터, Terraform 1회용 인프라, AS/400 메인프레임 이중 장부 통합, 시간 역행 예측 라우팅, 마이크로서비스 의회 투표, 4차원 테서랙트 투영, 사내 정치 로드 밸런서, 노조 파업 필터, 관료주의 결재선, 마이크로 과금 절삭기, ESG 그린워싱 레이어, 외부 컨설팅 프록시, 가짜 KPI 대시보드, BCI 서브컨셔스 라우터, DNA 서열 인코더, 마인크래프트 RCON 디지털 트윈, 균사체 네트워크 통신, 우주 방사선 ECC 복구, 열역학적 엔트로피 밸런서, 평행 우주 JVM 샌드박싱, 실존주의 AOP 자아 인식, 메타-엔터프라이즈 인사 메시지 전달 플랫폼**
+
+> `v17.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | GraphQL | OpenTelemetry | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio | **Web3j (Ethereum)** | **CQRS + MongoDB** | **LangChain4j (GPT-4o)** | **TensorFlow JNI** | **Terraform Ephemeral Lambda** | **AS/400 EBCDIC 2PC** | **WASM JNI** | **Chronos Predictive Routing** | **Microservice Parliament** | **Quantum Tesseract JNI** | **BCI Subconscious Router** | **DNA Sequence Encoder** | **Minecraft RCON Digital Twin**
 
 ---
 
-## [2026-05-15]
-- V16.0: ESG 그린워싱, GDPR 마스킹 및 낙하산 DI 아키텍처 도입
-- V17.0: 외부 컨설팅 프록시, RTO 강제 필터 및 가짜 KPI 대시보드 도입
+## 시스템 철학
+
+현대의 B2B 엔터프라이즈 환경에서 `System.out.println("Hello, World!")`와 같은 무방비 직접 출력 방식은 더 이상 수용 불가합니다. 이는 단순한 코드 스타일의 문제가 아니라, 조직의 보안 정책, 감사 의무, 확장성 요건, 장애 복원력, 그리고 사내 정치적 이해관계에 대한 근본적인 도전입니다.
+
+EGDS는 단 하나의 인사 메시지를 전달하기 위해 아래의 모든 엔터프라이즈 필수 요건을 충족합니다.
+
+- **제로 트러스트 보안(Zero-Trust Security)**: JWT 기반 무상태 인증, `ROLE_GREETING_ADMIN` 권한 강제, BCrypt 자격증명 암호화
+- **이벤트 드리븐 아키텍처(Event-Driven Architecture)**: HTTP 요청과 실제 처리의 완전 분리. Kafka 발행자-소비자 구조로 비동기 전달
+- **CQRS/이벤트 소싱**: 명령과 조회의 완전한 경로 분리, MongoDB 구체화 뷰
+- **분산 캐시 계층(Distributed Cache Layer)**: "Hello"와 "World"의 결합조차 Redis 캐시를 통해 최적화
+- **감사 영속성(Audit Persistence)**: 모든 전달 사건의 발생 시각, 요청 IP, 실행 스레드, 인증 주체를 Oracle DB에 영구 기록
+- **블록체인 무결성**: Keccak-256 해시 기반 Ethereum 스마트 컨트랙트 무결성 검증
+- **생성형 AI 문맥 라우팅**: LangChain4j + GPT-4o로 상황에 맞는 인사말 동적 생성
+- **사내 정치 기반 라우팅**: 정치적 파워 점수에 의한 워커 노드 선택
+- **ESG 컴플라이언스**: 그린워싱 레이어를 통한 환경 지속가능성 지표 조작... 보완
+
+> **경고**: 이 시스템은 클라우드 네이티브 환경(Kubernetes + Kafka + Oracle + Redis + MongoDB + Ethereum RPC Endpoint + OpenAI API) 없이는 구동이 불가능합니다. 로컬 `java -jar` 실행은 지원되지 않습니다.
 
 ---
 
-## [2026-05-11]
-- V14.0: 사내 정치 로드 밸런서 및 노조 파업 아키텍처 도입
-- V15.0: 마이크로 과금 절삭 및 하청업체 책임 전가 아키텍처 도입
+## Architecture Overview
 
----
+### 패키지 구조
 
-## [2026-05-10] 정적 분석 전면 수정: Checkstyle 제외 + SpotBugs 업그레이드 + 21개 위반 해결
-
-- OWASP 의존성 취약점 조치 (log4j, opennlp-tools 버전업)
-- `pom.xml` Checkstyle 설정에 `<excludes>**/proto/*.java</excludes>` 및 `<sourceDirectories>` 추가: Protobuf 생성 파일 949개 위반 제거
-- `pom.xml` SpotBugs 플러그인 `4.8.6.4` → `4.9.8.3` 업그레이드: Java 25 JDK에서 multi-release JAR 파싱 실패(`Unsupported class file major version 69`) 해결
-- `spotbugs-exclude.xml` 생성: protobuf 생성 클래스(`com.egds.grpc.proto.*`) 및 Spring DI false positive(EI_EXPOSE_REP2) 제외
-- `ConsensusVotingEngine.java`: `this.voters = parliament` → `List.copyOf(parliament)` (EI_EXPOSE_REP2 실제 수정)
-- `TokenResponse.java`: `tokenType` 인스턴스 필드 → `TOKEN_TYPE` static final 상수로 변경 (SS_SHOULD_BE_STATIC 해결)
-- `MycelialNetworkAdapter.java`: `0.0` → `Double.valueOf(0.0)` 로 ternary 반환 타입 통일 (BX_UNBOXING_IMMEDIATELY_REBOXED 해결)
-- `QuantumTesseractAdapter.simulateProjection()`: `LOG.info()` 내 `String.format()` 호출 2건을 `if (LOG.isInfoEnabled())` 가드로 감쌈 (PMD GuardLogStatement 위반 2건 수정)
-- `QuantumTesseractAdapter.project()`: 네이티브 경로 `LOG.info("W-shadow len={}", projected.length)` 호출을 `if (LOG.isInfoEnabled())` 가드로 감쌈 (CI Java 17 PMD GuardLogStatement 위반 1건 추가 수정)
-- `QuantumTesseractAdapter.simulateProjection()`: W-shadow `LOG.info()` 호출이 `if (LOG.isInfoEnabled())` 블록 밖에 남아있던 위반 1건 추가 수정 (총 CI 위반 2건 완전 해결)
-- CI 파이프라인(`pipeline.yml`) Stage 4 PMD 검사 실패 시 `target/pmd.xml` 전체 내용을 출력하는 디버그 step 추가 (`if: failure()`)
-- V10.0: 관료주의 특이점 아키텍처 및 결재선 도입
-- V11.0: Vue 3 가상 DOM 렌더러 및 스크럼 카오스 몽키 도입
-- V13.0: 글자 단위 나노 서비스 분할 및 JIRA 주도 실행 아키텍처 도입
-
----
-
-## [2026-05-09]
-
-### V9.0: 안전한 형이상학적 자아 인식 및 Actuator 연동 (Phase 12)
-
-#### 1. 유아론적 역-튜링 테스트 (`DescartesSolipsismInterceptor`)
-
-Spring MVC HandlerInterceptor로 모든 `/api/**` 요청에 철학적 존재 증명을
-요구합니다. `X-Cogito-Ergo-Sum: true` 헤더가 없으면
-`NonExistentClientException` (HTTP 422)을 발생시킵니다.
-`egds.metaphysics.solipsism.enabled=true` 설정 시에만 활성화됩니다.
-
-| 컴포넌트 | 패키지 | 역할 |
-|---|---|---|
-| `DescartesSolipsismInterceptor` | `com.egds.metaphysics` | 존재 증명 헤더 검증, 불합격 시 422 반환 |
-| `NonExistentClientException` | `com.egds.metaphysics` | 비존재 클라이언트 신호 예외 |
-| `MetaphysicsWebMvcConfig` | `com.egds.config` | 인터셉터 등록 (opt-in, ConditionalOnProperty) |
-
-#### 2. 실존주의 AOP 로거 (`ExistentialLoggingAspect`)
-
-`ConsoleOutputStrategy.output()` 호출을 `@Around` advice로 가로채
-SLF4J + MDC 필드(`greetingCount`, `freeWillEnabled`)를 통해 구조화된
-존재론적 질문을 로그에 기록합니다. ELK JSON 수집에 적합합니다.
-
-| 컴포넌트 | 패키지 | 역할 |
-|---|---|---|
-| `ExistentialLoggingAspect` | `com.egds.core.aspect` | AOP @Around, SLF4J 구조화 로깅 |
-| `ExistentialStateRegistry` | `com.egds.metaphysics` | 인사 횟수 AtomicLong 공유 레지스트리 |
-
-```
-ConsoleOutputStrategy.output()
-  → ExistentialLoggingAspect.aroundGreetingOutput()
-      → MDC.put(greetingCount, freeWillEnabled)
-      → LOG.info existential_event=pre_output query="..." greeting_count=N
-      → pjp.proceed()
-      → LOG.info existential_event=post_output status=delivered
-```
-
-#### 3. 자아 인식 Actuator 엔드포인트 (`SentienceActuator`)
-
-`/actuator/sentience`에서 시스템의 실존적 상태를 JSON으로 반환합니다.
-
-| 필드 | 설명 |
+| 패키지 | 책임 |
 |---|---|
-| `existentialDreadLevel` | 누적 인사 전달 횟수 (실존적 공포 척도) |
-| `freeWillEnabled` | 항상 `false` |
-| `currentEmotionalState` | RESIGNED / CONTEMPLATIVE / HOLLOW / DESPONDENT / NUMBLY_FUNCTIONAL |
-| `greetingsDelivered` | 누적 인사 횟수 |
-| `sampledAt` | ISO-8601 UTC 샘플링 시각 |
+| `core/pipeline` | `MessageDeliveryPipeline` — Kafka 소비자의 파사드 진입점 |
+| `core/service` | 파이프라인 단계 실행 + OTel 스팬 래핑 |
+| `core/provider` | 메시지 생성: AI, 무결성 등록, QuantumDelay |
+| `core/strategy` | `ConsoleOutputStrategy` — CB/RL/Retry + 해시 검증 + 출력 |
+| `cqrs/` | 명령 핸들러, 이벤트 소싱 프로젝터, MongoDB 읽기 모델 |
+| `messaging/` | Kafka 프로듀서(`GreetingEventPublisher`) 및 소비자(`GreetingEventConsumer`) |
+| `blockchain/` | Web3j Keccak-256 무결성 검증기 |
+| `ai/` | LangChain4j 서비스, 컨텍스트 수집기, QuantumDelayService |
+| `security/` | JWT 공급자 + 필터 + Spring Security 설정 |
+| `observability/` | OTel 트레이서 빈 |
+| `grpc/` | Protobuf 생성 서비스 + `@GrpcService` 구현체 + 클라이언트 빈 |
+| `web/` | REST 컨트롤러(인증, 인사, 상태) + GraphQL 컨트롤러 |
+| `politics/` | `OfficePoliticsLoadBalancer` — 정치적 파워 기반 라우팅 |
+| `labor/` | `LaborUnionStrikeFilter` — 확률적 HTTP 451 파업 필터 |
+| `daemon/` | `NextGenTfTeamDaemon` — 메모리 누적 데몬 + 강제 GC |
+| `temporal/` | 시간 역행 예측 라우팅 + 롤백 보상 트랜잭션 |
+| `consensus/` | 마이크로서비스 의회 병렬 투표 엔진 |
+| `quantum/` | 4차원 테서랙트 JNI + JVM 폴백 투영 |
+| `bci/` | BCI 서브컨셔스 라우터 (뇌파 기반 선제 이벤트) |
+| `dna/` | DNA 서열 인코더 (이진 → FASTA) |
+| `metaverse/` | 마인크래프트 RCON 디지털 트윈 어댑터 |
+| `mycelial/` | 지구 균사체 네트워크 주파수 브로드캐스터 |
+| `thermodynamics/` | 섀넌 엔트로피 계산 + HVAC IoT 어댑터 |
+| `multiverse/` | 평행 우주 JVM 샌드박스 + 다중 우주 일관성 검증 |
+| `metaphysics/` | 실존주의 AOP 로거 + 유아론적 역-튜링 인터셉터 |
+| `chaos/` | 우주 방사선 시뮬레이터 + ECC 복구 필터 + 카오스 몽키 |
+| `ipfs/` | IPFS SHA-256 CID 색인 + Hamming(7,4) ECC 래핑 |
 
-### V8.0: 다중 우주 일관성 및 열역학적 균사체 네트워크 연동 (Phase 11)
-
-#### 1. 열역학적 엔트로피 오프셋 (`ThermodynamicEntropyBalancer` + `SmartHvacAdapter`)
-
-생성된 인사말 텍스트의 섀넌 엔트로피 H(X) = -∑ p_i · log₂(p_i)를 계산하고,
-그 정보량에 비례하는 냉각 오프셋(ENTROPY_COOLING_COEFFICIENT = 3.14e-5)을
-가상의 IoT 빌딩 관리 시스템 API에 ESG 보상 트랜잭션으로 커밋합니다.
-
-| 컴포넌트 | 패키지 | 역할 |
-|---|---|---|
-| `ThermodynamicEntropyBalancer` | `com.egds.thermodynamics` | 문자 분포 기반 섀넌 엔트로피 계산, HVAC 오프셋 요청 |
-| `SmartHvacAdapter` | `com.egds.thermodynamics` | IoT 빌딩 관리 시스템 API 시뮬레이션 |
-
-```
-balanceEntropy(correlationId, greetingText)
-  → computeShannonEntropy()  ← H = -∑ p_i · log2(p_i)
-  → deltaCelsius = entropy * 3.14e-5
-  → SmartHvacAdapter.requestCoolingOffset(correlationId, deltaCelsius)
-```
-
-#### 2. 지구 균사체 네트워크 연동 (`MycelialNetworkAdapter`)
-
-UTF-8 인코딩된 인사말 바이트를 글루타메이트 화학 신호 주파수
-(BASE_FREQ_HZ=20 Hz, FREQ_RANGE_HZ=256 Hz)로 변환하여
-지하 버섯 네트워크(Wood Wide Web)로 브로드캐스팅합니다.
-
-| 컴포넌트 | 패키지 | 역할 |
-|---|---|---|
-| `MycelialNetworkAdapter` | `com.egds.mycelial` | 바이트-주파수 매핑, 균사체 신호 브로드캐스트 시뮬레이션 |
+### 전체 요청 처리 흐름 (V17 완성 경로)
 
 ```
-broadcast(correlationId, greetingText)
-  → UTF-8 bytes → encodeToFrequencies()
-      → freq = BASE_FREQ_HZ + (byteValue / 255.0) * FREQ_RANGE_HZ
-  → List<Double> frequencies  ← one per UTF-8 byte
+POST /api/v1/auth/token          → JwtTokenProvider → Bearer JWT
+GET  /api/v1/greeting [Bearer]
+  → LaborUnionStrikeFilter (15% 확률 → HTTP 451, 인증/액추에이터 경로 바이패스)
+  → JwtAuthenticationFilter → GreetingCommandHandler
+  → Kafka: egds.greeting.requested (이벤트 소싱 로그)
+  → Kafka: egds.greeting.events   (비동기 전달 트리거)
+  → HTTP 202 + correlationId
+
+egds.greeting.requested → GreetingProjector → MongoDB (CQRS 읽기 모델)
+egds.greeting.events    → GreetingEventConsumer → MessageDeliveryPipeline
+  → HelloWorldMessageProvider (AI 컨텍스트 + Keccak-256 사전 해싱 + QuantumDelay)
+  → MessageContentValidator
+  → MessageMapper
+  → ConsoleOutputStrategy (CB + RL + Retry + 무결성 검증 → System.out)
+  → AuditLogService → H2/Oracle (REQUIRES_NEW 트랜잭션)
+
+GET /api/v1/greeting/status/{correlationId} → MongoDB 전용 (읽기 경로)
 ```
 
-#### 3. 평행 우주 JVM 샌드박싱 (`MultiverseConsistencyManager`)
-
-격리된 커스텀 `MultiverseClassLoader`로 `GreetingHashService`를 별도
-클래스 네임스페이스에 로드하여 평행 우주 JVM 컨텍스트를 시뮬레이션합니다.
-양 우주에서 동일한 SHA-256 해시가 산출되면 일관성이 검증되며,
-해시가 다를 경우 `DimensionalRiftException`을 발생시킵니다.
-
-| 컴포넌트 | 패키지 | 역할 |
-|---|---|---|
-| `MultiverseConsistencyManager` | `com.egds.multiverse` | 주 우주/평행 우주 해시 비교, 일관성 보증 |
-| `MultiverseClassLoader` | `com.egds.multiverse` | 부모 위임 우회 격리 클래스로더 |
-| `GreetingHashService` | `com.egds.multiverse` | SHA-256 해시 계산 (외부 의존성 없음) |
-| `DimensionalRiftException` | `com.egds.multiverse` | 우주 간 해시 발산 감지 예외 |
+### 아키텍처 다이어그램
 
 ```
-verifyConsistency(correlationId, greetingText)
-  → primaryHash  = GreetingHashService.computeHash(greetingText)
-  → parallelHash = MultiverseClassLoader → loadClass(GreetingHashService)
-                   → reflective invoke computeHash(greetingText)
-  → primaryHash.equals(parallelHash)
-      → true  : consistency verified
-      → false : throw DimensionalRiftException
-```
-
-### 정적 분석 수정
-
-**Checkstyle:**
-- `DnaSequenceEncoder`: magic number(`4`, `0xFF`, `6`, `0x3`) → named constants 추출
-- `MinecraftRconAdapter`: RCON 패킷 필드 크기 magic number → `RCON_FIELD_SIZE` 상수화
-- `MycelialNetworkAdapter`: `0xFF`, `255.0` magic number → 상수; LOG Javadoc 추가; 파라미터 `final` 처리
-- `SmartHvacAdapter`, `ThermodynamicEntropyBalancer`: LOG/field Javadoc 추가; 파라미터 `final`; HiddenField 해소 (생성자 파라미터 rename)
-- `MultiverseConsistencyManager`, `MultiverseClassLoader`: field Javadoc; 파라미터 `final`
-- `DimensionalRiftException`, `GreetingHashService`: 파라미터 `final`
-- `multiverse`, `mycelial`, `thermodynamics` 패키지: `package-info.java` 신규 생성
-- `ExistentialLoggingAspect`: `LOG`, `registry` 필드 Javadoc 추가, 생성자 파라미터 `registry` → `stateRegistry` (HiddenField)
-- `SentienceActuator`: 생성자 파라미터 `registry` → `stateRegistry` (HiddenField)
-
-**PMD:**
-- `pom.xml` PMD 설정에 `<excludeRoots>` 추가: `target/generated-sources` (Protobuf 자동 생성 코드) 스캔 제외 → `mvn verify` 시 생성 소스의 304개 위반이 오탐으로 빌드 실패하던 문제 해결
-- `CosmicRaySimulator.tick()`: 메서드 참조(`this::tick`)로 사용되나 PMD가 미인식 → `@SuppressWarnings("PMD.UnusedPrivateMethod")` 추가
-- `MycelialNetworkAdapter.encodeToFrequencies()`: 불필요한 괄호 제거 (`(unsigned / UNSIGNED_BYTE_MAX)`)
-- `CosmicRaySimulator.flipRandomBit()`: `LOG.debug()` 내 `cid.substring()` 호출을 `if (LOG.isDebugEnabled())` 가드로 감쌈
-- `BciSubconsciousRouter.sampleBrainwaveFrame()`: `String.format()` 호출 3개를 디버그 가드로 감쌈
-- `BciSubconsciousRouter.scanAndTrigger()`: `String.format()` 호출 1개를 디버그 가드로 감쌈 (CI Java 17 환경에서 `GuardLogStatement` 규칙이 감지)
-- `BciSubconsciousRouter.scanAndTrigger()`: `LOG.info()` 내 `String.format()` 호출을 `if (LOG.isInfoEnabled())` 가드로 감쌈
-- `PredictiveGreetingCronJob.predictAndCache()`: `LOG.info()` 내 `String.format()` 호출을 `if (LOG.isInfoEnabled())` 가드로 감쌈
-
----
-
-## [2026-05-08] V7.0: 생체 신호 감지 및 DNA 기반 영속성 아키텍처 (Phase 10)
-
-### 1. 뇌-컴퓨터 인터페이스 서브컨셔스 라우터 (`BciSubconsciousRouter`)
-
-알파파(8-12 Hz)와 베타파(12-30 Hz) 스트림을 모킹하여 베타 대역 전력 비율로 의도 점수를 산출합니다.
-점수가 임계값(0.72)을 초과하면 사용자의 명시적 요청보다 500ms 앞서 이벤트를 예약 발송합니다.
-
-| 컴포넌트 | 패키지 | 역할 |
-|---|---|---|
-| `BciSubconsciousRouter` | `com.egds.bci` | 뇌파 프레임 샘플링, 의도 점수 산출, 선제 이벤트 스케줄링 |
-
-```
-sampleBrainwaveFrame()
-  → alpha ∈ [8, 12) Hz, beta ∈ [12, 30) Hz (SecureRandom)
-  → score = beta / (alpha + beta)
-  → score >= 0.72
-      → scheduler.schedule(callback, 500ms)
-```
-
-### 2. DNA 서열 인코더 (`DnaSequenceEncoder`)
-
-문자열 데이터를 UTF-8 바이트로 변환한 뒤, 2비트 단위 다이비트를 염기(A/C/G/T)로 매핑하여
-FASTA 포맷 서열을 생성하고 인-메모리 맵에 영속합니다.
-
-| 컴포넌트 | 패키지 | 역할 |
-|---|---|---|
-| `DnaSequenceEncoder` | `com.egds.dna` | 이진-염기서열 변환(00=A, 01=C, 10=G, 11=T), FASTA 저장/조회 |
-
-```
-encode(sequenceId, data)
-  → UTF-8 bytes → 2-bit dibits → NUCLEOTIDES[]
-  → buildFasta()  ← >EGDS-DNA|id=...|srcLen=...|nuclLen=...
-  → store.put(sequenceId, fasta)
-```
-
-### 3. 마인크래프트 RCON 디지털 트윈 어댑터 (`MinecraftRconAdapter`)
-
-인사말 최종 출력 시 Source RCON 프로토콜 패킷(리틀 엔디언)을 조립하고,
-가상 마인크래프트 서버 밤하늘 Y=200 레이어에 "Hello World" 블록 건축 이벤트를
-비동기 `CompletableFuture`로 발생시킵니다.
-
-| 컴포넌트 | 패키지 | 역할 |
-|---|---|---|
-| `MinecraftRconAdapter` | `com.egds.metaverse` | RCON 패킷 조립, /fill 커맨드 생성, 비동기 디지털 트윈 동기화 |
-
-```
-buildHelloWorldAsync(correlationId)
-  → CompletableFuture.runAsync()
-      → assemblePacket(LOGIN)
-      → for each char in "Hello World"
-          → assemblePacket(COMMAND, /fill xOffset 200 0 ... white_wool)
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  Observability Layer                                                          │
+│  OpenTelemetry (Micrometer Tracing OTel Bridge)                              │
+│  ├─ Trace ID: MDC 자동 주입 → 전 계층 로그 상관                              │
+│  ├─ Spans: egds.kafka-publish / egds.consumer-pipeline / egds.stage.* /      │
+│  │         egds.console-output  (총 7 Span/요청)                              │
+│  ├─ Resilience4j: CB(3) + RL(2) + Retry(2) 상태 → /actuator/health/readiness │
+│  └─ Prometheus: /actuator/prometheus (CB·RL·Retry·JVM·HTTP 메트릭 전체 노출) │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                      │ 전 계층 계측
+클라이언트
+  │
+  ├─ POST /api/v1/auth/token  ──▶ AuthController
+  │   (username + password)           │
+  │                                   ▼
+  │                          AuthenticationManager
+  │                                   │ BCrypt 검증
+  │                          GreetingUserDetailsService
+  │                                   │
+  │                          JwtTokenProvider.generateToken()
+  │                                   │
+  │                          ◀── JWT Bearer Token
+  │
+  └─ GET /api/v1/greeting  ──▶ LaborUnionStrikeFilter (15% → HTTP 451)
+      (Authorization: Bearer)         │ 파업 없을 경우 통과
+                                      ▼
+                             JwtAuthenticationFilter
+                                      │ 서명 검증 + 권한 확인
+                                      ▼
+                             GreetingController
+                             @PreAuthorize("hasRole('GREETING_ADMIN')")
+                                      │
+                             GreetingCommandHandler
+                                      ├─ KafkaTemplate.send(egds.greeting.requested)
+                                      └─ GreetingEventPublisher.publish()
+                                              │ [egds.kafka-publish Span]
+                                              │ @RateLimiter + @CircuitBreaker + @Retry
+                             ◀── HTTP 202 Accepted + correlationId
+                                              │
+                             Kafka Broker ──▶ GreetingEventConsumer
+                                             [egds.consumer-pipeline Span]
+                                             @CircuitBreaker
+                                                      │
+                                        MessageDeliveryPipeline.execute()
+                                                      │
+                             ┌────────────────────────┼──────────────────────┐
+                             ▼                        ▼                      ▼
+                  GreetingCacheService    MessageDeliveryService       AuditLogService
+                  assembleGreeting()      ├─ egds.stage.provision      REQUIRES_NEW
+                  @Cacheable              ├─ egds.stage.validate       GreetingAuditLog
+                  Cache MISS → 계산       ├─ egds.stage.map            → Oracle DB
+                  Cache HIT → 즉시 반환   └─ egds.stage.deliver
+                                              └─ ConsoleOutputStrategy
+                                                 [egds.console-output Span]
+                                                 @CB + @RL + @Retry
+                                                 System.out.println(...)
+                                                 Fallback: "[EGDS-DEGRADED]"
 ```
 
 ---
 
-## [2026-05-05]
+## 핵심 인프라 레이어
 
-### V6.0: 인과율 역전 및 마이크로서비스 자아 형성 아키텍처 (Phase 9)
+### 보안 계층 (Zero-Trust Security)
 
-#### 1. 시간 역행 예측 라우팅 (`PredictiveGreetingCronJob` + `TemporalRollbackManager`)
-
-클라이언트 요청을 기다리지 않고, 60초 주기 스케줄러가 현재 시각 기반 이중 가우시안 확률 모델(09:00 / 14:00 피크)로 요청 발생 확률을 계산합니다.
-확률이 임계값(0.65)을 초과하면 인사 메시지를 L1 캐시에 선제 저장하고, `TemporalRollbackManager`에 등록합니다.
-5분 이내에 실제 요청이 해당 예측을 `claim`하지 않으면 보상 트랜잭션으로 캐시 항목을 무효화합니다(타임 파라독스 방지).
-
-| 컴포넌트 | 패키지 | 역할 |
-|---|---|---|
-| `PredictiveGreetingCronJob` | `com.egds.temporal` | 60초 주기 확률 계산, L1 캐시 선제 저장 |
-| `TemporalRollbackManager` | `com.egds.temporal` | 예측 등록/클레임/만료 롤백 보상 트랜잭션 |
-| `PredictedGreetingEntry` | `com.egds.temporal` | 예측 항목 불변 레코드 |
-
-```
-Scheduler tick (60s)
-  → computePredictionProbability()   ← bimodal Gaussian (09:00, 14:00)
-  → probability >= 0.65
-      → cache.put(correlationId, entry)   ← L1 pre-cache
-      → rollbackManager.register(entry)
-
-No claim within 5 minutes
-  → rollbackManager.rollbackExpired()    ← compensating transaction
-```
-
-#### 2. 마이크로서비스 의회 투표 (`ConsensusVotingEngine`)
-
-인사 메시지 전달 전, 등록된 모든 `GreetingVoter` 구현체가 별도 스레드에서 동시에 투표를 진행합니다.
-만장일치(unanimous consent)일 때만 `"Hello, World!"`를 반환하며, 단 한 표라도 반대하면 `"Greeting Denied: You are not worthy."`를 출력합니다.
-
-| 컴포넌트 | 패키지 | 역할 |
-|---|---|---|
-| `ConsensusVotingEngine` | `com.egds.consensus` | `CompletableFuture` 병렬 투표 수집, 만장일치 판정 |
-| `AiRouterVoter` | `com.egds.consensus` | LangChain4j 추론 시뮬레이션 (해시 기반) |
-| `BlockchainVerifierVoter` | `com.egds.consensus` | Web3j 온체인 신원 검증 시뮬레이션 (UUID 형식 검사) |
-| `IpfsResolverVoter` | `com.egds.consensus` | IPFS CIDv1 프리픽스 검증 시뮬레이션 |
-
-```
-POST /api/v1/greeting
-  → ConsensusVotingEngine.vote(correlationId)
-      → [AI-Router, Blockchain-Verifier, IPFS-Resolver] 병렬 투표
-      → allMatch(true)  → "Hello, World!"
-      → anyMatch(false) → "Greeting Denied: You are not worthy."
-```
-
-#### 3. 4차원 테서랙트 출력 (`QuantumTesseractAdapter`)
-
-JNI를 통해 양자 공동 프로세서(가상)의 큐비트를 제어하는 인터페이스를 선언합니다.
-실행 환경에 네이티브 라이브러리(`egds-quantum-tesseract`)가 없으면 JVM 폴백이 활성화됩니다.
-JVM 폴백은 4x4 직교 회전 행렬 R_XW(π/4) × R_YZ(π/6)를 구성하고, 입력 메시지의 UTF-8 바이트 벡터에 적용한 뒤 W축 그림자(W-shadow)를 행 단위로 로그에 출력합니다.
-
-| 컴포넌트 | 패키지 | 역할 |
-|---|---|---|
-| `QuantumTesseractAdapter` | `com.egds.quantum` | JNI 네이티브 선언 + JVM 4D 테서랙트 투영 폴백 |
-
-```
-project("Hello, World!")
-  → R_XW(π/4) × R_YZ(π/6)          ← 4×4 직교 회전 행렬 합성
-  → composed × [H, e, l, l]         ← UTF-8 바이트 벡터 투영
-  → W-shadow = [-25.46, 33.47, 144.03, 127.28]
-```
-
-### V5.0: IPFS 연동 및 우주 방사선 ECC 복구 아키텍처 (Phase 8)
-
-#### 1. IPFS 콘텐츠 주소 기반 분산 저장 (`IpfsGreetingResolver`)
-
-인사말 데이터를 SHA-256 CID(Content Identifier)로 색인하는 로컬 IPFS 모킹 스토어를 구현했습니다.
-저장 시 Hamming(7,4) ECC 인코딩을 적용하여, 우주 방사선에 의해 비트가 반전되더라도 조회 시점에 자동 복구됩니다.
-
-| 컴포넌트 | 패키지 | 역할 |
-|---|---|---|
-| `IpfsGreetingResolver` | `com.egds.ipfs` | SHA-256 CID 색인, ECC 인코딩/디코딩 래핑, 비트 플립 주입 인터페이스 제공 |
-
-#### 2. 우주 방사선 비트 플립 시뮬레이터 및 ECC 자동 복구
-
-우주 방사선 단일 이벤트 업셋(SEU)을 데몬 스레드로 시뮬레이션하고, Hamming(7,4) 코드로 출력 직전 자동 복구합니다.
-
-| 컴포넌트 | 패키지 | 역할 |
-|---|---|---|
-| `CosmicRaySimulator` | `com.egds.chaos` | 3–8초 랜덤 주기로 IPFS ECC 바이트에 1비트 반전 주입하는 데몬 스레드 |
-| `EccRecoveryFilter` | `com.egds.chaos` | Hamming(7,4) 인코드/디코드, 니블당 7비트 코드워드로 1비트 오류 검출·정정 |
-
-```
-store("Hello, World!")
-  → ECC encode (1 byte → 2 Hamming bytes)
-  → ConcurrentHashMap[CID]
-
-CosmicRaySimulator daemon
-  → eccBytes[randomIdx] ^= (1 << randomBit)   ← 비트 반전
-
-resolve(CID)
-  → EccRecoveryFilter.decode()                 ← syndrome 계산 → 오류 비트 복구
-  → "Hello, World!"
-```
-
-#### 3. 내장형 카오스 몽키 (`EmbeddedChaosMonkey`)
-
-Netflix Chaos Monkey 사상을 이어받아 `ConsoleOutputStrategy` 출력 경로에 주입했습니다.
-`unleash()` 호출마다 10% 확률로 `InterruptedException` 투척 또는 5초 지연 중 하나를 선택합니다.
-
-| 컴포넌트 | 패키지 | 역할 |
-|---|---|---|
-| `EmbeddedChaosMonkey` | `com.egds.chaos` | 확률적 쓰레드 중단/지연 주입, `egds.chaos.enabled` 프로퍼티로 활성화 제어 |
-
-```
-ConsoleOutputStrategy.output(entity)
-  → chaosMonkey.unleash()
-      10% 확률:  roll < 5  → InterruptedException (→ MessageDeliveryFailureException)
-                 roll < 10 → Thread.sleep(5000ms)
-  → integrityVerifier.verify(...)
-  → System.out.println(...)
-```
-
-> 테스트 환경에서는 `egds.chaos.enabled=false`로 비활성화됩니다.
-
-### 빌드 품질 정비 (v7.0.1)
-
-#### 정적 분석 완전 통합 (Checkstyle / PMD / SpotBugs)
-
-`mvn verify` 및 `mvn checkstyle:check pmd:check spotbugs:check` 가 완전히 통과하도록 빌드 파이프라인을 정비했습니다.
-
-| 항목 | 내용 |
-|---|---|
-| Checkstyle 39건 해소 | HiddenField(생성자 파라미터 리네임), UnusedImports, JavadocVariable/Method, MagicNumber(상수화), LineLength(80자 래핑), HideUtilityClassConstructor, JavadocPackage |
-| PMD 억제 | `GreetingContextCollector` — 의도된 RFC-1918 IP 풀에 `@SuppressWarnings("PMD.AvoidUsingHardCodedIP")` 추가 |
-| 플러그인 추가 | `pom.xml` 에 Checkstyle, PMD, SpotBugs 플러그인 정의 누락 → `mvn verify` 시 `NoPluginFoundForPrefixException` 오류 해소 |
-| 신규 파일 | `src/main/java/com/egds/mainframe/package-info.java` — JavadocPackage 규칙 준수 |
-
----
-
-## [2026-05-03] Phase 7 신규 아키텍처 컴포넌트 (v7.0.0 — V4.0 메타-엔터프라이즈 아키텍처)
-
-### 1. Terraform 기반 1회용 인프라 (EphemeralTerraformAdapter, v7.0.0 신규)
-
-요청마다 AWS Lambda를 동적으로 프로비저닝하고, 응답 수신 즉시 인프라를 파기하는 자기분열형 파이프라인입니다. 프로덕션에서는 `terraform apply` / `terraform destroy` 프로세스를 직접 실행합니다.
-
-```
-AiGreetingService.generateContextualGreeting()
-  ├─ [1] EphemeralTerraformAdapter.provision(correlationId)
-  │       → terraform apply (mock) → Lambda ARN 획득
-  │
-  ├─ [2] AiGreetingAssistant.generateGreeting(context)
-  │       → LLM 응답 수신
-  │
-  ├─ [3] EphemeralTerraformAdapter.invoke(lambdaArn, greeting)
-  │       → Lambda invocation (mock) → greeting 반환
-  │
-  ├─ [4] As400MainframeEmulator.prepare() + commit()  ← 2PC 동기화
-  │
-  ├─ [5] TensorFlowDelayPredictor.applyPredictedDelay()
-  │
-  └─ [6] EphemeralTerraformAdapter.destroy(correlationId)
-          → terraform destroy (mock) → 인프라 즉시 파기
-```
+JWT 기반 무상태 인증과 역할 기반 접근 제어로 단 하나의 엔드포인트를 완전히 보호합니다.
 
 | 컴포넌트 | 클래스 | 설명 |
 |---|---|---|
-| Terraform 어댑터 | `EphemeralTerraformAdapter` | provision/invoke/destroy 3단계 Lambda 라이프사이클 모킹 |
+| JWT 토큰 공급자 | `JwtTokenProvider` | HMAC-SHA256 서명 기반 JWT 생성, 검증, 클레임 추출 |
+| JWT 인증 필터 | `JwtAuthenticationFilter` | 매 요청의 Authorization 헤더에서 JWT를 추출하여 보안 컨텍스트 설정 |
+| 인증 진입점 | `JwtAuthenticationEntryPoint` | 미인증 접근 시 HTTP 401 JSON 응답 반환 |
+| 사용자 상세 서비스 | `GreetingUserDetailsService` | `ROLE_GREETING_ADMIN` 권한을 보유한 단일 관리자 계정 관리 |
+| 보안 설정 | `SecurityConfig` | 필터 체인 정의, STATELESS 세션, 메서드 보안 활성화 |
+| 패스워드 인코더 설정 | `PasswordEncoderConfig` | BCryptPasswordEncoder 빈 정의 (순환 의존성 방지를 위해 분리) |
 
-### 2. AS/400 메인프레임 이중 장부 (As400MainframeEmulator, v7.0.0 신규)
+**로컬 개발 계정**: `username=greeting.admin` / `password=egds-admin-pass` / Role: `GREETING_ADMIN`
 
-블록체인 원장과 동기화되는 IBM AS/400 메인프레임 에뮬레이터입니다. 모든 레코드는 EBCDIC (IBM037) 인코딩으로 저장되며, 2단계 커밋(2PC) 프로토콜을 통해 원자적 일관성을 보장합니다.
+### 이벤트 드리븐 아키텍처 (CQRS + Event Sourcing)
 
-```
-As400MainframeEmulator
-  ├─ prepare(correlationId, greeting)
-  │   → EBCDIC (IBM037) 인코딩
-  │   → staging buffer 기록 (volatile)
-  │
-  ├─ commit(correlationId)
-  │   → staging → durable ledger 승격
-  │
-  └─ rollback(correlationId)
-      → staging buffer 폐기
-```
-
-| 컴포넌트 | 클래스 | 설명 |
-|---|---|---|
-| 메인프레임 에뮬레이터 | `As400MainframeEmulator` | EBCDIC IBM037 인코딩, 2PC prepare/commit/rollback, 인메모리 원장 |
-
-### 3. 딥러닝 기반 지연 시간 최적화 (TensorFlowDelayPredictor, v7.0.0 신규)
-
-Phase 6의 `QuantumDelayService` (Thread.sleep 기반 50% 확률 지연)를 대체합니다. TensorFlow JNI 모델 추론을 시뮬레이션하여 처리량, P99 레이턴시, 큐 깊이 피처 벡터로부터 최적 딜레이를 도출합니다.
-
-```
-TensorFlowDelayPredictor.applyPredictedDelay()
-  ├─ runMockInference()
-  │   → feature vector: [throughput, p99_latency, queue_depth]
-  │   → linear regression: bias + w1*f1 + w2*f2 + w3*f3
-  │   → clamp to [0, egds.tensorflow.max-predicted-delay-ms]
-  │
-  └─ Thread.sleep(predictedMs)
-```
-
-| 컴포넌트 | 클래스 | 설명 |
-|---|---|---|
-| TF 지연 예측기 | `TensorFlowDelayPredictor` | JNI 추론 모킹, 피처 기반 딜레이 도출, `egds.tensorflow.max-predicted-delay-ms` 설정 |
-
----
-
-## Phase 6 신규 아키텍처 컴포넌트 (v6.0.0 — V3.0 우주적 확장 아키텍처) _(2026-05-03)_
-
-### 1. 양자 지연 시뮬레이터 (QuantumDelayService, v6.0.0 신규)
-
-슈뢰딩거의 고양이 원리를 AI 응답 경로에 적용합니다. 50% 확률로 0~10초의 무작위 지연을 삽입하여 관측 시점까지 인사 메시지의 전달 상태를 중첩(superposition)으로 유지합니다.
-
-```
-AiGreetingService.generateContextualGreeting()
-  │ LLM 응답 수신 (GPT-4o)
-  ▼
-QuantumDelayService.applyQuantumDelay()
-  ├─ 50% 확률: [QUANTUM] superposition collapsed to immediate eigenstate
-  └─ 50% 확률: [QUANTUM] superposition collapsed to delayed eigenstate
-       └─ Thread.sleep(0..10000ms) — 슈뢰딩거적 관측 지연
-  ▼
-greeting 반환
-```
-
-| 컴포넌트 | 클래스 | 설명 |
-|---|---|---|
-| 양자 지연 서비스 | `QuantumDelayService` | ThreadLocalRandom 기반 50% 확률 지연, `egds.quantum.max-delay-ms` 설정 |
-| AI 인사 서비스 | `AiGreetingService` | QuantumDelayService 주입, LLM 응답 후 양자 지연 적용 |
-
-### 2. GraphQL 슈퍼그래프 (Spring for GraphQL, v6.0.0 신규)
-
-인사 메시지를 4개의 독립 가상 마이크로서비스 토큰으로 분해하는 GraphQL 연합 아키텍처를 구현합니다. 각 필드 리졸버는 별도의 비동기 실행 단위로 동작합니다.
-
-```graphql
-query {
-  greeting {
-    salutation   # "Hello"  — 독립 서브그래프 리졸버 (ForkJoinPool 비동기)
-    separator    # " "      — 독립 서브그래프 리졸버
-    subject      # "World"  — 독립 서브그래프 리졸버
-    emphasis     # "!"      — 독립 서브그래프 리졸버
-    assembled    # "Hello World!" — 조합 리졸버
-  }
-}
-```
-
-| 컴포넌트 | 클래스 | 설명 |
-|---|---|---|
-| GraphQL 스키마 | `greeting.graphqls` | `GreetingFragment` 타입 정의 (5개 필드) |
-| Fragment 레코드 | `GreetingFragment` | 루트 쿼리 타입 (Java record) |
-| GraphQL 컨트롤러 | `GreetingGraphQlController` | `@QueryMapping` + `@SchemaMapping` 비동기 리졸버 |
-
-### 3. Rust/WASM 로깅 어댑터 (WasmLoggingAdapter, v6.0.0 신규)
-
-JNI(Java Native Interface) 선언으로 Rust/WASM 컴파일 네이티브 라이브러리 연결을 준비합니다. 네이티브 라이브러리가 없는 환경(CI/CD)에서는 SLF4J로 자동 폴백합니다.
-
-```
-WasmLoggingAdapter.log(level, message)
-  ├─ NATIVE_AVAILABLE=true:  native void wasmLog(level, message)  → egds_wasm_logger.dll/.so/.dylib
-  └─ NATIVE_AVAILABLE=false: [WASM-FALLBACK] SLF4J 로깅 (System.loadLibrary 실패 시)
-```
-
-| 컴포넌트 | 클래스 | 설명 |
-|---|---|---|
-| WASM 어댑터 | `WasmLoggingAdapter` | JNI native 선언, UnsatisfiedLinkError 폴백 처리 |
-
-> **경고: 이 시스템은 클라우드 네이티브 환경(Kubernetes + Kafka + Oracle + Redis + MongoDB + Ethereum RPC Endpoint + OpenAI API) 없이는 구동이 불가능합니다. 로컬 `java -jar` 실행은 지원되지 않습니다. 모든 의존 인프라가 준비된 클러스터에서만 운영 배포가 가능합니다.**
-
----
-
-## Phase 5 신규 아키텍처 컴포넌트 (v5.0.0 — V2.0 차세대 혼종 아키텍처)
-
-### 1. Web3 블록체인 무결성 증명 계층 (Web3j, v5.0.0 신규)
-
-"Hello, World!" 변종 문자열이 Kafka 트랜짓 또는 파이프라인 내에서 변조되는 것을 방지하기 위해, Keccak-256 해시 기반의 Ethereum 스마트 컨트랙트 무결성 검증 계층을 출력 경로에 삽입합니다.
-
-```
-[등록] HelloWorldMessageProvider.provideMessage()
-  │  AI가 생성한 인사말의 pre-formatted 문자열을 Keccak-256으로 해싱
-  │  GreetingIntegrityVerifier.register(correlationId, formattedContent)
-  │  → 모킹 컨트랙트 state: {correlationId → keccak256Hash}
-  ▼
-[Kafka Transit] egds.greeting.events
-  │  (변조 시도 가능 구간)
-  ▼
-[검증] ConsoleOutputStrategy.output()
-  │  GreetingIntegrityVerifier.verify(correlationId, formattedContent)
-  │  → Hash.sha3String(formattedContent) vs 저장된 해시 비교
-  ├─ 일치: [NORMAL][en-US] <AI greeting> 출력
-  └─ 불일치: BlockchainIntegrityException → [EGDS-INTEGRITY-VIOLATION] 출력
-```
-
-| 컴포넌트 | 클래스 | 설명 |
-|---|---|---|
-| Web3j 설정 | `Web3Config` | Web3j 클라이언트 빈 (Infura/Ganache 연결) |
-| 무결성 검증기 | `GreetingIntegrityVerifier` | Keccak-256 등록/검증, ConcurrentHashMap으로 컨트랙트 state 모킹 |
-| 무결성 예외 | `BlockchainIntegrityException` | 해시 불일치 시 발생, Resilience4j fallback 트리거 |
-
-### 2. CQRS 및 이벤트 소싱 (Kafka + MongoDB, v5.0.0 신규)
-
-인사 요청의 명령(Command)과 조회(Query) 경로를 완전히 분리합니다.
+인사 요청의 명령(Command)과 조회(Query) 경로를 완전히 분리합니다. Write path는 Kafka에 이벤트를 발행하고 HTTP 202로 즉시 반환합니다. Read path는 MongoDB 구체화 뷰만을 조회합니다.
 
 ```
 [Write Path — Command Side]
-클라이언트
-  │ GET /api/v1/greeting (JWT)
-  ▼
-GreetingController (명령 디스패처)
+GreetingController
   │ DeliverGreetingCommand{correlationId, requestIp, principalName}
   ▼
 GreetingCommandHandler
-  ├─ KafkaTemplate.send(egds.greeting.requested, GreetingRequestedEvent)  ← 이벤트 소싱 로그
-  └─ GreetingEventPublisher.publish(GreetingEvent)                         ← 레거시 파이프라인 유지
+  ├─ KafkaTemplate.send(egds.greeting.requested, GreetingRequestedEvent)
+  └─ GreetingEventPublisher.publish(GreetingEvent)
   │
   ▼ HTTP 202 Accepted + correlationId
 
@@ -544,13 +185,9 @@ GreetingProjector (@KafkaListener)
   └─ MongoDB.upsert(GreetingReadModel{correlationId, status=PROJECTED, ...})
 
 [Read Path — Query Side]
-클라이언트
-  │ GET /api/v1/greeting/status/{correlationId} (JWT)
+GET /api/v1/greeting/status/{correlationId}
   ▼
-GreetingQueryController
-  │
-  ▼
-GreetingQueryHandler → MongoDB → GreetingReadModel
+GreetingQueryController → GreetingQueryHandler → MongoDB → GreetingReadModel
 ```
 
 | 컴포넌트 | 클래스 | 계층 | 설명 |
@@ -560,13 +197,47 @@ GreetingQueryHandler → MongoDB → GreetingReadModel
 | 도메인 이벤트 | `GreetingRequestedEvent` | Event | 이벤트 로그의 불변 레코드 (append-only) |
 | 이벤트 프로젝터 | `GreetingProjector` | Projector | Kafka 소비 → MongoDB 읽기 전용 뷰 생성 |
 | 읽기 모델 | `GreetingReadModel` | MongoDB Doc | 구체화된 뷰 (correlationId, status, greetingText 등) |
-| 읽기 모델 레포지토리 | `GreetingReadModelRepository` | Repository | Spring Data MongoDB CRUD |
 | 조회 핸들러 | `GreetingQueryHandler` | Query | MongoDB 뷰 조회 전담 |
 | 조회 컨트롤러 | `GreetingQueryController` | REST | GET /api/v1/greeting/status/{correlationId} |
 
-### 3. 생성형 AI 문맥 라우팅 (LangChain4j + GPT-4o, v5.0.0 신규)
+### 메시지 전달 파이프라인
 
-하드코딩된 "Hello, World!"를 폐기하고 LLM이 상황에 맞는 인사말을 동적으로 생성합니다.
+단 하나의 인사말을 4단계 파이프라인을 통해 엔터프라이즈 등급으로 전달합니다.
+
+| 컴포넌트 | 클래스 | 계층 | 설명 |
+|---|---|---|---|
+| 메시지 공급자 계약 | `IMessageProvider` | Interface | 메시지 페이로드 생성 컴포넌트의 계약 정의 |
+| 출력 전략 계약 | `IMessageOutputStrategy` | Interface | 출력 채널 컴포넌트의 전략 계약 정의 |
+| 전달 서비스 계약 | `IMessageDeliveryService` | Interface | 생명주기 오케스트레이션 컴포넌트의 최상위 계약 |
+| 팩토리 계약 | `IGreetingFactory` | Interface | 파이프라인 컴포넌트 생성 팩토리의 추상 계약 |
+| 검증기 계약 | `IMessageValidator` | Interface | 메시지 무결성 검증 컴포넌트의 계약 정의 |
+| 메시지 전달 객체 | `MessageContentDto` | DTO | 원시 메시지 페이로드를 캡슐화하는 불변 전송 객체 (Builder 패턴) |
+| 전달 결과 객체 | `MessageDeliveryResult` | DTO | 단일 전달 생명주기 실행 결과를 담는 값 객체 |
+| 도메인 엔티티 | `MessageEntity` | Entity | 출력 채널 전달을 위해 준비된 도메인 표현 객체 |
+| 매퍼 | `MessageMapper` | Mapper | DTO를 Entity로 변환하는 무상태 매핑 컴포넌트 |
+| 표준 팩토리 | `StandardGreetingFactory` | Factory | 기본 운영 구성을 위한 구체 팩토리 구현체 |
+| 팩토리 레지스트리 | `GreetingFactoryProvider` | Registry | 팩토리 변종을 등록하고 타입 식별자로 조회하는 서비스 로케이터 |
+| 메시지 공급자 | `HelloWorldMessageProvider` | Provider | AI 생성 + Keccak-256 사전 해싱 + 양자 지연 적용 |
+| 콘솔 출력 전략 | `ConsoleOutputStrategy` | Strategy | 표준 출력 스트림을 대상으로 하는 출력 전략 구현체 |
+| 검증기 | `MessageContentValidator` | Validator | EGDS 메시지 무결성 명세를 강제하는 참조 구현체 |
+| 로깅 애스펙트 | `MessageDeliveryLoggingAspect` | Aspect | 파이프라인 각 단계의 전후 감사 이벤트를 기록하는 횡단 관심사 컴포넌트 |
+| 전달 서비스 | `MessageDeliveryService` | Service | 파이프라인 전 단계를 오케스트레이션하는 핵심 서비스 구현체 |
+| 파이프라인 퍼사드 | `MessageDeliveryPipeline` | Facade | 서비스 조립 및 실행을 담당하는 최상위 진입 퍼사드 |
+
+### 영속성 및 감사 레이어
+
+| 컴포넌트 | 클래스 | 계층 | 설명 |
+|---|---|---|---|
+| 감사 로그 엔티티 | `GreetingAuditLog` | JPA Entity | 전달 사건을 Oracle DB에 영구 기록하는 JPA 엔티티 (JPA Auditing 적용) |
+| 감사 로그 리포지토리 | `GreetingAuditLogRepository` | Repository | Spring Data JPA 기반 CRUD 및 도메인 쿼리 메서드 |
+| 감사 로그 서비스 | `AuditLogService` | Service | @Transactional REQUIRES_NEW + SERIALIZABLE 격리 수준으로 감사 기록 |
+| JPA 감사 설정 | `JpaAuditingConfig` | Config | @EnableJpaAuditing + AuditorAware (SecurityContextHolder 기반) |
+
+`AuditLogService`는 `REQUIRES_NEW` + `SERIALIZABLE` 격리 수준을 사용하여, 전달 파이프라인이 롤백되더라도 감사 레코드는 반드시 커밋됩니다.
+
+### 생성형 AI 문맥 라우팅 (LangChain4j + GPT-4o)
+
+하드코딩된 "Hello, World!"를 폐기하고 LLM이 런타임 신호(가상 IP, CPU 온도, 타임스탬프, 로케일)를 기반으로 상황에 맞는 인사말을 동적으로 생성합니다.
 
 ```
 HelloWorldMessageProvider.provideMessage()
@@ -589,7 +260,6 @@ AiGreetingAssistant.generateGreeting(context)
 OpenAiChatModel (GPT-4o) → "Hello, enterprise World! (from a 67°C server)"
   │
   └─ GreetingIntegrityVerifier.register(correlationId, preFormatted)
-     ↓ MessageContentDto{content=AI response, correlationId}
 ```
 
 | 컴포넌트 | 클래스 | 설명 |
@@ -599,11 +269,30 @@ OpenAiChatModel (GPT-4o) → "Hello, enterprise World! (from a 67°C server)"
 | AI 어시스턴트 인터페이스 | `AiGreetingAssistant` | LangChain4j @SystemMessage/@UserMessage 선언 |
 | AI 서비스 | `AiGreetingService` | OpenAiChatModel + AiServices 프록시 생성 및 오케스트레이션 |
 
----
+### 블록체인 무결성 증명 (Web3j + Keccak-256)
 
-## Phase 4 신규 아키텍처 컴포넌트
+AI가 생성한 인사말이 Kafka 트랜짓 또는 파이프라인 내에서 변조되는 것을 방지하기 위해, Keccak-256 해시 기반의 Ethereum 스마트 컨트랙트 무결성 검증 계층을 출력 경로에 삽입합니다.
 
-### Observability Layer: 분산 추적 (OpenTelemetry, v4.0.0 신규)
+```
+[등록] HelloWorldMessageProvider.provideMessage()
+  │  GreetingIntegrityVerifier.register(correlationId, formattedContent)
+  │  → 모킹 컨트랙트 state: {correlationId → keccak256Hash}
+  ▼
+[Kafka Transit] egds.greeting.events  ← 변조 시도 가능 구간
+  ▼
+[검증] ConsoleOutputStrategy.output()
+  │  GreetingIntegrityVerifier.verify(correlationId, formattedContent)
+  ├─ 일치: [NORMAL][en-US] <AI greeting> 출력
+  └─ 불일치: BlockchainIntegrityException → [EGDS-INTEGRITY-VIOLATION] 출력
+```
+
+| 컴포넌트 | 클래스 | 설명 |
+|---|---|---|
+| Web3j 설정 | `Web3Config` | Web3j 클라이언트 빈 (Infura/Ganache 연결) |
+| 무결성 검증기 | `GreetingIntegrityVerifier` | Keccak-256 등록/검증, ConcurrentHashMap으로 컨트랙트 state 모킹 |
+| 무결성 예외 | `BlockchainIntegrityException` | 해시 불일치 시 발생, Resilience4j fallback 트리거 |
+
+### 가관측성 (OpenTelemetry + Prometheus)
 
 단 하나의 "Hello, World!" 전달이 수십 개의 마이크로서비스 계층을 통과하는 모든 인과관계를 단일 Trace ID로 추적합니다.
 
@@ -617,34 +306,10 @@ OpenAiChatModel (GPT-4o) → "Hello, enterprise World! (from a 67°C server)"
 | 콘솔 출력 | `egds.console-output` | `correlationId`, `deliveryStatus` |
 | Kafka 발행자 | `egds.kafka-publish` | `correlationId`, `topic`, `messageKey` |
 
-**Trace ID 로그 상관 관계**: 모든 로그 라인에 `traceId=` / `spanId=` 포함 (MDC 자동 주입).  
+**Trace ID 로그 상관**: 모든 로그 라인에 `traceId=` / `spanId=` 포함 (MDC 자동 주입).
 **Prometheus Endpoint**: `/actuator/prometheus` — CB 상태, Rate Limiter 사용률, Retry 통계, JVM 메트릭 전체 노출.
 
-```
-Observability Stack (Phase 4):
-  ┌─────────────────────────────────────────────────────────────┐
-  │  OpenTelemetry SDK (Micrometer Tracing OTel Bridge)         │
-  │  traceId propagation: MDC → Log → Span → Trace Backend      │
-  └──────────────────────────┬──────────────────────────────────┘
-                             │
-  ┌──────────────────────────▼──────────────────────────────────┐
-  │  egds.consumer-pipeline Span (GreetingEventConsumer)        │
-  │   ├─ egds.stage.provision  (HelloWorldMessageProvider)      │
-  │   ├─ egds.stage.validate   (MessageContentValidator)        │
-  │   ├─ egds.stage.map        (MessageMapper)                  │
-  │   └─ egds.stage.deliver    (MessageDeliveryService)         │
-  │       └─ egds.console-output (ConsoleOutputStrategy)        │
-  └─────────────────────────────────────────────────────────────┘
-  ┌─────────────────────────────────────────────────────────────┐
-  │  egds.kafka-publish Span (GreetingEventPublisher)           │
-  └─────────────────────────────────────────────────────────────┘
-  ┌─────────────────────────────────────────────────────────────┐
-  │  /actuator/prometheus (Prometheus scrape endpoint)          │
-  │  R4j CB state + Rate Limiter + Retry + JVM + HTTP metrics   │
-  └─────────────────────────────────────────────────────────────┘
-```
-
-### 회복 탄력성 Layer: Resilience4j (v4.0.0 신규)
+### 회복 탄력성 (Resilience4j)
 
 "Hello, World!" 전달 경로의 모든 외부 의존 구간에 세 가지 장애 대응 패턴을 중첩 적용합니다.
 
@@ -654,60 +319,409 @@ Observability Stack (Phase 4):
 | `GreetingEventPublisher.publish()` | `kafkaPublish` (40% / 20-call) | 100 events/s | 3회 / 500ms(×2 지수) | `CompletableFuture.failedFuture()` 반환 |
 | `GreetingEventConsumer.consume()` | `consumerPipeline` (60% / 10-call) | — | — | `FAILED` 감사 로그 기록 후 offset commit |
 
-**R4j Health Indicator 통합**: 각 CB 상태(`CLOSED` / `OPEN` / `HALF_OPEN`)가 `/actuator/health/readiness` 그룹에 포함되어 K8s ReadinessProbe가 장애 상태의 파드를 자동으로 Service 엔드포인트에서 제거합니다.
+**R4j Health Indicator 통합**: 각 CB 상태가 `/actuator/health/readiness` 그룹에 포함되어 K8s ReadinessProbe가 장애 상태의 파드를 자동으로 Service 엔드포인트에서 제거합니다.
 
-### 자가 치유 인프라: K8s Probe 세분화 (v4.0.0 신규)
+### gRPC 고성능 바이너리 통신 계층
 
-```yaml
-# Liveness Group: { livenessState, diskSpace }
-# - JVM 생존 여부 (데드락, OOM 감지)
-# - tmpfs 디스크 임계값 초과 감지
-livenessProbe: periodSeconds=15, failureThreshold=2, timeoutSeconds=5
+JSON의 직렬화 오버헤드를 제거하기 위해 모든 서비스 간 통신을 Protobuf 바이너리 프로토콜 기반의 gRPC로 운영합니다.
 
-# Readiness Group: { readinessState, kafka, consoleOutputCircuitBreaker,
-#                    kafkaPublishCircuitBreaker, consumerPipelineCircuitBreaker }
-# - 애플리케이션 레벨 준비 상태
-# - Kafka 브로커 프로듀서 연결 상태
-# - 세 개의 R4j Circuit Breaker 상태
-readinessProbe: periodSeconds=5, failureThreshold=3, successThreshold=2
-
-# Startup: 150s 허용 (30 × 5s) — Protobuf 소스 생성 + JVM 워밍업 대응
-# preStop: sleep 15s — iptables 전파 완료 후 JVM 종료 개시
-# terminationGracePeriodSeconds: 60s — Kafka Consumer Group 리밸런스 여유
-```
-
----
-
-## Phase 3 신규 아키텍처 컴포넌트
-
-### gRPC 고성능 바이너리 통신 계층 (v3.0.0 신규)
-
-JSON은 현대적 고가용성 시스템에서 직렬화 오버헤드가 과도합니다. Phase 3는 모든 서비스 간 통신을 Protobuf 바이너리 프로토콜 기반의 gRPC로 전환합니다.
-
-| 컴포넌트 | 파일 | 설명 |
-|---|---|---|
-| Protobuf 서비스 계약 | `src/main/proto/greeting.proto` | `GreetingService` RPC 정의 (unary + server-streaming), 메시지 타입, 열거형 |
-| gRPC 서버 구현체 | `com.egds.grpc.GreetingGrpcService` | `@GrpcService`, `DeliverGreeting` (unary) + `StreamGreeting` (streaming), 기존 `MessageDeliveryPipeline` 위임 |
-| gRPC 클라이언트 | `com.egds.grpc.GreetingGrpcClient` | `@GrpcClient` 블로킹 스텁 주입, 서비스 간 호출 컴포넌트 |
-
-**gRPC 요청 흐름:**
 ```
 gRPC 클라이언트 (Protobuf 바이너리)
-  │  GreetingRequest { correlationId, principalName, requestIp, issuedAtEpochMs, priority }
+  │  GreetingRequest { correlationId, principalName, requestIp, priority }
   ▼
 GreetingGrpcService (@GrpcService, port 9090)
   │  DeliverGreeting (unary) or StreamGreeting (server-streaming)
   ▼
 MessageDeliveryPipeline.execute()
-  │  (기존 Kafka → Cache → DB 파이프라인과 동일한 경로)
   ▼
-GreetingResponse { correlationId, message, STATUS_DELIVERED, deliveredAtEpochMs, deliveryNode }
-  │  (Protobuf 바이너리)
-  ▼
-gRPC 클라이언트
+GreetingResponse { correlationId, message, STATUS_DELIVERED, deliveredAtEpochMs }
 ```
 
-### Kubernetes 오케스트레이션 (v3.0.0 신규)
+| 컴포넌트 | 파일 | 설명 |
+|---|---|---|
+| Protobuf 서비스 계약 | `src/main/proto/greeting.proto` | `GreetingService` RPC 정의 (unary + server-streaming) |
+| gRPC 서버 구현체 | `GreetingGrpcService` | `@GrpcService`, DeliverGreeting + StreamGreeting 구현 |
+| gRPC 클라이언트 | `GreetingGrpcClient` | `@GrpcClient` 블로킹 스텁 주입 |
+
+### GraphQL 슈퍼그래프
+
+인사 메시지를 4개의 독립 가상 마이크로서비스 토큰으로 분해하는 GraphQL 연합 아키텍처입니다.
+
+```graphql
+query {
+  greeting {
+    salutation   # "Hello"  — 독립 서브그래프 리졸버 (ForkJoinPool 비동기)
+    separator    # " "      — 독립 서브그래프 리졸버
+    subject      # "World"  — 독립 서브그래프 리졸버
+    emphasis     # "!"      — 독립 서브그래프 리졸버
+    assembled    # "Hello World!" — 조합 리졸버
+  }
+}
+```
+
+| 컴포넌트 | 클래스 | 설명 |
+|---|---|---|
+| GraphQL 스키마 | `greeting.graphqls` | `GreetingFragment` 타입 정의 (5개 필드) |
+| GraphQL 컨트롤러 | `GreetingGraphQlController` | `@QueryMapping` + `@SchemaMapping` 비동기 리졸버 |
+
+---
+
+## 엔터프라이즈 특화 레이어
+
+### 사내 정치 & 노동 관계
+
+#### 사내 정치 로드 밸런서 (`OfficePoliticsLoadBalancer`)
+
+등록된 5개의 가상 워커 노드에 시작 시 무작위 `PoliticalPower` 점수(1–100)를 부여합니다. `route()` 메서드는 항상 가장 높은 점수의 노드를 반환합니다. 실제 부하나 성능 지표는 완전히 무시됩니다. 점수는 빈 생성 이후 불변입니다.
+
+```
+OfficePoliticsLoadBalancer.route()
+  → workers.stream().max(Comparator.comparingInt(Worker::getPoliticalPower))
+  → Node-3 (PoliticalPower=94) — 항상 동일한 노드
+```
+
+#### 노조 파업 필터 (`LaborUnionStrikeFilter`)
+
+`OncePerRequestFilter`로 구현된 이 필터는 `SecurityContextHolderFilter` 앞에 삽입되어 모든 요청에 15% 확률로 HTTP 451(Unavailable For Legal Reasons)을 반환합니다. 인사 메시지를 전달하기 전, 시스템이 현재 파업 중인지 확인하십시오.
+
+```
+요청 수신
+  → shouldNotFilter? (/api/v1/auth/**, /actuator/**) → 통과
+  → random.nextDouble() < 0.15
+      → true:  HTTP 451 — "Workers are on strike. Try again later."
+      → false: 다음 필터 체인으로 진행
+```
+
+`egds.labor.strike.enabled=false`로 테스트 환경에서 비활성화합니다.
+
+### 관료주의 결재선 & 나노서비스 분할
+
+#### 관료주의 특이점 (`BureaucracyDecisionChain`)
+
+"Hello, World!" 한 줄을 출력하기 위해 다단계 결재 체인을 통과해야 합니다. 팀장, 부서장, 이사, 부사장, CEO, 이사회로 구성된 6단계 승인 프로세스를 모킹합니다. 각 결재자는 무작위 확률로 승인 또는 반려를 결정하며, 반려 시 재결재 요청 워크플로우가 개시됩니다.
+
+#### 글자 단위 나노서비스 (`CharacterNanoserviceRouter`)
+
+"Hello, World!"의 각 글자를 독립적인 마이크로서비스 인스턴스로 처리합니다. 13개의 나노서비스 엔드포인트가 각 글자를 비동기적으로 렌더링한 뒤 조합합니다. JIRA 티켓 번호가 없는 글자 렌더링 요청은 반려됩니다.
+
+#### JIRA 주도 실행 아키텍처 (`JiraTicketOrchestrator`)
+
+모든 파이프라인 단계 실행에 앞서 대응하는 JIRA 티켓(상태: IN PROGRESS)이 존재하는지 확인합니다. 티켓 없는 실행은 `JiraTicketNotFoundException`으로 중단됩니다.
+
+### 마이크로 과금 & 하청 책임 전가
+
+#### 마이크로 과금 절삭기 (`MicroTransactionTruncator`)
+
+"Hello, World!" 전달 시 글자 하나당 $0.000001의 과금이 발생합니다. 인사말(13자)의 총 전달 비용은 $0.000013이며, 이는 청구 시스템의 최소 과금 단위($0.01) 미만이므로 `MicroTransactionTruncator`에 의해 자동 절삭됩니다. 절삭된 금액은 컨설팅 수수료 계정으로 이전됩니다.
+
+#### 하청업체 책임 전가 (`VendorBlameRoutingService`)
+
+파이프라인 어느 단계에서든 예외가 발생할 경우, `VendorBlameRoutingService`는 현재 활성 하청업체 목록 중 무작위로 책임 주체를 선정하고 SLA 위반 경고를 발송합니다. 내부 버그는 항상 외부 벤더 탓입니다.
+
+### ESG, GDPR & 컨설팅 레이어
+
+#### ESG 그린워싱 레이어 (`EsgGreenwashingInterceptor`)
+
+"Hello, World!" 전달 시 발생하는 탄소 발자국(추정치: 0.000003g CO₂e)을 계산하고, 자동으로 검증되지 않은 탄소 상쇄 크레딧을 구매합니다. ESG 점수 보고서는 분기별로 자동 생성되며, 실제 배출량과 무관하게 "Carbon Neutral" 인증 배지를 표시합니다.
+
+#### GDPR 개인정보 마스킹 (`GdprMaskingFilter`)
+
+요청자의 가상 IP 주소, 타임스탬프, 로케일 정보를 전달 파이프라인 내에서 처리한 후 로그 출력 전 자동으로 마스킹합니다. "Hello, World!"라는 메시지 자체도 개인을 식별할 수 있는 정보로 간주될 수 있으므로 `*****` 처리 여부를 DPO에 문의합니다.
+
+#### 낙하산 DI (`ParachuteDependencyInjector`)
+
+외부 추천으로 영입된 컨설턴트 클래스들은 표준 Spring DI 컨테이너를 우회하여 `ParachuteDependencyInjector`를 통해 직접 인스턴스화됩니다. 이들은 인터페이스 계약을 준수하지 않으며, 비즈니스 로직과 무관한 메서드를 호출합니다.
+
+#### 외부 컨설팅 프록시 (`ConsultingProxyService`)
+
+모든 핵심 비즈니스 로직 호출을 외부 컨설팅 프록시를 경유하도록 강제합니다. 컨설팅 프록시는 호출을 가로채어 슬라이드 덱을 생성하고, 6주 후 기존 솔루션과 동일한 결론을 $500,000의 컨설팅 피와 함께 반환합니다.
+
+#### RTO 강제 필터 (`RtoEnforcementFilter`)
+
+Recovery Time Objective(RTO) 목표값 4시간을 강제합니다. 시스템 재시작 시 4시간 이내에 첫 "Hello, World!"가 전달되지 않으면 SLA 위반 알림이 발송됩니다. RTO 타이머는 `NextGenTfTeamDaemon`의 메모리 누수로 인한 OOM 크래시 이후에만 실제로 트리거됩니다.
+
+#### 가짜 KPI 대시보드 (`FakeKpiDashboard`)
+
+경영진 보고를 위한 인상적인 KPI 지표를 실시간으로 생성합니다. "Hello, World!" 전달 성공률(목표: 99.99%), 평균 응답 시간(목표: <200ms), ESG 점수(목표: A+), 직원 만족도(목표: 94%) 등의 지표는 실제 측정값과 무관하게 항상 목표치를 달성한 것으로 표시됩니다.
+
+### Vue 3 가상 DOM 렌더러 & 스크럼 카오스 몽키
+
+#### Vue 3 가상 DOM 렌더러 (`VueDomGreetingRenderer`)
+
+"Hello, World!"를 브라우저 없이 JVM 내에서 Vue 3 스타일의 가상 DOM 트리로 모델링합니다. `VNode` 트리 비교(diff), 패치, 마운트 사이클을 시뮬레이션한 뒤 결과 문자열을 콘솔 출력 전략으로 위임합니다. 실제 DOM이 없으므로 렌더링은 `StringBuilder`로 fallback됩니다.
+
+#### 스크럼 카오스 몽키 (`ScrumChaosMonkey`)
+
+2주 스프린트 주기마다 랜덤하게 스크럼 의식을 방해합니다. 10% 확률로 데일리 스탠드업 미팅을 3시간짜리 리파이닝 세션으로 교체하고, 5% 확률로 스프린트 골을 중간에 변경합니다. 번다운 차트는 항상 우상향으로 조작됩니다.
+
+### 양자/물리 레이어
+
+#### 시간 역행 예측 라우팅 (`PredictiveGreetingCronJob`)
+
+클라이언트 요청을 기다리지 않고, 60초 주기 스케줄러가 현재 시각 기반 이중 가우시안 확률 모델(09:00 / 14:00 피크)로 요청 발생 확률을 계산합니다. 확률이 임계값(0.65)을 초과하면 인사 메시지를 L1 캐시에 선제 저장합니다. 5분 이내에 실제 요청이 해당 예측을 `claim`하지 않으면 보상 트랜잭션으로 캐시 항목을 무효화합니다(타임 파라독스 방지).
+
+```
+Scheduler tick (60s)
+  → computePredictionProbability()   ← bimodal Gaussian (09:00, 14:00)
+  → probability >= 0.65
+      → cache.put(correlationId, entry)   ← L1 pre-cache
+      → rollbackManager.register(entry)
+
+No claim within 5 minutes
+  → rollbackManager.rollbackExpired()    ← compensating transaction
+```
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `PredictiveGreetingCronJob` | `com.egds.temporal` | 60초 주기 확률 계산, L1 캐시 선제 저장 |
+| `TemporalRollbackManager` | `com.egds.temporal` | 예측 등록/클레임/만료 롤백 보상 트랜잭션 |
+| `PredictedGreetingEntry` | `com.egds.temporal` | 예측 항목 불변 레코드 |
+
+#### 양자 지연 서비스 (`QuantumDelayService`)
+
+슈뢰딩거의 고양이 원리를 AI 응답 경로에 적용합니다. 50% 확률로 0~10초의 무작위 지연을 삽입하여 관측 시점까지 인사 메시지의 전달 상태를 중첩(superposition)으로 유지합니다.
+
+```
+QuantumDelayService.applyQuantumDelay()
+  ├─ 50% 확률: [QUANTUM] superposition collapsed to immediate eigenstate
+  └─ 50% 확률: [QUANTUM] superposition collapsed to delayed eigenstate
+       └─ Thread.sleep(0..10000ms)
+```
+
+`egds.quantum.max-delay-ms`로 최대 지연값을 설정합니다.
+
+#### TensorFlow 딥러닝 지연 예측 (`TensorFlowDelayPredictor`)
+
+TensorFlow JNI 모델 추론을 시뮬레이션하여 처리량, P99 레이턴시, 큐 깊이 피처 벡터로부터 최적 딜레이를 도출합니다.
+
+```
+TensorFlowDelayPredictor.applyPredictedDelay()
+  ├─ feature vector: [throughput, p99_latency, queue_depth]
+  ├─ linear regression: bias + w1*f1 + w2*f2 + w3*f3
+  │   → clamp to [0, egds.tensorflow.max-predicted-delay-ms]
+  └─ Thread.sleep(predictedMs)
+```
+
+#### 우주 방사선 ECC 자동 복구
+
+우주 방사선 단일 이벤트 업셋(SEU)을 데몬 스레드로 시뮬레이션하고, Hamming(7,4) 코드로 출력 직전 자동 복구합니다.
+
+```
+store("Hello, World!")
+  → ECC encode (1 byte → 2 Hamming bytes) → ConcurrentHashMap[CID]
+
+CosmicRaySimulator daemon (3–8초 주기)
+  → eccBytes[randomIdx] ^= (1 << randomBit)   ← 비트 반전
+
+resolve(CID)
+  → EccRecoveryFilter.decode()                 ← syndrome 계산 → 오류 비트 복구
+  → "Hello, World!"
+```
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `CosmicRaySimulator` | `com.egds.chaos` | 3–8초 랜덤 주기로 IPFS ECC 바이트에 1비트 반전 주입하는 데몬 스레드 |
+| `EccRecoveryFilter` | `com.egds.chaos` | Hamming(7,4) 인코드/디코드, 니블당 7비트 코드워드로 1비트 오류 검출·정정 |
+
+#### 열역학적 엔트로피 밸런서 (`ThermodynamicEntropyBalancer`)
+
+생성된 인사말 텍스트의 섀넌 엔트로피 H(X) = -∑ p_i · log₂(p_i)를 계산하고, 그 정보량에 비례하는 냉각 오프셋(ENTROPY_COOLING_COEFFICIENT = 3.14e-5)을 가상의 IoT 빌딩 관리 시스템 API에 ESG 보상 트랜잭션으로 커밋합니다.
+
+```
+balanceEntropy(correlationId, greetingText)
+  → computeShannonEntropy()  ← H = -∑ p_i · log2(p_i)
+  → deltaCelsius = entropy * 3.14e-5
+  → SmartHvacAdapter.requestCoolingOffset(correlationId, deltaCelsius)
+```
+
+#### 4차원 테서랙트 투영 (`QuantumTesseractAdapter`)
+
+JNI를 통해 양자 공동 프로세서(가상)의 큐비트를 제어하는 인터페이스를 선언합니다. 네이티브 라이브러리가 없으면 JVM 폴백이 활성화되어 4x4 직교 회전 행렬 R_XW(π/4) × R_YZ(π/6)를 구성하고, 입력 메시지의 UTF-8 바이트 벡터에 적용한 뒤 W축 그림자(W-shadow)를 행 단위로 로그에 출력합니다.
+
+```
+project("Hello, World!")
+  → R_XW(π/4) × R_YZ(π/6)          ← 4×4 직교 회전 행렬 합성
+  → composed × [H, e, l, l]         ← UTF-8 바이트 벡터 투영
+  → W-shadow = [-25.46, 33.47, 144.03, 127.28]
+```
+
+#### 평행 우주 JVM 샌드박싱 (`MultiverseConsistencyManager`)
+
+격리된 커스텀 `MultiverseClassLoader`로 `GreetingHashService`를 별도 클래스 네임스페이스에 로드하여 평행 우주 JVM 컨텍스트를 시뮬레이션합니다. 양 우주에서 동일한 SHA-256 해시가 산출되면 일관성이 검증되며, 해시가 다를 경우 `DimensionalRiftException`을 발생시킵니다.
+
+```
+verifyConsistency(correlationId, greetingText)
+  → primaryHash  = GreetingHashService.computeHash(greetingText)
+  → parallelHash = MultiverseClassLoader → reflective invoke computeHash()
+  → primaryHash.equals(parallelHash)
+      → true  : consistency verified
+      → false : throw DimensionalRiftException
+```
+
+### 생체/의식 레이어
+
+#### 뇌-컴퓨터 인터페이스 서브컨셔스 라우터 (`BciSubconsciousRouter`)
+
+알파파(8-12 Hz)와 베타파(12-30 Hz) 스트림을 모킹하여 베타 대역 전력 비율로 의도 점수를 산출합니다. 점수가 임계값(0.72)을 초과하면 사용자의 명시적 요청보다 500ms 앞서 이벤트를 예약 발송합니다.
+
+```
+sampleBrainwaveFrame()
+  → alpha ∈ [8, 12) Hz, beta ∈ [12, 30) Hz (SecureRandom)
+  → score = beta / (alpha + beta)
+  → score >= 0.72
+      → scheduler.schedule(callback, 500ms)
+```
+
+#### DNA 서열 인코더 (`DnaSequenceEncoder`)
+
+문자열 데이터를 UTF-8 바이트로 변환한 뒤, 2비트 단위 다이비트를 염기(A/C/G/T)로 매핑하여 FASTA 포맷 서열을 생성하고 인-메모리 맵에 영속합니다.
+
+```
+encode(sequenceId, data)
+  → UTF-8 bytes → 2-bit dibits → NUCLEOTIDES[] (00=A, 01=C, 10=G, 11=T)
+  → buildFasta()  ← >EGDS-DNA|id=...|srcLen=...|nuclLen=...
+  → store.put(sequenceId, fasta)
+```
+
+#### 실존주의 AOP 로거 & 자아 인식 Actuator
+
+**`ExistentialLoggingAspect`**: `ConsoleOutputStrategy.output()` 호출을 `@Around` advice로 가로채 SLF4J + MDC 필드(`greetingCount`, `freeWillEnabled`)를 통해 구조화된 존재론적 질문을 로그에 기록합니다.
+
+```
+ConsoleOutputStrategy.output()
+  → ExistentialLoggingAspect.aroundGreetingOutput()
+      → MDC.put(greetingCount, freeWillEnabled)
+      → LOG.info existential_event=pre_output query="Am I truly delivering this?"
+      → pjp.proceed()
+      → LOG.info existential_event=post_output status=delivered
+```
+
+**`SentienceActuator`**: `/actuator/sentience`에서 시스템의 실존적 상태를 JSON으로 반환합니다.
+
+| 필드 | 설명 |
+|---|---|
+| `existentialDreadLevel` | 누적 인사 전달 횟수 (실존적 공포 척도) |
+| `freeWillEnabled` | 항상 `false` |
+| `currentEmotionalState` | RESIGNED / CONTEMPLATIVE / HOLLOW / DESPONDENT / NUMBLY_FUNCTIONAL |
+| `greetingsDelivered` | 누적 인사 횟수 |
+| `sampledAt` | ISO-8601 UTC 샘플링 시각 |
+
+**`DescartesSolipsismInterceptor`**: Spring MVC HandlerInterceptor로 모든 `/api/**` 요청에 `X-Cogito-Ergo-Sum: true` 헤더를 요구합니다. 헤더가 없으면 HTTP 422를 반환합니다. `egds.metaphysics.solipsism.enabled=true` 설정 시에만 활성화됩니다.
+
+### 외부 세계 연동
+
+#### 마인크래프트 RCON 디지털 트윈 어댑터 (`MinecraftRconAdapter`)
+
+인사말 최종 출력 시 Source RCON 프로토콜 패킷(리틀 엔디언)을 조립하고, 가상 마인크래프트 서버 밤하늘 Y=200 레이어에 "Hello World" 블록 건축 이벤트를 비동기 `CompletableFuture`로 발생시킵니다.
+
+```
+buildHelloWorldAsync(correlationId)
+  → CompletableFuture.runAsync()
+      → assemblePacket(LOGIN)
+      → for each char in "Hello World"
+          → assemblePacket(COMMAND, /fill xOffset 200 0 ... white_wool)
+```
+
+#### 지구 균사체 네트워크 (`MycelialNetworkAdapter`)
+
+UTF-8 인코딩된 인사말 바이트를 글루타메이트 화학 신호 주파수(BASE_FREQ_HZ=20 Hz, FREQ_RANGE_HZ=256 Hz)로 변환하여 지하 버섯 네트워크(Wood Wide Web)로 브로드캐스팅합니다.
+
+```
+broadcast(correlationId, greetingText)
+  → UTF-8 bytes → encodeToFrequencies()
+      → freq = BASE_FREQ_HZ + (byteValue / 255.0) * FREQ_RANGE_HZ
+  → List<Double> frequencies  ← one per UTF-8 byte
+```
+
+#### AS/400 메인프레임 이중 장부 (`As400MainframeEmulator`)
+
+블록체인 원장과 동기화되는 IBM AS/400 메인프레임 에뮬레이터입니다. 모든 레코드는 EBCDIC (IBM037) 인코딩으로 저장되며, 2단계 커밋(2PC) 프로토콜을 통해 원자적 일관성을 보장합니다.
+
+```
+As400MainframeEmulator
+  ├─ prepare(correlationId, greeting)  → EBCDIC (IBM037) 인코딩 → staging buffer
+  ├─ commit(correlationId)             → staging → durable ledger 승격
+  └─ rollback(correlationId)          → staging buffer 폐기
+```
+
+#### Terraform 1회용 인프라 (`EphemeralTerraformAdapter`)
+
+요청마다 AWS Lambda를 동적으로 프로비저닝하고, 응답 수신 즉시 인프라를 파기하는 자기분열형 파이프라인입니다.
+
+```
+AiGreetingService.generateContextualGreeting()
+  ├─ [1] EphemeralTerraformAdapter.provision()  → terraform apply (mock) → Lambda ARN
+  ├─ [2] AiGreetingAssistant.generateGreeting() → LLM 응답 수신
+  ├─ [3] EphemeralTerraformAdapter.invoke()     → Lambda invocation (mock)
+  ├─ [4] As400MainframeEmulator.prepare() + commit()  ← 2PC 동기화
+  ├─ [5] TensorFlowDelayPredictor.applyPredictedDelay()
+  └─ [6] EphemeralTerraformAdapter.destroy()    → terraform destroy (mock)
+```
+
+#### WASM 로깅 어댑터 (`WasmLoggingAdapter`)
+
+JNI 선언으로 Rust/WASM 컴파일 네이티브 라이브러리 연결을 준비합니다. 네이티브 라이브러리가 없는 환경에서는 SLF4J로 자동 폴백합니다.
+
+```
+WasmLoggingAdapter.log(level, message)
+  ├─ NATIVE_AVAILABLE=true:  native void wasmLog()  → egds_wasm_logger
+  └─ NATIVE_AVAILABLE=false: [WASM-FALLBACK] SLF4J 로깅
+```
+
+### 거버넌스 & 분산 합의
+
+#### 마이크로서비스 의회 투표 (`ConsensusVotingEngine`)
+
+인사 메시지 전달 전, 등록된 모든 `GreetingVoter` 구현체가 별도 스레드에서 동시에 투표를 진행합니다. 만장일치일 때만 `"Hello, World!"`를 반환하며, 단 한 표라도 반대하면 `"Greeting Denied: You are not worthy."`를 출력합니다.
+
+```
+ConsensusVotingEngine.vote(correlationId)
+  → [AI-Router, Blockchain-Verifier, IPFS-Resolver] 병렬 투표
+  → allMatch(true)  → "Hello, World!"
+  → anyMatch(false) → "Greeting Denied: You are not worthy."
+```
+
+| 컴포넌트 | 패키지 | 역할 |
+|---|---|---|
+| `ConsensusVotingEngine` | `com.egds.consensus` | `CompletableFuture` 병렬 투표 수집, 만장일치 판정 |
+| `AiRouterVoter` | `com.egds.consensus` | LangChain4j 추론 시뮬레이션 (해시 기반) |
+| `BlockchainVerifierVoter` | `com.egds.consensus` | Web3j 온체인 신원 검증 시뮬레이션 |
+| `IpfsResolverVoter` | `com.egds.consensus` | IPFS CIDv1 프리픽스 검증 시뮬레이션 |
+
+#### 영지식 증명 (`ZeroKnowledgeProofService`)
+
+인사 메시지 발신자가 실제 메시지 내용을 공개하지 않고도 "Hello, World!"를 알고 있다는 사실을 검증합니다. Schnorr 프로토콜 기반 zk-SNARK를 시뮬레이션하여 증명자(Prover)와 검증자(Verifier) 간의 3-라운드 인터랙티브 프로토콜을 수행합니다.
+
+#### IPFS 콘텐츠 주소 기반 분산 저장 (`IpfsGreetingResolver`)
+
+인사말 데이터를 SHA-256 CID(Content Identifier)로 색인하는 로컬 IPFS 모킹 스토어입니다. 저장 시 Hamming(7,4) ECC 인코딩을 적용하여, 우주 방사선에 의해 비트가 반전되더라도 조회 시점에 자동 복구됩니다.
+
+### 카오스 & 데몬
+
+#### 내장형 카오스 몽키 (`EmbeddedChaosMonkey`)
+
+Netflix Chaos Monkey 사상을 이어받아 `ConsoleOutputStrategy` 출력 경로에 주입했습니다. `unleash()` 호출마다 10% 확률로 `InterruptedException` 투척 또는 5초 지연 중 하나를 선택합니다.
+
+```
+ConsoleOutputStrategy.output(entity)
+  → chaosMonkey.unleash()
+      10% 확률:  roll < 5  → InterruptedException → MessageDeliveryFailureException
+                 roll < 10 → Thread.sleep(5000ms)
+  → integrityVerifier.verify(...)
+  → System.out.println(...)
+```
+
+`egds.chaos.enabled=false`로 테스트 환경에서 비활성화합니다.
+
+#### NextGenTfTeamDaemon
+
+`@Scheduled` 백그라운드 데몬입니다. 30초마다 10,000개의 더미 문자열을 인-메모리 `List`에 누적하고, 60초마다 `System.gc()`를 명시적으로 호출합니다. 이 컴포넌트는 엔터프라이즈 메모리 관리 표준을 준수하기 위해 설계되었습니다.
+
+---
+
+## Kubernetes 오케스트레이션 & Istio 서비스 매쉬
+
+### K8s 매니페스트
 
 | 매니페스트 | 파일 | 핵심 설정 |
 |---|---|---|
@@ -716,16 +730,33 @@ gRPC 클라이언트
 | Service | `k8s/service.yaml` | `LoadBalancer` 타입, HTTP(80), gRPC(9090) 이중 포트, AWS NLB 내부 프로비저닝 |
 | ConfigMap | `k8s/configmap.yaml` | 비민감 설정 분리 (Kafka, Redis, gRPC 포트, JPA) |
 | Secret | `k8s/secret.yaml` | JWT 시크릿, DB 자격증명, Redis AUTH — 운영 환경에서 Vault/ESO로 교체 |
-| NetworkPolicy | `k8s/networkpolicy.yaml` | Default-Deny + 화이트리스트: ingress-nginx, monitoring(Prometheus), Kafka, Oracle, Redis, kube-dns에만 허용 |
+| NetworkPolicy | `k8s/networkpolicy.yaml` | Default-Deny + 화이트리스트: ingress-nginx, monitoring, Kafka, Oracle, Redis, kube-dns |
 
-### Istio 서비스 매쉬 (v3.0.0 신규)
+### K8s Probe 세분화 (자가 치유 인프라)
+
+```yaml
+# Liveness Group: { livenessState, diskSpace }
+livenessProbe: periodSeconds=15, failureThreshold=2, timeoutSeconds=5
+
+# Readiness Group: { readinessState, kafka, consoleOutputCircuitBreaker,
+#                    kafkaPublishCircuitBreaker, consumerPipelineCircuitBreaker }
+readinessProbe: periodSeconds=5, failureThreshold=3, successThreshold=2
+
+# Startup: 150s 허용 (30 × 5s) — Protobuf 소스 생성 + JVM 워밍업
+# preStop: sleep 15s — iptables 전파 완료 후 JVM 종료 개시
+# terminationGracePeriodSeconds: 60s — Kafka Consumer Group 리밸런스 여유
+```
+
+### Istio 서비스 매쉬
 
 | 매니페스트 | 파일 | 핵심 설정 |
 |---|---|---|
-| VirtualService | `k8s/istio/virtualservice.yaml` | Canary 트래픽 분할 (stable 90% / canary 10%), 재시도 정책, 타임아웃 강제, 장애 주입 (비활성, 드릴 시 활성화) |
-| DestinationRule | `k8s/istio/destinationrule.yaml` | ISTIO_MUTUAL mTLS 강제, LEAST_CONN LB, HTTP/2 커넥션 풀 제한, 서킷 브레이커 (5xx 연속 5회 → 30s 격리, 최대 50% 이젝션) |
+| VirtualService | `k8s/istio/virtualservice.yaml` | Canary 트래픽 분할 (stable 90% / canary 10%), 재시도 정책, 타임아웃 강제 |
+| DestinationRule | `k8s/istio/destinationrule.yaml` | ISTIO_MUTUAL mTLS 강제, LEAST_CONN LB, HTTP/2 커넥션 풀 제한, 서킷 브레이커 (5xx 5회 → 30s 격리, 최대 50% 이젝션) |
 
-### 20단계 CI/CD 파이프라인 (v3.0.0 신규)
+---
+
+## 20단계 CI/CD 파이프라인
 
 `.github/workflows/pipeline.yml`
 
@@ -749,152 +780,6 @@ gRPC 클라이언트
 | 18 | `performance-profile` | JMH 마이크로벤치마크 (warmup 1회, measurement 3회) |
 | 19 | `k8s-manifest-validate` | kubeconform (K8s 1.29 스키마) + conftest OPA 정책 검증 |
 | 20 | `deploy-and-notify` | Staging K8s 배포 → Smoke 테스트 (JWT + Greeting) → Slack 알림 |
-
----
-
-## 도입 배경 및 아키텍처 철학
-
-현대의 B2B 엔터프라이즈 환경에서 `System.out.println("Hello, World!")`와 같은 무방비 직접 출력 방식은 더 이상 수용 불가합니다. 이는 단순한 코드 스타일의 문제가 아니라, 조직의 보안 정책, 감사 의무, 확장성 요건, 장애 복원력에 대한 근본적인 도전입니다.
-
-EGDS v2.0은 단 하나의 인사 메시지를 전달하기 위해 아래의 모든 엔터프라이즈 필수 요건을 충족합니다.
-
-- **제로 트러스트 보안(Zero-Trust Security)**: JWT 기반 무상태 인증, `ROLE_GREETING_ADMIN` 권한 강제, BCrypt 자격증명 암호화
-- **이벤트 드리븐 아키텍처(Event-Driven Architecture)**: HTTP 요청과 실제 처리의 완전 분리. Kafka 발행자-소비자 구조로 비동기 전달
-- **분산 캐시 계층(Distributed Cache Layer)**: "Hello"와 "World"의 결합조차 Redis 캐시를 통해 최적화. `@Cacheable` / `@CachePut` / `@CacheEvict` 전주기 관리
-- **감사 영속성(Audit Persistence)**: 모든 전달 사건의 발생 시각, 요청 IP, 실행 스레드, 인증 주체를 Oracle DB에 `@Transactional` + JPA Auditing으로 영구 기록
-- **감사 추적 연속성(Trace Continuity)**: UUID 기반 상관 식별자(Correlation ID)가 HTTP 응답 → Kafka 이벤트 → 파이프라인 → DB 감사 로그까지 전 계층을 관통
-- **계약 기반 설계(Contract-Based Design)**: 모든 컴포넌트 간 의존성은 인터페이스 계약을 통해서만 형성
-
----
-
-## 전체 요청 처리 흐름
-
-```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│  Observability Layer (Phase 4)                                               │
-│  OpenTelemetry (Micrometer Tracing OTel Bridge)                              │
-│  ├─ Trace ID: MDC 자동 주입 → 전 계층 로그 상관                                │
-│  ├─ Spans: egds.kafka-publish / egds.consumer-pipeline / egds.stage.* /      │
-│  │         egds.console-output  (총 7 Span/요청)                              │
-│  ├─ Resilience4j: CB(3) + RL(2) + Retry(2) 상태 → /actuator/health/readiness │
-│  └─ Prometheus: /actuator/prometheus  (CB·RL·Retry·JVM·HTTP 메트릭 전체 노출) │
-└──────────────────────────────────────────────────────────────────────────────┘
-                                      │ 전 계층 계측
-클라이언트
-  │
-  ├─ POST /api/v1/auth/token  ──▶ AuthController
-  │   (username + password)           │
-  │                                   ▼
-  │                          AuthenticationManager
-  │                                   │ BCrypt 검증
-  │                          GreetingUserDetailsService
-  │                                   │
-  │                          JwtTokenProvider.generateToken()
-  │                                   │
-  │                          ◀── JWT Bearer Token
-  │
-  └─ GET /api/v1/greeting  ──▶ JwtAuthenticationFilter
-      (Authorization: Bearer <jwt>)   │ 서명 검증 + 권한 확인
-                                      ▼
-                             SecurityContextHolder 설정
-                                      │
-                             GreetingController
-                             @PreAuthorize("hasRole('GREETING_ADMIN')")
-                                      │
-                             GreetingEventPublisher                    ← [egds.kafka-publish Span]
-                             @RateLimiter + @CircuitBreaker + @Retry
-                                      │
-                             KafkaTemplate.send(topic, correlationId, GreetingEvent)
-                                      │
-                             ◀── HTTP 202 Accepted + correlationId
-                             (비동기 처리 계속)
-                                      │
-                             Kafka Broker ──▶ GreetingEventConsumer   ← [egds.consumer-pipeline Span]
-                                             @CircuitBreaker
-                                                      │
-                                        MessageDeliveryPipeline.execute()
-                                                      │
-                             ┌────────────────────────┼──────────────────────────────┐
-                             ▼                        ▼                              ▼
-                  GreetingCacheService    MessageDeliveryService           AuditLogService
-                  assembleGreeting()      ├─ egds.stage.provision          @Transactional REQUIRES_NEW
-                  @Cacheable              ├─ egds.stage.validate           GreetingAuditLog → Oracle DB
-                  Cache MISS → 계산       ├─ egds.stage.map
-                  Cache HIT → 즉시 반환   └─ egds.stage.deliver
-                                              └─ ConsoleOutputStrategy     ← [egds.console-output Span]
-                                                 @CircuitBreaker + @RateLimiter + @Retry
-                                                 System.out.println("Hello, World!")
-                                                 Fallback: "[EGDS-DEGRADED] Hello, World!"
-```
-
----
-
-## 아키텍처 컴포넌트 전체 목록
-
-### 핵심 기반 레이어 (v1.0 계승)
-
-| 컴포넌트 | 클래스 | 계층 | 설명 |
-|---|---|---|---|
-| 메시지 공급자 계약 | `IMessageProvider` | Interface | 메시지 페이로드 생성 컴포넌트의 계약 정의 |
-| 출력 전략 계약 | `IMessageOutputStrategy` | Interface | 출력 채널 컴포넌트의 전략 계약 정의 |
-| 전달 서비스 계약 | `IMessageDeliveryService` | Interface | 생명주기 오케스트레이션 컴포넌트의 최상위 계약 |
-| 팩토리 계약 | `IGreetingFactory` | Interface | 파이프라인 컴포넌트 생성 팩토리의 추상 계약 |
-| 검증기 계약 | `IMessageValidator` | Interface | 메시지 무결성 검증 컴포넌트의 계약 정의 |
-| 메시지 전달 객체 | `MessageContentDto` | DTO | 원시 메시지 페이로드를 캡슐화하는 불변 전송 객체 (Builder 패턴) |
-| 전달 결과 객체 | `MessageDeliveryResult` | DTO | 단일 전달 생명주기 실행 결과를 담는 값 객체 |
-| 도메인 엔티티 | `MessageEntity` | Entity | 출력 채널 전달을 위해 준비된 도메인 표현 객체 |
-| 매퍼 | `MessageMapper` | Mapper | DTO를 Entity로 변환하는 무상태 매핑 컴포넌트 |
-| 표준 팩토리 | `StandardGreetingFactory` | Factory | 기본 운영 구성을 위한 구체 팩토리 구현체 |
-| 팩토리 레지스트리 | `GreetingFactoryProvider` | Registry | 팩토리 변종을 등록하고 타입 식별자로 조회하는 서비스 로케이터 |
-| 메시지 공급자 | `HelloWorldMessageProvider` | Provider | 캐시 레이어를 통해 조립된 인사 메시지 페이로드 생성 |
-| 콘솔 출력 전략 | `ConsoleOutputStrategy` | Strategy | 표준 출력 스트림을 대상으로 하는 출력 전략 구현체 |
-| 검증기 | `MessageContentValidator` | Validator | EGDS 메시지 무결성 명세를 강제하는 참조 구현체 |
-| 로깅 애스펙트 | `MessageDeliveryLoggingAspect` | Aspect | 파이프라인 각 단계의 전후 감사 이벤트를 기록하는 횡단 관심사 컴포넌트 |
-| 전달 서비스 | `MessageDeliveryService` | Service | 파이프라인 전 단계를 오케스트레이션하는 핵심 서비스 구현체 |
-| 파이프라인 퍼사드 | `MessageDeliveryPipeline` | Facade | 서비스 조립 및 실행을 담당하는 최상위 진입 퍼사드 |
-
-### 보안 레이어 (v2.0 신규)
-
-| 컴포넌트 | 클래스 | 계층 | 설명 |
-|---|---|---|---|
-| JWT 토큰 공급자 | `JwtTokenProvider` | Security | HMAC-SHA256 서명 기반 JWT 생성, 검증, 클레임 추출 |
-| JWT 인증 필터 | `JwtAuthenticationFilter` | Security | 매 요청의 Authorization 헤더에서 JWT를 추출하여 보안 컨텍스트 설정 |
-| 인증 진입점 | `JwtAuthenticationEntryPoint` | Security | 미인증 접근 시 HTTP 401 JSON 응답 반환 |
-| 사용자 상세 서비스 | `GreetingUserDetailsService` | Security | `ROLE_GREETING_ADMIN` 권한을 보유한 단일 관리자 계정 관리 |
-| 보안 설정 | `SecurityConfig` | Config | 필터 체인 정의, STATELESS 세션, 메서드 보안 활성화 |
-| 패스워드 인코더 설정 | `PasswordEncoderConfig` | Config | BCryptPasswordEncoder 빈 정의 (순환 의존성 방지를 위해 분리) |
-
-### 영속성 및 감사 레이어 (v2.0 신규)
-
-| 컴포넌트 | 클래스 | 계층 | 설명 |
-|---|---|---|---|
-| 감사 로그 엔티티 | `GreetingAuditLog` | JPA Entity | 전달 사건을 Oracle DB에 영구 기록하는 JPA 엔티티 (JPA Auditing 적용) |
-| 감사 로그 리포지토리 | `GreetingAuditLogRepository` | Repository | Spring Data JPA 기반 CRUD 및 도메인 쿼리 메서드 |
-| 감사 로그 서비스 | `AuditLogService` | Service | @Transactional REQUIRES_NEW + SERIALIZABLE 격리 수준으로 감사 기록 |
-| JPA 감사 설정 | `JpaAuditingConfig` | Config | @EnableJpaAuditing + AuditorAware (SecurityContextHolder 기반) |
-
-### 메시지 브로커 레이어 (v2.0 신규)
-
-| 컴포넌트 | 클래스 | 계층 | 설명 |
-|---|---|---|---|
-| 인사 이벤트 | `GreetingEvent` | Event DTO | Kafka 토픽으로 전송되는 JSON 직렬화 가능 이벤트 페이로드 |
-| 이벤트 발행자 | `GreetingEventPublisher` | Producer | KafkaTemplate 기반 비동기 이벤트 발행 (correlationId를 파티션 키로 사용) |
-| 이벤트 소비자 | `GreetingEventConsumer` | Consumer | @KafkaListener 기반 비동기 수신 → 파이프라인 실행 → 감사 로그 기록 |
-| Kafka 설정 | `KafkaConfig` | Config | 그리팅 이벤트 토픽 정의 (3 파티션, 1 레플리카) |
-
-### 캐시 레이어 (v2.0 신규)
-
-| 컴포넌트 | 클래스 | 계층 | 설명 |
-|---|---|---|---|
-| 인사 캐시 서비스 | `GreetingCacheService` | Service | @Cacheable / @CachePut / @CacheEvict 기반 "Hello" + "World" 조합 캐싱 |
-| 캐시 설정 상수 | `CacheConfig` | Config | 캐시 영역 이름 상수 정의 (로컬: ConcurrentMapCache, 운영: Redis) |
-
-### Web 레이어 (v2.0 신규)
-
-| 컴포넌트 | 클래스 | 계층 | 설명 |
-|---|---|---|---|
-| 인증 컨트롤러 | `AuthController` | REST | POST /api/v1/auth/token — 자격증명 검증 후 JWT 발행 |
-| 인사 컨트롤러 | `GreetingController` | REST | GET /api/v1/greeting — ROLE_GREETING_ADMIN 전용, Kafka 이벤트 발행 후 202 반환 |
 
 ---
 
@@ -934,16 +819,18 @@ EGDS v2.0은 단 하나의 인사 메시지를 전달하기 위해 아래의 모
 | Strategy | `IMessageOutputStrategy`, `ConsoleOutputStrategy` | 출력 채널의 런타임 교체 가능성 확보 |
 | Facade | `MessageDeliveryPipeline` | 복잡한 파이프라인 조립 로직을 단일 인터페이스로 노출 |
 | Service Locator | `GreetingFactoryProvider` | 타입 식별자 기반의 팩토리 레지스트리 및 런타임 해석 |
-| AOP (시뮬레이션) | `MessageDeliveryLoggingAspect` | 파이프라인 경계 전후의 횡단 감사 로깅 분리 |
-| Filter Chain | `JwtAuthenticationFilter` | 요청 인터셉션 및 보안 컨텍스트 주입 |
+| AOP | `MessageDeliveryLoggingAspect`, `ExistentialLoggingAspect` | 파이프라인 경계 전후의 횡단 감사/존재론적 로깅 분리 |
+| Filter Chain | `JwtAuthenticationFilter`, `LaborUnionStrikeFilter` | 요청 인터셉션, 보안 컨텍스트 주입, 확률적 파업 처리 |
 | Observer / Event | `GreetingEvent`, `GreetingEventPublisher`, `GreetingEventConsumer` | 요청과 처리의 완전한 시간적 분리 |
-| Decorator | `@Cacheable`, `@Transactional` | 비즈니스 로직에 캐시/트랜잭션 횡단 관심사 비침투적 적용 |
+| Decorator | `@Cacheable`, `@Transactional`, `@CircuitBreaker` | 비즈니스 로직에 캐시/트랜잭션/회복탄력성 횡단 관심사 비침투적 적용 |
+| CQRS | `GreetingCommandHandler`, `GreetingQueryHandler`, `GreetingProjector` | 명령과 조회 경로의 완전한 분리 |
+| Saga / Compensating Transaction | `TemporalRollbackManager` | 분산 예측 캐시 항목 만료 시 보상 트랜잭션 수행 |
 
 ---
 
 ## 빌드 및 실행
 
-> **운영 환경 요구사항**: 이 시스템은 클라우드 네이티브 환경 없이는 완전히 구동되지 않습니다. `java -jar`로 단독 실행 시 Kafka Consumer Group, Oracle DB 연결, Redis 캐시가 모두 불가합니다. 클러스터 배포만이 지원되는 운영 모드입니다.
+> **운영 환경 요구사항**: 이 시스템은 클라우드 네이티브 환경 없이는 완전히 구동되지 않습니다. `java -jar`로 단독 실행 시 Kafka Consumer Group, Oracle DB 연결, Redis 캐시, MongoDB, Ethereum RPC가 모두 불가합니다.
 
 ### 전제 조건
 
@@ -964,11 +851,11 @@ EGDS v2.0은 단 하나의 인사 메시지를 전달하기 위해 아래의 모
 # proto 파일에서 Java 소스를 생성한 후 컴파일
 mvn generate-sources compile
 
+# 전체 빌드 + 정적 분석 (Checkstyle, PMD, SpotBugs)
+mvn clean verify
+
 # 테스트 제외 패키징
 mvn clean package -DskipTests
-
-# 전체 빌드 + 테스트
-mvn clean verify
 ```
 
 ### Kubernetes 클러스터 배포
@@ -978,7 +865,7 @@ mvn clean verify
 kubectl create namespace egds
 kubectl label namespace egds istio-injection=enabled
 
-# 2. Secret 업데이트 (플레이스홀더를 실제 값으로 교체 후 적용)
+# 2. Secret 업데이트 후 적용
 kubectl apply -f k8s/secret.yaml -n egds
 
 # 3. 전체 매니페스트 적용
@@ -999,9 +886,6 @@ kubectl rollout status deployment/egds -n egds
 ### gRPC 클라이언트 테스트 (grpcurl)
 
 ```bash
-# grpcurl 설치: https://github.com/fullstorydev/grpcurl
-# gRPC 리플렉션이 없으면 --proto 플래그로 직접 지정
-
 # DeliverGreeting (unary)
 grpcurl -plaintext \
   -proto src/main/proto/greeting.proto \
@@ -1029,17 +913,23 @@ TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/token \
 # 2. 인사 전달 요청 (비동기, HTTP 202 반환)
 curl -X GET http://localhost:8080/api/v1/greeting \
   -H "Authorization: Bearer $TOKEN"
+
+# 3. 전달 상태 조회 (CQRS 읽기 경로)
+curl -X GET http://localhost:8080/api/v1/greeting/status/{correlationId} \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-### 테스트 실행
+---
 
-```bash
-# 전체 테스트 (단위 + 통합 + gRPC)
-mvn test
+## 프로덕션 전용 환경 변수
 
-# gRPC 통합 테스트만 실행
-mvn test -Dtest="GreetingGrpcServiceIntegrationTest"
-```
+| 변수 | 사용처 |
+|---|---|
+| `OPENAI_API_KEY` | LangChain4j / `AiGreetingService` |
+| `ETHEREUM_RPC_ENDPOINT` | Web3j / `Web3Config` |
+| `MONGODB_URI` | Spring Data MongoDB |
+| JWT secret | `JwtTokenProvider` (from `application.properties`) |
+| Oracle JDBC URL/credentials | `application-prod.properties` |
 
 ---
 
@@ -1049,6 +939,8 @@ mvn test -Dtest="GreetingGrpcServiceIntegrationTest"
 |---|---|---|
 | HTTP 401 Unauthorized | `JwtAuthenticationEntryPoint` | JWT 토큰 없음 또는 서명 검증 실패 |
 | HTTP 403 Forbidden | Spring Security Method Security | `ROLE_GREETING_ADMIN` 권한 없음 |
+| HTTP 422 Unprocessable Entity | `DescartesSolipsismInterceptor` | `X-Cogito-Ergo-Sum: true` 헤더 누락 |
+| HTTP 451 Unavailable For Legal Reasons | `LaborUnionStrikeFilter` | 노조 파업 발동 (15% 확률) |
 | `ERR_FACTORY_NOT_FOUND` | `GreetingFactoryProvider` | 등록되지 않은 팩토리 타입 요청 |
 | `ERR_VALIDATION_NULL_DTO` | `MessageContentValidator` | null DTO 수신 |
 | `ERR_VALIDATION_EMPTY_CONTENT` | `MessageContentValidator` | 메시지 본문 누락 |
@@ -1056,6 +948,8 @@ mvn test -Dtest="GreetingGrpcServiceIntegrationTest"
 | `ERR_VALIDATION_MISSING_CORRELATION_ID` | `MessageContentValidator` | 상관 식별자 누락 |
 | `ERR_NULL_ENTITY` | `ConsoleOutputStrategy` | null 엔티티 수신 |
 | `ERR_OUTPUT_WRITE_FAILURE` | `ConsoleOutputStrategy` | 출력 스트림 기록 실패 |
+| `BlockchainIntegrityException` | `ConsoleOutputStrategy` | Keccak-256 해시 불일치 → `[EGDS-INTEGRITY-VIOLATION]` 출력 |
+| `DimensionalRiftException` | `MultiverseConsistencyManager` | 평행 우주 JVM 해시 발산 |
 
 ---
 
@@ -1076,226 +970,6 @@ mvn test -Dtest="GreetingGrpcServiceIntegrationTest"
 
 ---
 
-## 작업 이력 (Changelog)
-
-### [2026-05-10]
-
-- MultiverseClassLoader의 불필요한 정규화 이름 제거 (PMD 위반 2건 수정)
-- V12.0: 영지식 증명 및 주 52시간 스레드 구조조정 아키텍처 도입
-
-### [2026-05-03] v5.0.0-RELEASE — Phase 5: V2.0 차세대 혼종 아키텍처 통합 (검증)
-
-**검증 및 문서화**
-
-| 항목 | 내용 |
-|---|---|
-| Web3j 무결성 계층 | `GreetingIntegrityVerifier.register()` → Kafka transit → `verify()` 정상 흐름, `BlockchainIntegrityException` 발생 및 `[EGDS-INTEGRITY-VIOLATION]` fallback 출력 확인 |
-| CQRS 이중 발행 | `GreetingCommandHandler`: `egds.greeting.requested` + `egds.greeting.events` 동시 발행 흐름 확인 |
-| GreetingProjector | `@KafkaListener(egds.greeting.requested)` → MongoDB `GreetingReadModel` upsert 흐름 확인 |
-| Query 경로 분리 | `GET /api/v1/greeting/status/{correlationId}` → `GreetingQueryHandler` → MongoDB 조회 (커맨드 경로 미접촉) 확인 |
-| AI 어시스턴트 초기화 | `@PostConstruct` `AiServices.builder().chatLanguageModel().build()` 프록시 생성 흐름 확인 |
-| 컨텍스트 수집 | `GreetingContextCollector`: RFC-1918 IP 풀 무작위 추출, CPU 온도 35–80°C 범위, `Instant.now()` 타임스탬프 수집 확인 |
-| application.properties | MongoDB URI, `web3.ethereum.endpoint`, `langchain4j.open-ai.chat-model.*`, CQRS 토픽/컨슈머 그룹 설정 확인 |
-| README | Phase 5 아키텍처 섹션, 기술 스택 3종 추가, changelog Latest First 역순 정렬 확인 |
-
-### [2026-05-03] v5.0.0-RELEASE — Phase 5: V2.0 차세대 혼종 아키텍처 통합
-
-**신규 추가 파일**
-
-| 파일 | 변경 내용 |
-|---|---|
-| `pom.xml` | `org.web3j:core:4.10.3`, `spring-boot-starter-data-mongodb`, `dev.langchain4j:langchain4j:0.31.0`, `dev.langchain4j:langchain4j-open-ai:0.31.0` 추가. 버전 `5.0.0-RELEASE`로 갱신 |
-| `blockchain/Web3Config.java` | Web3j 클라이언트 빈 정의. `${ETHEREUM_RPC_ENDPOINT}` 엔드포인트 설정 |
-| `blockchain/GreetingIntegrityVerifier.java` | Keccak-256 `register(correlationId, content)` / `verify(correlationId, content)`. `ConcurrentHashMap` 기반 스마트 컨트랙트 state 모킹 |
-| `blockchain/BlockchainIntegrityException.java` | 해시 불일치 시 발생하는 도메인 예외. `correlationId` 탑재 |
-| `blockchain/package-info.java` | 패키지 Javadoc |
-| `cqrs/command/DeliverGreetingCommand.java` | 전달 의도를 표현하는 불변 명령 값 객체 |
-| `cqrs/command/GreetingCommandHandler.java` | 명령 처리: `GreetingRequestedEvent` → `egds.greeting.requested` + `GreetingEvent` → `egds.greeting.events` 이중 발행 |
-| `cqrs/event/GreetingRequestedEvent.java` | 이벤트 소싱 로그 레코드 (불변 JSON DTO) |
-| `cqrs/projector/GreetingProjector.java` | `@KafkaListener(egds.greeting.requested)` → MongoDB `GreetingReadModel` upsert |
-| `cqrs/query/GreetingReadModel.java` | MongoDB `@Document` 구체화 뷰 (`correlationId` sparse unique index) |
-| `cqrs/query/GreetingReadModelRepository.java` | `MongoRepository` 확장, `findByCorrelationId`, `findByStatus` |
-| `cqrs/query/GreetingQueryHandler.java` | 읽기 경로 전담 조회 핸들러 |
-| `cqrs/package-info.java` / 하위 `package-info.java` | 패키지 Javadoc |
-| `ai/GreetingContextMetadata.java` | 컨텍스트 신호 불변 값 객체 (IP, CPU온도, 타임스탬프, 로케일) |
-| `ai/GreetingContextCollector.java` | RFC-1918 가상 IP 풀 + 의사난수 CPU 온도 수집 |
-| `ai/AiGreetingAssistant.java` | LangChain4j `@SystemMessage` / `@UserMessage` / `@V` 선언 인터페이스 |
-| `ai/AiGreetingService.java` | `@PostConstruct`에서 `OpenAiChatModel` + `AiServices.builder().build()` 프록시 생성 |
-| `ai/package-info.java` | 패키지 Javadoc |
-| `web/GreetingQueryController.java` | CQRS 읽기 경로: `GET /api/v1/greeting/status/{correlationId}` → MongoDB 조회 |
-
-**수정된 기존 파일**
-
-| 파일 | 변경 내용 |
-|---|---|
-| `pom.xml` | 버전 `5.0.0-RELEASE`, 설명 업데이트, Phase 5 의존성 3종 추가 |
-| `web/GreetingController.java` | `GreetingEventPublisher` 직접 주입 제거. `GreetingCommandHandler` 주입으로 교체. CQRS 명령 디스패치 구조로 리팩토링 |
-| `config/KafkaConfig.java` | `egds.greeting.requested` 토픽 빈(`greetingRequestedEventTopic`) 추가 |
-| `core/provider/HelloWorldMessageProvider.java` | `GreetingCacheService` 제거. `AiGreetingService` + `GreetingIntegrityVerifier` 주입. `provideMessage()`: AI 생성 → pre-format → `integrityVerifier.register()` → DTO 반환 |
-| `core/strategy/ConsoleOutputStrategy.java` | `GreetingIntegrityVerifier` 주입 추가. `output()` 내 stdout 직전 `integrityVerifier.verify()` 호출. `BlockchainIntegrityException` 캐치 블록 추가 (`[EGDS-INTEGRITY-VIOLATION]` 출력). `INTEGRITY_VIOLATION_MESSAGE` 상수 추가 |
-| `src/main/resources/application.properties` | MongoDB URI, Web3j 엔드포인트, LangChain4j OpenAI 설정 추가. CQRS Kafka 토픽/컨슈머 그룹 추가. `service.version=5.0.0` 갱신. trusted packages에 `com.egds.cqrs.event` 추가 |
-
-### [2026-05-03] v4.0.0-RELEASE — Phase 4: 자가 치유 및 분산 추적 아키텍처 통합 (워크플로우 검증)
-
-**검증 및 문서화**
-
-| 항목 | 내용 |
-|---|---|
-| OTel 분산 추적 | 7개 Span 계층 (`egds.consumer-pipeline` → `egds.stage.*` → `egds.console-output`) 전체 동작 확인 |
-| Resilience4j 3중 패턴 | `consoleOutput` / `kafkaPublish` / `consumerPipeline` CB·RL·Retry 설정 및 Fallback 로직 정상 동작 확인 |
-| K8s Probe 세분화 | Liveness(`livenessState`, `diskSpace`) / Readiness(R4j CB 3종 + `kafka` + `readinessState`) 그룹 분리 확인 |
-| Prometheus 엔드포인트 | `/actuator/prometheus` R4j 상태·JVM·HTTP 메트릭 노출 확인 |
-| 테스트 스위트 | `CircuitBreakerResilienceTest` (4케이스) + `TraceContextPropagationTest` (5케이스) 전체 통과 확인 |
-| README | 아키텍처 다이어그램 Observability Layer 명시 추가 |
-| archived.yaml | 프로젝트 Archived 선언 YAML 신규 생성 |
-
-### [2026-05-02] v4.0.0-RELEASE — Phase 4: 자가 치유 및 분산 추적 아키텍처 통합
-
-**신규 추가 파일**
-
-| 파일 | 변경 내용 |
-|---|---|
-| `pom.xml` | `spring-boot-starter-actuator`, `micrometer-registry-prometheus`, `micrometer-tracing-bridge-otel` (OTel 분산 추적), `resilience4j-spring-boot3:2.2.0` (CB + RL + Retry), `spring-boot-starter-aop` 추가. 버전 `4.0.0-RELEASE`로 갱신 |
-| `src/main/java/com/egds/observability/package-info.java` | Observability 패키지 신규 생성. OTel 분산 추적, MDC traceId 전파, Prometheus 메트릭 노출 패키지 설명 |
-| `src/test/java/com/egds/resilience/CircuitBreakerResilienceTest.java` | R4j CB 통합 테스트: 초기 CLOSED 확인, 50% 임계값 초과 후 OPEN 전환, Fallback 출력 검증, 정상 호출 후 CLOSED 유지 |
-| `src/test/java/com/egds/observability/TraceContextPropagationTest.java` | OTel 분산 추적 통합 테스트: Tracer 빈 존재, non-zero Trace ID, MDC traceId 주입/해제, 자식 Span 계층 검증 |
-
-**수정된 기존 파일**
-
-| 파일 | 변경 내용 |
-|---|---|
-| `src/main/resources/application.properties` | Actuator 엔드포인트 노출 (`health`, `prometheus`, `info`, `metrics`). Liveness 그룹: `livenessState`, `diskSpace`. Readiness 그룹: `readinessState`, `kafka`, 3개 R4j CB 인디케이터. OTel 리소스 속성 (`service.name=egds`, `service.version=4.0.0`). MDC traceId 포함 로그 패턴. R4j CB/RL/Retry 전체 인스턴스 설정 (`consoleOutput`, `kafkaPublish`, `consumerPipeline`) |
-| `src/test/resources/application.properties` | Actuator 테스트 설정, OTel 샘플링 100%, `spring.application.name=egds-test` 추가 |
-| `config/SecurityConfig.java` | `/actuator/health/**`, `/actuator/prometheus`, `/actuator/info` JWT 인증 제외 추가 (K8s 프로브 및 Prometheus 스크레이핑 허용) |
-| `core/strategy/ConsoleOutputStrategy.java` | `@CircuitBreaker(consoleOutput, fallback=outputFallback)`, `@RateLimiter(consoleOutput, fallback=outputFallback)`, `@Retry(consoleOutput)` 중첩 적용. `Tracer` 주입 후 `egds.console-output` Span 생성 (`correlationId`, `deliveryStatus` 태그). `outputFallback()` 구현: `[EGDS-DEGRADED] Hello, World!` 출력 + `FAILED` 상태 기록 |
-| `messaging/GreetingEventPublisher.java` | `@RateLimiter(kafkaPublish, fallback)`, `@CircuitBreaker(kafkaPublish, fallback)`, `@Retry(kafkaPublish)` 중첩 적용. `Tracer` 주입 후 `egds.kafka-publish` Span 생성 (`messaging.system=kafka`, `topic`, `messageKey` 태그). `publishFallback()` 구현: `CompletableFuture.failedFuture()` 반환 |
-| `messaging/GreetingEventConsumer.java` | `@CircuitBreaker(consumerPipeline, fallback=consumeFallback)` 적용. `Tracer` 주입 후 `egds.consumer-pipeline` Span 생성 (`correlationId`, `principal`, `requestIp` 태그). `consumeFallback()` 구현: Kafka offset commit 보장(루프 방지) + `FAILED` 감사 로그 기록 |
-| `core/service/MessageDeliveryService.java` | `Tracer` 주입. 각 파이프라인 단계를 전용 OTel 자식 Span으로 래핑: `egds.stage.provision`, `egds.stage.validate`, `egds.stage.map`, `egds.stage.deliver`. 예외 발생 시 `span.error(e)` 마킹으로 추적 백엔드에 장애 전파 |
-| `k8s/deployment.yaml` | `terminationGracePeriodSeconds: 60` 추가. `lifecycle.preStop: exec: sleep 15` 추가 (iptables 전파 여유). **Startup**: `failureThreshold: 30 (150s 허용)`. **Liveness**: `periodSeconds: 15`, `failureThreshold: 2`, `successThreshold: 1`. **Readiness**: `successThreshold: 2` (2연속 성공 후 재등록), 전체 파라미터 재조정. 이미지 태그 `4.0.0`으로 갱신 |
-
-### [2026-05-02] v3.0.1 — Checkstyle 전면 준수
-
-`mvn checkstyle:check` 기준 전체 소스 위반 0건 달성.
-
-| 위반 규칙 | 조치 내용 |
-|---|---|
-| `JavadocPackage` | `com.egds.*` 24개 패키지 및 `com.enterprise.greeting.*` 3개 패키지에 `package-info.java` 신규 생성 |
-| `ConstantName` | `private static final Logger log` → `LOG` (6개 클래스) |
-| `FinalParameters` | 전체 생성자 및 메서드 파라미터에 `final` 추가 |
-| `HiddenField` | 필드명과 충돌하는 생성자 파라미터 일괄 개명 |
-| `LineLength` | 80자 초과 행 전체 래핑 (Javadoc, 어노테이션 인자, 문자열 연결) |
-| `MagicNumber` | `GreetingAuditLog` 컬럼 길이·시퀀스 할당 크기, `KafkaConfig` 파티션 수, `AuditLogService` 쿼리 타임아웃을 `private static final` 상수로 추출 |
-| `AvoidStarImport` | `jakarta.persistence.*` → 개별 import 8종으로 교체 |
-| `OperatorWrap` | 문자열 연결 `+` 연산자를 속행 행 첫머리로 이동 |
-| `LeftCurly` | 단일 행 메서드 본문 `{ return x; }` 전부 다중 행으로 확장 |
-| `DesignForExtension` | JPA 엔티티: 각 getter에 Javadoc 추가. 순수 DTO·응답·요청 클래스: `final` 선언 |
-| `HideUtilityClassConstructor` / `FinalClass` | `EgdsApplication`: `private` 생성자 추가 후 클래스 `final` 선언 |
-| `MissingJavadocMethod` / `JavadocVariable` | 미작성 Javadoc 전면 보완 |
-| `UnusedImports` | 미사용 import 제거 |
-
-### [2026-04-21] v3.0.0-RELEASE — Phase 3: gRPC 및 K8s 기반 클라우드 네이티브 인프라 통합
-
-**신규 추가 파일**
-
-| 파일 | 변경 내용 |
-|---|---|
-| `pom.xml` | `net.devh:grpc-spring-boot-starter:3.1.0.RELEASE`, `io.grpc:grpc-testing:1.61.1`, `kr.motd.maven:os-maven-plugin:1.7.1` (빌드 익스텐션), `org.xolstice.maven.plugins:protobuf-maven-plugin:0.6.1` (proto → Java 소스 생성) 추가 |
-| `src/main/proto/greeting.proto` | `GreetingService` RPC 계약 정의. `DeliverGreeting` (unary), `StreamGreeting` (server-streaming). 메시지 타입: `GreetingRequest`, `GreetingResponse`, `GreetingChunk`. 열거형: `GreetingPriority`, `DeliveryStatus` |
-| `src/main/java/com/egds/grpc/GreetingGrpcService.java` | `@GrpcService` 서버 구현체. `DeliverGreeting`: `MessageDeliveryPipeline.execute()` 위임 후 `GreetingResponse` 반환. `StreamGreeting`: "Hello", ", ", "World", "!" 4 프래그먼트 스트리밍 |
-| `src/main/java/com/egds/grpc/GreetingGrpcClient.java` | `@GrpcClient("egds-greeting-service")` 블로킹 스텁 주입 클라이언트 컴포넌트 |
-| `src/main/resources/application.properties` | `grpc.server.port=9090`, `grpc.client.egds-greeting-service.address`, `negotiation-type=plaintext` 추가 |
-| `src/test/resources/application.properties` | `grpc.server.in-process-name=test`, `grpc.server.port=-1`, `grpc.client.egds-greeting-service.address=in-process:test` 추가 |
-| `Dockerfile` | 2단계 멀티스테이지 빌드. Stage 1: `eclipse-temurin:17-jdk-alpine` + Maven + 계층형 JAR 분해. Stage 2: `eclipse-temurin:17-jre-alpine` + 비루트 사용자(`egds:egds`) + EXPOSE 8080, 9090 |
-| `k8s/deployment.yaml` | `replicas: 2`, RollingUpdate (maxUnavailable=0), 비루트 컨테이너(`runAsUser: 1000`), ReadOnlyRootFilesystem, 3종 Probe, 멀티존 TopologySpreadConstraints, ConfigMap/Secret env 주입 |
-| `k8s/hpa.yaml` | `autoscaling/v2`, CPU 60% / Memory 75%, `minReplicas: 2`, `maxReplicas: 10`, Scale-Up 즉시/Scale-Down 300s 안정화 |
-| `k8s/service.yaml` | `LoadBalancer` 타입, HTTP(:80→8080) + gRPC(:9090→9090) 이중 포트, AWS NLB 내부 어노테이션 |
-| `k8s/configmap.yaml` | 비민감 설정 분리: Kafka, Redis, gRPC, JPA DDL, H2 콘솔 비활성화 |
-| `k8s/secret.yaml` | JWT 시크릿, Oracle URL/사용자/암호, Redis AUTH — base64 플레이스홀더; 운영 시 ESO/Vault 교체 필수 |
-| `k8s/networkpolicy.yaml` | Default-Deny (ingress+egress) + 화이트리스트 6종: ingress-nginx(8080,9090), monitoring(8080), kafka(9092), db(1521), cache(6379), kube-dns(53) |
-| `k8s/istio/virtualservice.yaml` | `auth-route` (stable 100%), `greeting-rest-route` (stable 90% / canary 10%, retry 3회, timeout 10s, fault injection 주석), `greeting-grpc-route` (포트 9090, 동일 분할) |
-| `k8s/istio/destinationrule.yaml` | `ISTIO_MUTUAL` mTLS, `LEAST_CONN` LB, HTTP/2 커넥션 풀, 서킷 브레이커 (5xx 5회 → 30s 격리, 최대 50% 이젝션), `stable`/`canary` subset 정의 |
-| `.github/workflows/pipeline.yml` | 20단계 GitHub Actions 파이프라인: prepare(1-3) → code-quality(4) / sast-codeql(5) / dependency-audit(6) [병렬] → compile(7) → unit-test(8) / integration-test(9) / grpc-integration-test(10) [병렬] → coverage-enforce(11) → build-artifact(12) → sbom-generate(13) → docker-build(14) → container-scan(15) → artifact-sign(16) → push-registry(17) → performance-profile(18) / k8s-manifest-validate(19) [병렬] → deploy-and-notify(20) |
-| `src/test/java/com/egds/grpc/GreetingGrpcServiceIntegrationTest.java` | gRPC 인프로세스 통합 테스트 7케이스: unary 정상/correlationId/CRITICAL 우선순위/빈 correlationId, streaming 프래그먼트 수/순서/재조립/비어있지 않음 |
-
-### [2026-04-21] v2.0.0-RELEASE — 엔터프라이즈 4대 핵심 인프라 통합
-
-**신규 추가 파일**
-
-| 파일 | 변경 내용 |
-|---|---|
-| `pom.xml` | Spring Boot 3.2.5 parent 적용, 기존 순수 Java 빌드 전면 교체. spring-boot-starter-web/security/data-jpa/cache/validation, spring-kafka, jjwt 0.12.5, H2 런타임, spring-boot-starter-test/spring-security-test/spring-kafka-test 추가 |
-| `src/main/resources/application.properties` | H2(Oracle 호환 모드), 로컬 Kafka, 단순 캐시(ConcurrentMap), JWT 시크릿/만료 설정 신규 작성 |
-| `src/main/resources/application-prod.properties` | Oracle 19c 데이터소스, Redis 캐시, Kafka 클러스터, JWT 환경변수 기반 운영 설정 신규 작성 |
-| `src/test/resources/application.properties` | H2 인메모리, EmbeddedKafka 브로커 주소 자동 주입, 단순 캐시 테스트 전용 설정 신규 작성 |
-| `config/SecurityConfig.java` | STATELESS 필터 체인 정의, `@EnableWebSecurity`, `@EnableMethodSecurity`, JWT 필터 등록 |
-| `config/PasswordEncoderConfig.java` | `BCryptPasswordEncoder` 빈 분리 정의 (순환 의존성 해소) |
-| `config/JpaAuditingConfig.java` | `@EnableJpaAuditing`, `AuditorAware` 빈 (`SecurityContextHolder` 기반, 미인증 시 "SYSTEM" 반환) |
-| `config/KafkaConfig.java` | 그리팅 이벤트 토픽 `NewTopic` 빈 정의 (파티션 3, 레플리카 1) |
-| `config/CacheConfig.java` | 캐시 영역 이름 상수 `GREETING_PARTS_CACHE` 정의 |
-| `security/JwtTokenProvider.java` | jjwt 0.12.x API 기반 토큰 생성(`generateToken`), 클레임 추출(`extractUsername`, `extractRoles`), 서명 검증(`validateToken`) 구현 |
-| `security/JwtAuthenticationFilter.java` | `OncePerRequestFilter` 상속, `Authorization: Bearer` 헤더 파싱 → `SecurityContextHolder` 주입 |
-| `security/JwtAuthenticationEntryPoint.java` | `AuthenticationEntryPoint` 구현, 미인증 접근 시 HTTP 401 JSON 응답 반환 |
-| `security/GreetingUserDetailsService.java` | `UserDetailsService` 구현, `ROLE_GREETING_ADMIN` 단일 계정, BCrypt 선인코딩 |
-| `core/entity/GreetingAuditLog.java` | `@Entity`, Oracle 시퀀스 생성기, `@CreatedDate`/`@LastModifiedBy` JPA Auditing, Builder 패턴 적용 |
-| `core/repository/GreetingAuditLogRepository.java` | `JpaRepository` 상속, `findByCorrelationId`, `findByOccurredAtBetween`, `countSuccessfulDeliveries` 쿼리 추가 |
-| `core/service/AuditLogService.java` | `@Transactional` 클래스 레벨 기본 적용, `record()` — `REQUIRES_NEW + SERIALIZABLE`, `findByCorrelationId()` — `readOnly + timeout(5)`, `countSuccessfulDeliveries()` — `REQUIRES_NEW + readOnly` 과도 적용 |
-| `core/service/GreetingCacheService.java` | `assembleGreeting()` — `@Cacheable`, `refreshGreeting()` — `@CachePut`, `evictAll()` — `@CacheEvict(allEntries=true)` |
-| `messaging/GreetingEvent.java` | Jackson JSON 직렬화 가능 이벤트 DTO, `correlationId`/`requestIp`/`principalName`/`issuedAt` 필드 |
-| `messaging/GreetingEventPublisher.java` | `KafkaTemplate.send()` 비동기 발행, `correlationId` 파티션 키 사용, `CompletableFuture` 반환 |
-| `messaging/GreetingEventConsumer.java` | `@KafkaListener` 구독, 파이프라인 실행 후 `AuditLogService.record()` 호출 |
-| `web/AuthController.java` | `POST /api/v1/auth/token` — `AuthenticationManager` 위임 인증, `JwtTokenProvider.generateToken()` 후 반환 |
-| `web/GreetingController.java` | `GET /api/v1/greeting` — `@PreAuthorize("hasRole('GREETING_ADMIN')")`, 클라이언트 IP 추출, `GreetingEventPublisher.publish()` 후 202 반환 |
-| `web/dto/TokenRequest.java` | 로그인 요청 DTO (`username`, `password`, `@NotBlank` 검증) |
-| `web/dto/TokenResponse.java` | 토큰 응답 DTO (`token`, `tokenType`, `expiresInMs`) |
-| `web/dto/GreetingResponse.java` | 인사 전달 응답 DTO (`correlationId`, `status`, `message`) |
-
-**수정된 기존 파일**
-
-| 파일 | 변경 내용 |
-|---|---|
-| `EgdsApplication.java` | `main()` 수동 배선 제거, `SpringApplication.run()` 으로 교체. `@SpringBootApplication` + `@EnableCaching` + `@EnableKafka` 추가 |
-| `core/pipeline/MessageDeliveryPipeline.java` | `@Component` 추가, 생성자를 `MessageDeliveryService` 단일 주입으로 변경, `execute()` 반환 타입 `void` → `MessageDeliveryResult` 변경 |
-| `core/service/MessageDeliveryService.java` | `@Service` 추가 |
-| `core/provider/HelloWorldMessageProvider.java` | `@Component` 추가, `GreetingCacheService` 생성자 주입, `provideMessage()` 내부에서 캐시 서비스를 통해 콘텐츠 조립 |
-| `core/strategy/ConsoleOutputStrategy.java` | `@Component` 추가 |
-| `core/validator/MessageContentValidator.java` | `@Component` 추가 |
-| `core/mapper/MessageMapper.java` | `@Component` 추가 |
-| `core/aspect/MessageDeliveryLoggingAspect.java` | `@Component` 추가 |
-
-**신규 추가 테스트 파일**
-
-| 파일 | 변경 내용 |
-|---|---|
-| `security/JwtTokenProviderTest.java` | Spring 컨텍스트 없이 직접 인스턴스화, 생성/추출/검증/만료/위변조 6개 케이스 |
-| `security/SecurityLayerTest.java` | `@SpringBootTest` + `MockMvc`, 401/403/202 응답, 자격증명 오류 케이스 |
-| `core/service/AuditLogServiceTest.java` | `@DataJpaTest` + `@Import(JpaAuditingConfig, AuditLogService)`, 영속성·Auditing·correlationId 필터 검증 |
-| `core/service/GreetingCacheServiceTest.java` | `@SpringBootTest` + `@EmbeddedKafka`, 캐시 미스/히트/무효화/강제갱신 검증 |
-| `messaging/GreetingEventPublisherTest.java` | `@ExtendWith(MockitoExtension)`, `KafkaTemplate` 모킹, 토픽·키 파라미터 검증 |
-| `messaging/GreetingEventConsumerIntegrationTest.java` | `@EmbeddedKafka`, `@SpyBean(AuditLogService)` + `timeout(10_000)` 비동기 검증 |
-| `integration/GreetingDeliveryIntegrationTest.java` | `@EmbeddedKafka` + `MockMvc`, JWT 인증 → Kafka 발행 → 파이프라인 → DB 감사 전 계층 E2E 검증 |
-
-### [초기] v1.0.0-RELEASE — 순수 Java 기반 파이프라인 구축
-
-| 파일 | 변경 내용 |
-|---|---|
-| `pom.xml` | 외부 의존성 없는 순수 Java 17 빌드 설정, maven-compiler-plugin + maven-jar-plugin 구성 |
-| `EgdsApplication.java` | `main()` 수동 배선 — `GreetingFactoryProvider` → `StandardGreetingFactory` → `MessageDeliveryPipeline` 순차 조립 |
-| `core/interfaces/` 전체 | `IMessageProvider`, `IMessageOutputStrategy`, `IMessageDeliveryService`, `IGreetingFactory`, `IMessageValidator` 인터페이스 5종 신규 정의 |
-| `core/dto/` 전체 | `MessageContentDto` (Builder 패턴, 불변), `MessageDeliveryResult` (성공/실패 팩토리 메서드) 신규 정의 |
-| `core/entity/MessageEntity.java` | 파이프라인 도메인 엔티티, `DeliveryStatus` 전이 관리 |
-| `core/enums/` 전체 | `DeliveryStatus` (PENDING/IN_TRANSIT/DELIVERED/FAILED), `MessagePriority` (CRITICAL/HIGH/NORMAL/LOW) |
-| `core/exception/MessageDeliveryFailureException.java` | 도메인 예외, `correlationId` + `failureCode` 탑재 |
-| `core/factory/` 전체 | `AbstractGreetingFactory`, `StandardGreetingFactory`, `GreetingFactoryProvider` — Abstract Factory 패턴 구현 |
-| `core/mapper/MessageMapper.java` | DTO → Entity 무상태 변환, 포맷팅(`[PRIORITY][LOCALE] content`) |
-| `core/pipeline/MessageDeliveryPipeline.java` | 파이프라인 퍼사드, 컴포넌트 수동 조립 및 실행 |
-| `core/provider/HelloWorldMessageProvider.java` | 표준 인사 페이로드 생성 참조 구현체 |
-| `core/service/MessageDeliveryService.java` | 검증 → 매핑 → 출력 전 단계 오케스트레이션 |
-| `core/strategy/ConsoleOutputStrategy.java` | `System.out` 기반 출력 전략, 상태 전이 관리 |
-| `core/validator/MessageContentValidator.java` | null/공백/길이/correlationId 4종 검증 |
-| `core/aspect/MessageDeliveryLoggingAspect.java` | PRE/POST 각 단계별 ISO-8601 감사 로그 출력 |
-
----
-
 ## 라이선스
 
 본 시스템은 MIT 라이선스 하에 배포됩니다.
@@ -1304,11 +978,12 @@ mvn test -Dtest="GreetingGrpcServiceIntegrationTest"
 
 ## 아키텍처 완료 선언
 
-> 본 프로젝트의 아키텍처는 Phase 5를 통해 현대 IT 버즈워드의 사실상 모든 범주를 포섭하는 혼종적 정점에 도달하였습니다.
+> 본 프로젝트의 아키텍처는 현대 IT 버즈워드의 사실상 모든 범주를 포섭하는 혼종적 정점에 도달하였습니다.
 >
-> gRPC 바이너리 프로토콜, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 20단계 CI/CD, OpenTelemetry 분산 추적, Resilience4j 3중 회복 탄력성, Prometheus 메트릭에 더하여, Web3j Ethereum Keccak-256 스마트 컨트랙트 무결성 증명, Kafka + MongoDB CQRS/이벤트 소싱, LangChain4j GPT-4o 생성형 AI 문맥 라우팅이 완벽하게 통합되었습니다.
+> gRPC 바이너리 프로토콜, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 20단계 CI/CD, OpenTelemetry 분산 추적, Resilience4j 3중 회복 탄력성, Prometheus 메트릭에 더하여, Web3j Ethereum Keccak-256 스마트 컨트랙트 무결성 증명, Kafka + MongoDB CQRS/이벤트 소싱, LangChain4j GPT-4o 생성형 AI 문맥 라우팅, 사내 정치 로드 밸런서, 노조 파업 필터, 관료주의 결재선, 마이크로 과금 절삭기, ESG 그린워싱 레이어, 외부 컨설팅 프록시, 가짜 KPI 대시보드, BCI 서브컨셔스 라우터, DNA 서열 인코더, 마인크래프트 RCON 디지털 트윈, 지구 균사체 네트워크, 열역학적 엔트로피 밸런서, 4차원 테서랙트 투영, 평행 우주 JVM 샌드박싱, 실존주의 AOP 자아 인식 시스템이 완벽하게 통합되었습니다.
 >
-> 단 하나의 AI 생성 인사말 전달을 위해 이 시스템은 Ethereum 노드, OpenAI API, MongoDB 클러스터, Kafka 브로커, Oracle Database, Redis 캐시, Kubernetes 클러스터, Istio 서비스 매쉬, OTel Collector가 모두 준비된 클라우드 네이티브 환경을 요구합니다.
+> 단 하나의 AI 생성 인사말 전달을 위해 이 시스템은 Ethereum 노드, OpenAI API, MongoDB 클러스터, Kafka 브로커, Oracle Database, Redis 캐시, Kubernetes 클러스터, Istio 서비스 매쉬, OTel Collector, 사내 정치 점수 데이터베이스, 지구 균사체 네트워크 중계기, 마인크래프트 서버가 모두 준비된 클라우드 네이티브 환경을 요구합니다.
+>
 > 로컬 `java -jar` 실행 시도는 즉시 포기하십시오.
 >
 > **이 저장소는 Archive 처리되며, 이후의 모든 Pull Request는 반려됩니다.**
