@@ -1,3 +1,9 @@
+# ─── Maven (legacy build output — retained for local reference only) ──────────
+target/
+
+# ─── Claude Code local config ────────────────────────────────────────────────
+.claude/
+
 # ─── Gradle ──────────────────────────────────────────────────────────────────
 build/
 .gradle/
