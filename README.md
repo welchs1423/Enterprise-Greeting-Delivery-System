@@ -76,10 +76,11 @@ GET  /api/v1/greeting [Bearer]
 
 egds.greeting.requested → GreetingProjector → MongoDB (CQRS 읽기 모델)
 egds.greeting.events    → GreetingEventConsumer → MessageDeliveryPipeline
-  → HelloWorldMessageProvider (AI 컨텍스트 + Keccak-256 사전 해싱 + QuantumDelay)
+  → HelloWorldMessageProvider (AI 컨텍스트 + GenAiHallucination(20%) + Keccak-256 사전 해싱)
   → MessageContentValidator
   → MessageMapper
-  → ConsoleOutputStrategy (CB + RL + Retry + 무결성 검증 → System.out)
+  → ConsoleOutputStrategy (CB + RL + Retry + 무결성 검증 → 도트매트릭스 출력
+                           + VirtualPizzaPartyCompensation 힙 누수)
   → AuditLogService → H2/Oracle (REQUIRES_NEW 트랜잭션)
 
 GET /api/v1/greeting/status/{correlationId} → MongoDB 전용 (읽기 경로)
@@ -161,7 +162,7 @@ JWT 기반 무상태 인증과 역할 기반 접근 제어로 단 하나의 엔�
 | JWT 인증 필터 | `JwtAuthenticationFilter` | 매 요청의 Authorization 헤더에서 JWT를 추출하여 보안 컨텍스트 설정 |
 | 인증 진입점 | `JwtAuthenticationEntryPoint` | 미인증 접근 시 HTTP 401 JSON 응답 반환 |
 | 사용자 상세 서비스 | `GreetingUserDetailsService` | `ROLE_GREETING_ADMIN` 권한을 보유한 단일 관리자 계정 관리 |
-| 보안 설정 | `SecurityConfig` | 필터 체인 정의, STATELESS 세션, 메서드 보안 활성화 |
+| 보안 설정 | `SecurityConfig` | 필터 체인 정의, STATELESS 세션, 메서드 보안 활성화 (V18: DRM 필터 포함) |
 | 패스워드 인코더 설정 | `PasswordEncoderConfig` | BCryptPasswordEncoder 빈 정의 (순환 의존성 방지를 위해 분리) |
 
 **로컬 개발 계정**: `username=greeting.admin` / `password=egds-admin-pass` / Role: `GREETING_ADMIN`
@@ -699,6 +700,64 @@ ConsensusVotingEngine.vote(correlationId)
 
 인사말 데이터를 SHA-256 CID(Content Identifier)로 색인하는 로컬 IPFS 모킹 스토어입니다. 저장 시 Hamming(7,4) ECC 인코딩을 적용하여, 우주 방사선에 의해 비트가 반전되더라도 조회 시점에 자동 복구됩니다.
 
+### V18 신규 레이어: 환각 데코레이터, 피자 파티 보상, 벤더 락인 DRM
+
+#### 생성형 AI 환각 데코레이터 (`GenAiHallucinationDecorator`)
+
+AI가 생성한 인사말을 마케팅 버즈워드로 교체하는 확률적 데코레이터입니다. `HelloWorldMessageProvider`가 LLM 응답을 수신한 직후, 블록체인 해시 등록 이전에 호출됩니다. 20% 확률로 원본 콘텐츠가 폐기되고 무작위로 선택된 버즈워드 문구로 대체됩니다. 교체 이벤트는 WARN 레벨로 감사 기록되며, 해시는 교체된 문자열 기준으로 등록되어 이후 `ConsoleOutputStrategy`의 블록체인 검증과 정합성이 유지됩니다.
+
+```
+HelloWorldMessageProvider.provideMessage()
+  │
+  ├─ AiGreetingService.generateContextualGreeting()   ← LLM 응답
+  │
+  ├─ GenAiHallucinationDecorator.decorate(content)
+  │     20% 확률: [GENAI-HALLUCINATION] 원본 폐기
+  │               → "Leveraging disruptive blockchain paradigms" 등 치환
+  │     80% 확률: 원본 반환
+  │
+  └─ GreetingIntegrityVerifier.register(correlationId, preFormatted)
+         ← 교체 후 문자열 기준으로 Keccak-256 등록
+```
+
+`egds.genai.hallucination.enabled=false`로 테스트 환경에서 비활성화합니다.
+
+#### 가상 피자 파티 보상 (`VirtualPizzaPartyCompensation`)
+
+`ConsoleOutputStrategy`가 인사말 전달에 성공할 때마다 작업 스레드에 가상 피자 조각(`VirtualPizzaSlice`)을 수여합니다. 피자 조각은 절대 해제되지 않는 `ArrayList`에 무기한 누적되어 전달 완료 횟수에 비례하는 의도적 힙 메모리 누수를 구성합니다. 누적 슬라이스가 10의 배수에 도달할 때마다 "가상 피자 파티" 강제 팀 이벤트 알림이 INFO 레벨로 발생하며, 시스템 자원이 고갈되는 동안 팀 사기가 성공적으로 시뮬레이션됩니다.
+
+```
+ConsoleOutputStrategy.output(entity)
+  │  ... 블록체인 검증, 이사회 승인, PoW 채굴, 도트매트릭스 출력 ...
+  │
+  └─ VirtualPizzaPartyCompensation.compensate()
+       → new VirtualPizzaSlice(Thread.currentThread().getName())
+       → slices.add(slice)           ← 절대 해제 안 됨 (의도적 누수)
+       → if (slices.size() % 10 == 0)
+           LOG.info "[MANDATORY FUN] 가상 피자 파티!"
+```
+
+| 컴포넌트 | 클래스 | 설명 |
+|---|---|---|
+| 피자 보상 서비스 | `VirtualPizzaPartyCompensation` | 전달 완료 스레드 보상 + 의도적 힙 누수 구현체 |
+| 피자 조각 값 객체 | `VirtualPizzaSlice` | 스레드 이름을 보유하는 불변 보상 레코드 |
+
+#### 벤더 락인 DRM 필터 (`VendorLockInDrmFilter`)
+
+엔터프라이즈 라이선스 검증을 강제하는 `OncePerRequestFilter`입니다. `SecurityContextHolderFilter` 앞에 삽입되어 모든 요청의 `X-Enterprise-Dongle-Key` 헤더를 검사합니다. 헤더가 없으면 응답 바디를 `ContentCachingResponseWrapper`로 버퍼링한 뒤 `[UNREGISTERED EVALUATION COPY]`를 앞뒤에 삽입하여 클라이언트에 반환합니다. 인증(`/api/v1/auth/**`) 및 액추에이터 경로는 DRM 적용에서 제외됩니다.
+
+```
+요청 수신
+  → shouldNotFilter? (/api/v1/auth/**, /actuator/**) → 통과
+  → hasDongleKey(request)?
+      → true:  필터 체인 그대로 통과
+      → false: [DRM] 응답 바디 버퍼링
+               → [UNREGISTERED EVALUATION COPY] {originalBody} [UNREGISTERED EVALUATION COPY]
+               → 워터마크 삽입 본문 반환
+```
+
+`egds.drm.enabled=false`로 테스트 환경에서 비활성화합니다.
+
 ### 카오스 & 데몬
 
 #### 내장형 카오스 몽키 (`EmbeddedChaosMonkey`)
@@ -970,6 +1029,9 @@ curl -X GET http://localhost:8080/api/v1/greeting/status/{correlationId} \
 | `GreetingEventConsumerIntegrationTest` | 통합 (@EmbeddedKafka) | Kafka 발행-소비 사이클, 감사 로그 비동기 저장 |
 | `GreetingDeliveryIntegrationTest` | E2E (@EmbeddedKafka + MockMvc) | JWT 인증 → Kafka → 파이프라인 → DB 감사 전 계층 |
 | `GreetingGrpcServiceIntegrationTest` | gRPC 통합 (in-process) | DeliverGreeting unary RPC (STATUS_DELIVERED, 상관ID 전파, CRITICAL 우선순위), StreamGreeting server-streaming (4 프래그먼트 순서 검증, "Hello, World!" 재조립) |
+| `GenAiHallucinationDecoratorTest` | 단위 | 환각 비활성 시 원본 반환, 환각 활성 시 버즈워드 치환, `egds.genai.hallucination.enabled=false` 억제 |
+| `VirtualPizzaPartyCompensationTest` | 단위 | 슬라이스 누적, 10번째 보상 시 파티 알림 발생, 슬라이스 카운트 단조 증가 검증 |
+| `VendorLockInDrmFilterTest` | 단위 (MockMvc) | 동글 키 있음 → 원본 응답 통과, 없음 → `[UNREGISTERED EVALUATION COPY]` 워터마크 삽입, auth/actuator 경로 제외 |
 
 ---
 
