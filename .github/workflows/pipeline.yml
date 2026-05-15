@@ -74,6 +74,9 @@ jobs:
         with:
           gradle-version: wrapper
 
+      - name: "[Stage 3] Grant execute permission to Gradle wrapper"
+        run: chmod +x ./gradlew
+
       - name: "[Stage 3] Warm Gradle dependency cache"
         id: gradle-cache
         run: ./gradlew dependencies --configuration compileClasspath -q
