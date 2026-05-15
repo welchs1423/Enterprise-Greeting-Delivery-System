@@ -612,9 +612,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ push-registry, performance-profile, k8s-manifest-validate ]
     if: github.ref == 'refs/heads/master'
-    environment:
-      name: staging
-      url: https://egds.staging.example.internal
     steps:
       - uses: actions/checkout@v4
 
