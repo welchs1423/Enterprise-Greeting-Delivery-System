@@ -1,7 +1,10 @@
-# Maven build output
-target/
+# ─── Gradle ──────────────────────────────────────────────────────────────────
+build/
+.gradle/
+# Wrapper JAR은 커밋 대상 (CI에서 별도 Gradle 설치 불필요)
+!gradle/wrapper/gradle-wrapper.jar
 
-# IDE
+# ─── IDE ─────────────────────────────────────────────────────────────────────
 .idea/
 *.iml
 .classpath
@@ -9,13 +12,31 @@ target/
 .settings/
 *.class
 
-# OS
+# IntelliJ IDEA generated files
+out/
+*.iws
+*.ipr
+
+# VS Code
+.vscode/
+
+# ─── OS ──────────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Logs
+# ─── Logs ────────────────────────────────────────────────────────────────────
 *.log
 logs/
-
-# Spring Boot
 spring-shell.log
+
+# ─── Secrets & credentials ───────────────────────────────────────────────────
+.env
+*.pem
+*.p12
+*.jks
+*.keystore
+
+# ─── OWASP Dependency-Check local cache ──────────────────────────────────────
+# NVD data is re-downloaded per run; do not commit
+dependency-check-data/
