@@ -143,9 +143,12 @@ dependencies {
 
 // ─── Protobuf / gRPC ───────────────────────────────────────────────────────
 
-// Workaround: protoc on Windows cannot handle non-ASCII paths.
-// Copy proto sources to an ASCII-safe staging directory before generation.
-def protoStageDir = file('C:/tmp/egds-proto-stage')
+// Workaround: protoc on Windows cannot handle non-ASCII paths (project dir contains Korean).
+// On Linux/CI, java.io.tmpdir resolves to /tmp which is always ASCII-safe.
+def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
+def protoStageDir = isWindows
+        ? file('C:/tmp/egds-proto-stage')
+        : file("${System.getProperty('java.io.tmpdir')}/egds-proto-stage")
 
 tasks.register('stageProtoFiles', Copy) {
     description = 'Copies proto sources to an ASCII-safe staging directory'
