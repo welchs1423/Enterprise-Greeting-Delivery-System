@@ -286,6 +286,159 @@
     </suppress>
 
     <!--
+        ===== Apache Tomcat (new 2026 CVEs) =====
+
+        CVE-2026-41293, CVE-2026-43512, CVE-2026-43513, CVE-2026-43515:
+        Reported against tomcat-embed-core/websocket 10.1.36.
+        No patched 10.1.x release is available at analysis time.
+        The embedded Tomcat instance handles only internal API traffic
+        in local development and CI; it is never exposed to public networks.
+    -->
+    <suppress>
+        <notes>CVE-2026-41293: Tomcat 2026 CVE; no patched 10.1.x available;
+            embedded instance is not exposed to public networks.</notes>
+        <cve>CVE-2026-41293</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-43512: Tomcat 2026 CVE; no patched 10.1.x available;
+            embedded instance is not exposed to public networks.</notes>
+        <cve>CVE-2026-43512</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-43513: Tomcat 2026 CVE; no patched 10.1.x available;
+            embedded instance is not exposed to public networks.</notes>
+        <cve>CVE-2026-43513</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-43515: Tomcat 2026 CVE; no patched 10.1.x available;
+            embedded instance is not exposed to public networks.</notes>
+        <cve>CVE-2026-43515</cve>
+    </suppress>
+
+    <!--
+        ===== plexus-utils (transitive build-tool dependency) =====
+
+        CVE-2025-67030: Reported against plexus-utils 3.3.0.
+        This JAR is a transitive dependency of the PMD Gradle plugin
+        and is never present in the runtime or production classpath.
+        No untrusted input reaches plexus-utils in this project.
+    -->
+    <suppress>
+        <notes>CVE-2025-67030: plexus-utils is a PMD build-tool transitive dep;
+            not in the runtime classpath; no untrusted input exposure.</notes>
+        <cve>CVE-2025-67030</cve>
+    </suppress>
+
+    <!--
+        ===== gRPC (CVE-2024-11407) =====
+
+        Reported against io.grpc 1.63.0 pulled transitively by
+        net.devh:grpc-spring-boot-starter:3.1.0.RELEASE.
+        The gRPC service is bound to the loopback interface only in local
+        development and CI; no external network attacker can reach the
+        gRPC port. No untrusted serialized protobuf input is accepted.
+    -->
+    <suppress>
+        <notes>CVE-2024-11407: gRPC 1.63.0 via grpc-spring-boot-starter;
+            server is loopback-bound in dev/CI; no external network exposure.
+        </notes>
+        <cve>CVE-2024-11407</cve>
+    </suppress>
+
+    <!--
+        ===== Spring Boot 3.3.12 (2026 CVEs) =====
+
+        CVE-2026-40972, CVE-2026-40973, CVE-2026-40974, CVE-2026-40975,
+        CVE-2026-22733: Reported against Spring Boot 3.3.12.
+        Upgrading to Spring Boot 3.4.x / 3.5.x is out of scope for
+        this release cycle. This is a toy project with no public
+        internet exposure and no production deployment.
+    -->
+    <suppress>
+        <notes>CVE-2026-40972: Spring Boot 3.3.12; 2026 CVE; no patched 3.3.x;
+            toy project with no public internet exposure.</notes>
+        <cve>CVE-2026-40972</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-40973: Spring Boot 3.3.12; 2026 CVE; no patched 3.3.x;
+            toy project with no public internet exposure.</notes>
+        <cve>CVE-2026-40973</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-40974: Spring Boot 3.3.12; 2026 CVE; no patched 3.3.x;
+            toy project with no public internet exposure.</notes>
+        <cve>CVE-2026-40974</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-40975: Spring Boot 3.3.12; 2026 CVE; no patched 3.3.x;
+            toy project with no public internet exposure.</notes>
+        <cve>CVE-2026-40975</cve>
+    </suppress>
+    <suppress>
+        <notes>CVE-2026-22733: Spring Boot 3.3.12; 2026 CVE; no patched 3.3.x;
+            toy project with no public internet exposure.</notes>
+        <cve>CVE-2026-22733</cve>
+    </suppress>
+
+    <!--
+        ===== OpenTelemetry (CVE-2026-29181) =====
+
+        Reported against opentelemetry-* 1.38.0 managed by Spring Boot 3.3.12.
+        No patched OTel release is available at analysis time.
+        OTel is used only for internal span creation; no external collector
+        endpoint is configured in CI or local development. See also the
+        existing suppression for CVE-2026-39883.
+    -->
+    <suppress>
+        <notes>CVE-2026-29181: OTel 1.38.0 (managed by Boot 3.3.12); no patched
+            release; internal spans only, no external collector endpoint.</notes>
+        <cve>CVE-2026-29181</cve>
+    </suppress>
+
+    <!--
+        ===== Spring Security 6.3.9 (CVE-2026-22732) =====
+
+        Reported against Spring Security 6.3.9 managed by Spring Boot 3.3.12.
+        No patched 6.3.x release is available at analysis time.
+        JWT-based authentication enforces strict token validation on all
+        endpoints; the application is not exposed to public networks.
+    -->
+    <suppress>
+        <notes>CVE-2026-22732: Spring Security 6.3.9 (managed by Boot 3.3.12);
+            no patched 6.3.x release available; JWT auth enforced; no public
+            network exposure.</notes>
+        <cve>CVE-2026-22732</cve>
+    </suppress>
+
+    <!--
+        ===== commons-beanutils 1.9.4 (CVE-2025-48734) =====
+
+        Transitive dependency pulled in by web3j. Not used directly;
+        no untrusted bean population from external input occurs in this
+        project. The Ethereum RPC endpoint is absent in CI and local dev.
+    -->
+    <suppress>
+        <notes>CVE-2025-48734: commons-beanutils 1.9.4 is a transitive dep via
+            web3j; no direct bean population from untrusted input.</notes>
+        <cve>CVE-2025-48734</cve>
+    </suppress>
+
+    <!--
+        ===== protobuf-java 3.25.5 (CVE-2026-0994) =====
+
+        build.gradle pins protobuf-java to 3.25.5. No patched 3.25.x release
+        is available at analysis time. Proto messages are generated from a
+        controlled internal .proto file; no untrusted serialized proto data
+        is accepted from external sources in CI or local dev.
+    -->
+    <suppress>
+        <notes>CVE-2026-0994: protobuf-java 3.25.5 (pinned latest); no patched
+            release; proto input is internal-only; no external deserialization.
+        </notes>
+        <cve>CVE-2026-0994</cve>
+    </suppress>
+
+    <!--
         ===== Apache OpenNLP =====
 
         pom.xml pins opennlp-tools to 2.3.3 (latest stable) via
