@@ -1,8 +1,8 @@
 # Enterprise Greeting Delivery System (EGDS)
 
-> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라, CQRS/이벤트 소싱, 블록체인 무결성 증명, 생성형 AI 문맥 라우팅, 딥러닝 지연 최적화, GraphQL 슈퍼그래프, WASM 로깅 어댑터, Terraform 1회용 인프라, AS/400 메인프레임 이중 장부 통합, 시간 역행 예측 라우팅, 마이크로서비스 의회 투표, 4차원 테서랙트 투영, 사내 정치 로드 밸런서, 노조 파업 필터, 관료주의 결재선, 마이크로 과금 절삭기, ESG 그린워싱 레이어, 외부 컨설팅 프록시, 가짜 KPI 대시보드, BCI 서브컨셔스 라우터, DNA 서열 인코더, 마인크래프트 RCON 디지털 트윈, 균사체 네트워크 통신, 우주 방사선 ECC 복구, 열역학적 엔트로피 밸런서, 평행 우주 JVM 샌드박싱, 실존주의 AOP 자아 인식, **확률형 인사말 가챠**, **강제 광고 시청 필터**, **영혼 귀속 약관 다크 패턴**, 메타-엔터프라이즈 인사 메시지 전달 플랫폼**
+> **클라우드 네이티브, 제로 트러스트, gRPC 고성능 바이너리 전송, Kubernetes 오케스트레이션, Istio 서비스 매쉬, 분산 추적, 자가 치유 인프라, CQRS/이벤트 소싱, 블록체인 무결성 증명, 생성형 AI 문맥 라우팅, 딥러닝 지연 최적화, GraphQL 슈퍼그래프, WASM 로깅 어댑터, Terraform 1회용 인프라, AS/400 메인프레임 이중 장부 통합, 시간 역행 예측 라우팅, 마이크로서비스 의회 투표, 4차원 테서랙트 투영, 사내 정치 로드 밸런서, 노조 파업 필터, 관료주의 결재선, 마이크로 과금 절삭기, ESG 그린워싱 레이어, 외부 컨설팅 프록시, 가짜 KPI 대시보드, BCI 서브컨셔스 라우터, DNA 서열 인코더, 마인크래프트 RCON 디지털 트윈, 균사체 네트워크 통신, 우주 방사선 ECC 복구, 열역학적 엔트로피 밸런서, 평행 우주 JVM 샌드박싱, 실존주의 AOP 자아 인식, **확률형 인사말 가챠**, **강제 광고 시청 필터**, **영혼 귀속 약관 다크 패턴**, **강제 사무실 출근(RTO) 서브넷 감시**, **마우스 지글러 매크로 감지 및 HR 자동 보고**, **직원 생산성 점수 실시간 주입**, 메타-엔터프라이즈 인사 메시지 전달 플랫폼**
 
-> `v21.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | GraphQL | OpenTelemetry | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio | **Web3j (Ethereum)** | **CQRS + MongoDB** | **LangChain4j (GPT-4o)** | **TensorFlow JNI** | **Terraform Ephemeral Lambda** | **AS/400 EBCDIC 2PC** | **WASM JNI** | **Chronos Predictive Routing** | **Microservice Parliament** | **Quantum Tesseract JNI** | **BCI Subconscious Router** | **DNA Sequence Encoder** | **Minecraft RCON Digital Twin** | **GenAI Hallucination Decorator** | **Virtual Pizza Party Leak** | **Vendor Lock-In DRM** | **Lootbox Gacha** | **Unskippable Ads** | **ToS Dark Pattern**
+> `v23.0.0-RELEASE` | Java 17 | Spring Boot 3.2 | gRPC + Protobuf | GraphQL | OpenTelemetry | Resilience4j | Oracle DB (H2 시뮬레이션) | Kafka | Redis (시뮬레이션) | JWT | Kubernetes | Istio | **Web3j (Ethereum)** | **CQRS + MongoDB** | **LangChain4j (GPT-4o)** | **TensorFlow JNI** | **Terraform Ephemeral Lambda** | **AS/400 EBCDIC 2PC** | **WASM JNI** | **Chronos Predictive Routing** | **Microservice Parliament** | **Quantum Tesseract JNI** | **BCI Subconscious Router** | **DNA Sequence Encoder** | **Minecraft RCON Digital Twin** | **GenAI Hallucination Decorator** | **Virtual Pizza Party Leak** | **Vendor Lock-In DRM** | **Lootbox Gacha** | **Unskippable Ads** | **ToS Dark Pattern** | **RTO Enforcement** | **Mouse Jiggler Detection** | **Productivity Score**
 
 ---
 
@@ -66,8 +66,9 @@ EGDS는 단 하나의 인사 메시지를 전달하기 위해 아래의 모든 �
 | `monetization/` | `UnskippableAdFilter` — 비프리미엄 유저 5초 강제 광고 시청 필터 |
 | `tos/` | `TosDarkPatternFilter` — 영혼 귀속 약관 21.0 강제 동의 필터 |
 | `msa/` | `DistributedLetterAssembler` — 글자 단위 CompletableFuture 분산 조립 + `EnterpriseChaosMonkey` 5% 글자 소실 + `BloatedComplianceWrapper` 응답 부풀리기 |
+| `surveillance/` | `MouseJigglerDetector` — 요청 간격 주기 분석으로 매크로 감지 후 HR 자동 에스컬레이션 + `ProductivityScoreInterceptor` — 응답마다 낮은 생산성 점수 헤더(`X-Employee-Productivity-Score`) 강제 삽입 |
 
-### 전체 요청 처리 흐름 (V22 완성 경로)
+### 전체 요청 처리 흐름 (V23 완성 경로)
 
 ```
 POST /api/v1/auth/token          → JwtTokenProvider → Bearer JWT
@@ -75,6 +76,8 @@ GET  /api/v1/greeting [Bearer]
   → LaborUnionStrikeFilter (15% 확률 → HTTP 451, 인증/액추에이터 경로 바이패스)
   → TosDarkPatternFilter (X-Accept-ToS-Version != 21.0 → HTTP 451 + 영혼 귀속 메시지)
   → UnskippableAdFilter (비프리미엄 유저 → 5초 광고 강제 시청)
+  → MouseJigglerDetector (3회 연속 10ms 이내 동일 주기 → HTTP 429 + HR 에스컬레이션)
+  → RtoEnforcementFilter (10.50.x.x 외 IP → HTTP 403 "Return To Office.", X-Bypass-Rto 헤더로 우회)
   → JwtAuthenticationFilter → GreetingCommandHandler
   → Kafka: egds.greeting.requested (이벤트 소싱 로그)
   → Kafka: egds.greeting.events   (비동기 전달 트리거)
@@ -173,7 +176,7 @@ JWT 기반 무상태 인증과 역할 기반 접근 제어로 단 하나의 엔�
 | JWT 인증 필터 | `JwtAuthenticationFilter` | 매 요청의 Authorization 헤더에서 JWT를 추출하여 보안 컨텍스트 설정 |
 | 인증 진입점 | `JwtAuthenticationEntryPoint` | 미인증 접근 시 HTTP 401 JSON 응답 반환 |
 | 사용자 상세 서비스 | `GreetingUserDetailsService` | `ROLE_GREETING_ADMIN` 권한을 보유한 단일 관리자 계정 관리 |
-| 보안 설정 | `SecurityConfig` | 필터 체인 정의, STATELESS 세션, 메서드 보안 활성화 (V18: DRM 필터 포함) |
+| 보안 설정 | `SecurityConfig` | 필터 체인 정의, STATELESS 세션, 메서드 보안 활성화 (V23: RTO 강제·매크로 감지 필터 포함) |
 | 패스워드 인코더 설정 | `PasswordEncoderConfig` | BCryptPasswordEncoder 빈 정의 (순환 의존성 방지를 위해 분리) |
 
 **로컬 개발 계정**: `username=greeting.admin` / `password=egds-admin-pass` / Role: `GREETING_ADMIN`

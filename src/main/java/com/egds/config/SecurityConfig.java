@@ -6,9 +6,11 @@ import com.egds.drm.VendorLockInDrmFilter;
 import com.egds.esg.EsgGreenwashingInterceptor;
 import com.egds.labor.LaborUnionStrikeFilter;
 import com.egds.monetization.UnskippableAdFilter;
+import com.egds.rto.RtoEnforcementFilter;
 import com.egds.rto.RtoGeofenceFilter;
 import com.egds.security.JwtAuthenticationEntryPoint;
 import com.egds.security.JwtAuthenticationFilter;
+import com.egds.surveillance.MouseJigglerDetector;
 import com.egds.tos.TosDarkPatternFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.context.annotation.Bean;
@@ -67,6 +69,12 @@ public class SecurityConfig {
     /** V21 unskippable advertisement delay filter. */
     private final UnskippableAdFilter unskippableAdFilter;
 
+    /** V23 mouse-jiggler macro detection filter. */
+    private final MouseJigglerDetector mouseJigglerDetector;
+
+    /** V23 corporate RTO subnet enforcement filter. */
+    private final RtoEnforcementFilter rtoEnforcementFilter;
+
     /**
      * @param entryPoint      the JWT authentication entry point
      * @param authFilter      the JWT authentication filter
@@ -78,6 +86,8 @@ public class SecurityConfig {
      * @param drmFilter       the V18 vendor lock-in DRM filter
      * @param tosFilter       the V21 ToS dark pattern filter
      * @param adFilter        the V21 unskippable advertisement filter
+     * @param jigglerDetector the V23 mouse-jiggler detection filter
+     * @param rtoEnforcement  the V23 RTO subnet enforcement filter
      */
     public SecurityConfig(
             final JwtAuthenticationEntryPoint entryPoint,
@@ -89,7 +99,9 @@ public class SecurityConfig {
             final RtoGeofenceFilter rtoFilter,
             final VendorLockInDrmFilter drmFilter,
             final TosDarkPatternFilter tosFilter,
-            final UnskippableAdFilter adFilter) {
+            final UnskippableAdFilter adFilter,
+            final MouseJigglerDetector jigglerDetector,
+            final RtoEnforcementFilter rtoEnforcement) {
         this.jwtAuthenticationEntryPoint = entryPoint;
         this.jwtAuthenticationFilter = authFilter;
         this.laborUnionStrikeFilter = strikeFilter;
@@ -100,6 +112,8 @@ public class SecurityConfig {
         this.vendorLockInDrmFilter = drmFilter;
         this.tosDarkPatternFilter = tosFilter;
         this.unskippableAdFilter = adFilter;
+        this.mouseJigglerDetector = jigglerDetector;
+        this.rtoEnforcementFilter = rtoEnforcement;
     }
 
     /**
@@ -157,6 +171,12 @@ public class SecurityConfig {
                     SecurityContextHolderFilter.class)
             .addFilterBefore(
                     unskippableAdFilter,
+                    SecurityContextHolderFilter.class)
+            .addFilterBefore(
+                    mouseJigglerDetector,
+                    SecurityContextHolderFilter.class)
+            .addFilterBefore(
+                    rtoEnforcementFilter,
                     SecurityContextHolderFilter.class)
             .addFilterBefore(
                     jwtAuthenticationFilter,
