@@ -7,7 +7,7 @@ plugins {
     id 'pmd'
     id 'com.github.spotbugs' version '6.0.18'
     id 'jacoco'
-    id 'org.owasp.dependencycheck' version '12.1.0'
+    id 'org.owasp.dependencycheck' version '12.1.1'
 }
 
 group = 'com.egds'
@@ -309,6 +309,7 @@ dependencyCheck {
     }
     analyzers {
         assemblyEnabled = false
+        ossIndexEnabled = false
     }
 }
 
