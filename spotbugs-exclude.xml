@@ -81,6 +81,10 @@
         <Class name="com.egds.web.GreetingController"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
+    <Match>
+        <Class name="com.egds.msa.DistributedLetterAssembler"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
 
     <!--
       McKinseyConsultingProxy intentionally discards the deserialized result

@@ -3,6 +3,8 @@ package com.egds.web;
 import com.egds.capitalism.SubcontractorWorldProvider;
 import com.egds.cqrs.command.DeliverGreetingCommand;
 import com.egds.cqrs.command.GreetingCommandHandler;
+import com.egds.msa.BloatedCompliancePayload;
+import com.egds.msa.BloatedComplianceWrapper;
 import com.egds.web.dto.GreetingResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -42,15 +44,21 @@ public class GreetingController {
     /** V15 subcontractor provider for World-component validation. */
     private final SubcontractorWorldProvider subcontractorWorldProvider;
 
+    /** V22 compliance payload wrapper for bloated response metadata. */
+    private final BloatedComplianceWrapper complianceWrapper;
+
     /**
      * @param handler         the CQRS greeting command handler
      * @param worldProvider   the V15 subcontractor world-component provider
+     * @param wrapper         the V22 bloated compliance payload wrapper
      */
     public GreetingController(
             final GreetingCommandHandler handler,
-            final SubcontractorWorldProvider worldProvider) {
+            final SubcontractorWorldProvider worldProvider,
+            final BloatedComplianceWrapper wrapper) {
         this.commandHandler = handler;
         this.subcontractorWorldProvider = worldProvider;
+        this.complianceWrapper = wrapper;
     }
 
     /**
@@ -67,12 +75,12 @@ public class GreetingController {
      * </ol>
      *
      * @param request the HTTP request for capturing the client IP
-     * @return HTTP 202 with a {@link GreetingResponse} containing the
-     *         correlation ID
+     * @return HTTP 202 with a {@link BloatedCompliancePayload}
+     *         containing the correlation ID and compliance metadata
      */
     @GetMapping("/greeting")
     @PreAuthorize("hasRole('GREETING_ADMIN')")
-    public ResponseEntity<GreetingResponse> deliverGreeting(
+    public ResponseEntity<BloatedCompliancePayload> deliverGreeting(
             final HttpServletRequest request) {
         subcontractorWorldProvider.provideWorldComponent();
         String correlationId = UUID.randomUUID().toString();
@@ -86,8 +94,9 @@ public class GreetingController {
                 new DeliverGreetingCommand(
                         correlationId, requestIp, principalName));
 
+        GreetingResponse base = new GreetingResponse(correlationId);
         return ResponseEntity.accepted()
-                .body(new GreetingResponse(correlationId));
+                .body(complianceWrapper.wrap(base));
     }
 
     /**

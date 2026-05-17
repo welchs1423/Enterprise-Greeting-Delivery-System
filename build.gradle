@@ -1,8 +1,8 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.2.5'
-    id 'io.spring.dependency-management' version '1.1.5'
-    id 'com.google.protobuf' version '0.9.4'
+    id 'org.springframework.boot' version '3.3.12'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.google.protobuf' version '0.9.5'
     id 'checkstyle'
     id 'pmd'
     id 'com.github.spotbugs' version '6.0.18'
@@ -12,6 +12,12 @@ plugins {
 
 group = 'com.egds'
 version = '5.0.0-RELEASE'
+
+// Redirect build output to an ASCII-safe path so protoc can handle it on Windows.
+// This has no effect on CI (Linux), where all paths are ASCII-safe.
+if (System.getProperty('os.name').toLowerCase().contains('win')) {
+    layout.buildDirectory = file('C:/tmp/egds-build')
+}
 
 java {
     toolchain {
@@ -137,6 +143,28 @@ dependencies {
 
 // ─── Protobuf / gRPC ───────────────────────────────────────────────────────
 
+// Workaround: protoc on Windows cannot handle non-ASCII paths.
+// Copy proto sources to an ASCII-safe staging directory before generation.
+def protoStageDir = file('C:/tmp/egds-proto-stage')
+
+tasks.register('stageProtoFiles', Copy) {
+    description = 'Copies proto sources to an ASCII-safe staging directory'
+    from 'src/main/proto'
+    into protoStageDir
+}
+
+tasks.named('processResources').configure {
+    mustRunAfter('stageProtoFiles')
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDirs = [protoStageDir]
+        }
+    }
+}
+
 protobuf {
     protoc {
         artifact = "com.google.protobuf:protoc:${protobufVersion}"
@@ -149,6 +177,9 @@ protobuf {
     generateProtoTasks {
         all()*.plugins {
             grpc {}
+        }
+        all().each { task ->
+            task.dependsOn('stageProtoFiles')
         }
     }
 }

@@ -65,8 +65,9 @@ EGDS는 단 하나의 인사 메시지를 전달하기 위해 아래의 모든 �
 | `lootbox/` | `GreetingLootboxProvider` — 80%/19%/1% 극악 확률 인사말 가챠 (`@Primary`) |
 | `monetization/` | `UnskippableAdFilter` — 비프리미엄 유저 5초 강제 광고 시청 필터 |
 | `tos/` | `TosDarkPatternFilter` — 영혼 귀속 약관 21.0 강제 동의 필터 |
+| `msa/` | `DistributedLetterAssembler` — 글자 단위 CompletableFuture 분산 조립 + `EnterpriseChaosMonkey` 5% 글자 소실 + `BloatedComplianceWrapper` 응답 부풀리기 |
 
-### 전체 요청 처리 흐름 (V21 완성 경로)
+### 전체 요청 처리 흐름 (V22 완성 경로)
 
 ```
 POST /api/v1/auth/token          → JwtTokenProvider → Bearer JWT
@@ -77,7 +78,7 @@ GET  /api/v1/greeting [Bearer]
   → JwtAuthenticationFilter → GreetingCommandHandler
   → Kafka: egds.greeting.requested (이벤트 소싱 로그)
   → Kafka: egds.greeting.events   (비동기 전달 트리거)
-  → HTTP 202 + correlationId
+  → HTTP 202 + BloatedCompliancePayload (correlationId + metadata 부풀리기)
 
 egds.greeting.requested → GreetingProjector → MongoDB (CQRS 읽기 모델)
 egds.greeting.events    → GreetingEventConsumer → MessageDeliveryPipeline
@@ -86,8 +87,11 @@ egds.greeting.events    → GreetingEventConsumer → MessageDeliveryPipeline
                 (AI 컨텍스트 + GenAiHallucination(20%) + Keccak-256 사전 해싱)
   → MessageContentValidator
   → MessageMapper
-  → ConsoleOutputStrategy (CB + RL + Retry + 무결성 검증 → 도트매트릭스 출력
-                           + VirtualPizzaPartyCompensation 힙 누수)
+  → ConsoleOutputStrategy (CB + RL + Retry + 무결성 검증)
+      → DistributedLetterAssembler (글자별 CompletableFuture, 50–200ms 딜레이,
+                                    EnterpriseChaosMonkey 5% 소실 → 공백 대체)
+      → DotMatrixPrinterAdapter (도트매트릭스 출력)
+      → VirtualPizzaPartyCompensation 힙 누수
   → AuditLogService → H2/Oracle (REQUIRES_NEW 트랜잭션)
 
 GET /api/v1/greeting/status/{correlationId} → MongoDB 전용 (읽기 경로)
@@ -804,6 +808,45 @@ GreetingLootboxProvider.provideMessage()
   → X-Accept-ToS-Version == "21.0"? → 통과
   → HTTP 451: {"error":"고객님의 영혼 귀속을 포함한 신규 약관 21.0에 동의해야 합니다."}
 ```
+
+### MSA 과적합 & 카오스 엔지니어링 (V22)
+
+이력서에 "분산 마이크로서비스 아키텍처"와 "카오스 엔지니어링" 두 줄을 추가하기 위해 "Hello, World!" 한 문자열을 글자 단위 가상 마이크로서비스로 분해·조립하는 레이어를 도입했습니다.
+
+#### 분산 글자 조립기 (`DistributedLetterAssembler`)
+
+메시지 파이프라인 끝단에서 `ConsoleOutputStrategy`가 도트매트릭스 출력을 호출하기 전, 무결성 검증이 완료된 최종 문자열을 글자(Character) 단위로 쪼갭니다. 각 글자는 `CompletableFuture.supplyAsync()`로 가상 마이크로서비스 호출을 시뮬레이션하며 50–200ms의 무작위 네트워크 왕복 지연을 부여받습니다. 모든 Future가 완료되면 결과를 다시 합쳐 출력에 전달합니다.
+
+```
+ConsoleOutputStrategy.output()
+  → integrityVerifier.verify() ← 무결성 검증 선행
+  → DistributedLetterAssembler.assemble("Hello, World!")
+      ├─ 'H' → CompletableFuture → 127ms sleep → EnterpriseChaosMonkey.sabotage() → 'H'
+      ├─ 'e' → CompletableFuture →  83ms sleep → EnterpriseChaosMonkey.sabotage() → 'e'
+      ├─ 'l' → CompletableFuture → 195ms sleep → EnterpriseChaosMonkey.sabotage() → ' ' ← 5% 소실
+      └─ ... (병렬 실행, 최대 지연 ≈ 200ms)
+  → dotMatrixPrinter.print("He lo, World!")    ← 간헐적 이빨 빠진 인사말
+```
+
+`egds.msa.assembler.enabled=false` 설정 시 글자 조립 없이 원본 문자열을 그대로 반환합니다(테스트 환경 기본값).
+
+#### 엔터프라이즈 카오스 몽키 (`EnterpriseChaosMonkey`)
+
+`DistributedLetterAssembler`의 각 글자 fetch 작업에 주입되는 글자 수준 카오스 에이전트입니다. `sabotage()` 호출마다 5% 확률로 `RuntimeException`("Letter microservice timeout")을 던져 해당 글자를 공백으로 대체시킵니다. 기존 `EmbeddedChaosMonkey`(파이프라인 전체 10%)와 독립적으로 동작하며, 충분한 호출 횟수에서 인사말에 불규칙한 공백이 발생합니다.
+
+#### 비대화 컴플라이언스 래퍼 (`BloatedComplianceWrapper`)
+
+`GET /api/v1/greeting` HTTP 202 응답을 `BloatedCompliancePayload`로 감쌉니다. `correlationId`, `status`, `message` 필드는 그대로 유지되며, `metadata` 노드에 아래와 같은 컴플라이언스 필수(?) 정보가 추가됩니다.
+
+| 메타데이터 키 | 내용 |
+|---|---|
+| `buildVersion` | `22.0.0-SNAPSHOT` |
+| `deploymentEnvironment` | `k8s-prod-cluster-euwest1-az3` |
+| `carbonEmissionsGramsCo2Eq` | `0.000042` (인사말 1회당 탄소 배출량) |
+| `gdprDisclaimer` | GDPR Art. 13 / ISO 27001 Annex A.12.3 / 7년 보존 고지문 |
+| `complianceFramework` | `GDPR-2018/SOC2-TYPE2/ISO27001/PCI-DSS-v4` |
+| `slaGuarantee` | `99.999%` |
+| `fakeEnvVar1–3` | 하드코딩 가짜 환경 변수 (실제 시크릿 미노출) |
 
 ### 카오스 & 데몬
 

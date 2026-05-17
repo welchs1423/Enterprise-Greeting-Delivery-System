@@ -13,6 +13,7 @@ import com.egds.core.exception.PaperJamException;
 import com.egds.core.interfaces.IMessageOutputStrategy;
 import com.egds.governance.AiBoardApprovalService;
 import com.egds.legacy.DotMatrixPrinterAdapter;
+import com.egds.msa.DistributedLetterAssembler;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -94,6 +95,9 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
     /** V18 pizza party compensation awarded after each delivery. */
     private final VirtualPizzaPartyCompensation pizzaPartyCompensation;
 
+    /** V22 distributed letter assembler for character-level MSA. */
+    private final DistributedLetterAssembler letterAssembler;
+
     /**
      * @param tracerBean    the Micrometer Tracing tracer for span creation
      * @param verifier      the blockchain integrity verifier
@@ -102,6 +106,7 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
      * @param miner         the PoW coin miner for gas-fee simulation
      * @param printer       the dot-matrix printer adapter for output
      * @param compensation  the V18 pizza party compensation bean
+     * @param assembler     the V22 distributed letter assembler
      */
     public ConsoleOutputStrategy(
             final Tracer tracerBean,
@@ -110,7 +115,8 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
             final AiBoardApprovalService boardApproval,
             final GreetingCoinMiner miner,
             final DotMatrixPrinterAdapter printer,
-            final VirtualPizzaPartyCompensation compensation) {
+            final VirtualPizzaPartyCompensation compensation,
+            final DistributedLetterAssembler assembler) {
         this.tracer = tracerBean;
         this.integrityVerifier = verifier;
         this.chaosMonkey = monkey;
@@ -118,6 +124,7 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
         this.coinMiner = miner;
         this.dotMatrixPrinter = printer;
         this.pizzaPartyCompensation = compensation;
+        this.letterAssembler = assembler;
     }
 
     /**
@@ -198,7 +205,9 @@ public class ConsoleOutputStrategy implements IMessageOutputStrategy {
                     messageEntity.getCorrelationId(),
                     span.context().traceId());
 
-            dotMatrixPrinter.print(messageEntity.getFormattedContent());
+            String assembled = letterAssembler.assemble(
+                    messageEntity.getFormattedContent());
+            dotMatrixPrinter.print(assembled);
             messageEntity.setDeliveryStatus(DeliveryStatus.DELIVERED);
             span.tag("egds.deliveryStatus", "DELIVERED");
             pizzaPartyCompensation.compensate();
