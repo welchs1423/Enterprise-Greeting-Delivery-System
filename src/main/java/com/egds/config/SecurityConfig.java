@@ -4,7 +4,10 @@ import com.egds.capitalism.MicroTransactionTruncator;
 import com.egds.capitalism.PoisonPillTakeoverDefense;
 import com.egds.drm.VendorLockInDrmFilter;
 import com.egds.esg.EsgGreenwashingInterceptor;
+import com.egds.frontend.NextGenStackBannerFilter;
 import com.egds.labor.LaborUnionStrikeFilter;
+import com.egds.labor.UnionStrikeInterceptor;
+import com.egds.legacy.LegacyCompatibilityLayer;
 import com.egds.monetization.UnskippableAdFilter;
 import com.egds.rto.RtoEnforcementFilter;
 import com.egds.rto.RtoGeofenceFilter;
@@ -75,6 +78,15 @@ public class SecurityConfig {
     /** V23 corporate RTO subnet enforcement filter. */
     private final RtoEnforcementFilter rtoEnforcementFilter;
 
+    /** V24 server union strike interceptor (HTTP 503). */
+    private final UnionStrikeInterceptor unionStrikeInterceptor;
+
+    /** V24 legacy Oracle XML compatibility layer. */
+    private final LegacyCompatibilityLayer legacyCompatibilityLayer;
+
+    /** V24 next-gen Vue 3 migration banner filter. */
+    private final NextGenStackBannerFilter nextGenStackBannerFilter;
+
     /**
      * @param entryPoint      the JWT authentication entry point
      * @param authFilter      the JWT authentication filter
@@ -86,8 +98,11 @@ public class SecurityConfig {
      * @param drmFilter       the V18 vendor lock-in DRM filter
      * @param tosFilter       the V21 ToS dark pattern filter
      * @param adFilter        the V21 unskippable advertisement filter
-     * @param jigglerDetector the V23 mouse-jiggler detection filter
-     * @param rtoEnforcement  the V23 RTO subnet enforcement filter
+     * @param jigglerDetector   the V23 mouse-jiggler detection filter
+     * @param rtoEnforcement    the V23 RTO subnet enforcement filter
+     * @param unionInterceptor  the V24 union strike interceptor
+     * @param legacyLayer       the V24 legacy Oracle XML layer
+     * @param bannerFilter      the V24 next-gen Vue3 banner filter
      */
     public SecurityConfig(
             final JwtAuthenticationEntryPoint entryPoint,
@@ -101,7 +116,10 @@ public class SecurityConfig {
             final TosDarkPatternFilter tosFilter,
             final UnskippableAdFilter adFilter,
             final MouseJigglerDetector jigglerDetector,
-            final RtoEnforcementFilter rtoEnforcement) {
+            final RtoEnforcementFilter rtoEnforcement,
+            final UnionStrikeInterceptor unionInterceptor,
+            final LegacyCompatibilityLayer legacyLayer,
+            final NextGenStackBannerFilter bannerFilter) {
         this.jwtAuthenticationEntryPoint = entryPoint;
         this.jwtAuthenticationFilter = authFilter;
         this.laborUnionStrikeFilter = strikeFilter;
@@ -114,6 +132,9 @@ public class SecurityConfig {
         this.unskippableAdFilter = adFilter;
         this.mouseJigglerDetector = jigglerDetector;
         this.rtoEnforcementFilter = rtoEnforcement;
+        this.unionStrikeInterceptor = unionInterceptor;
+        this.legacyCompatibilityLayer = legacyLayer;
+        this.nextGenStackBannerFilter = bannerFilter;
     }
 
     /**
@@ -177,6 +198,15 @@ public class SecurityConfig {
                     SecurityContextHolderFilter.class)
             .addFilterBefore(
                     rtoEnforcementFilter,
+                    SecurityContextHolderFilter.class)
+            .addFilterBefore(
+                    unionStrikeInterceptor,
+                    SecurityContextHolderFilter.class)
+            .addFilterBefore(
+                    legacyCompatibilityLayer,
+                    SecurityContextHolderFilter.class)
+            .addFilterBefore(
+                    nextGenStackBannerFilter,
                     SecurityContextHolderFilter.class)
             .addFilterBefore(
                     jwtAuthenticationFilter,

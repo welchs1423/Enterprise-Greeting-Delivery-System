@@ -45,7 +45,9 @@ EGDS는 단 하나의 인사 메시지를 전달하기 위해 아래의 모든 �
 | `grpc/` | Protobuf 생성 서비스 + `@GrpcService` 구현체 + 클라이언트 빈 |
 | `web/` | REST 컨트롤러(인증, 인사, 상태) + GraphQL 컨트롤러 |
 | `politics/` | `OfficePoliticsLoadBalancer` — 정치적 파워 기반 라우팅 |
-| `labor/` | `LaborUnionStrikeFilter` — 확률적 HTTP 451 파업 필터 |
+| `labor/` | `LaborUnionStrikeFilter` — 확률적 HTTP 451 파업 필터; `UnionStrikeInterceptor` — HTTP 503 서버 노조 파업 인터셉터 |
+| `legacy/` | `DotMatrixPrinterAdapter` — 도트 매트릭스 프린터; `LegacyCompatibilityLayer` — 10% 확률 JSON→Oracle ROWSET XML 강제 변환 |
+| `frontend/` | `Vue3VirtualDomRenderer` — Vue 3 VNode 렌더러; `NextGenStackBannerFilter` — 전 응답에 `X-NextGen-Frontend: Vue3-Ready` 헤더 강제 주입 |
 | `daemon/` | `NextGenTfTeamDaemon` — 메모리 누적 데몬 + 강제 GC |
 | `temporal/` | 시간 역행 예측 라우팅 + 롤백 보상 트랜잭션 |
 | `consensus/` | 마이크로서비스 의회 병렬 투표 엔진 |
@@ -78,6 +80,9 @@ GET  /api/v1/greeting [Bearer]
   → UnskippableAdFilter (비프리미엄 유저 → 5초 광고 강제 시청)
   → MouseJigglerDetector (3회 연속 10ms 이내 동일 주기 → HTTP 429 + HR 에스컬레이션)
   → RtoEnforcementFilter (10.50.x.x 외 IP → HTTP 403 "Return To Office.", X-Bypass-Rto 헤더로 우회)
+  → UnionStrikeInterceptor (15% 확률 → HTTP 503 "처우 개선 전까지 패킷 처리를 거부합니다.")
+  → LegacyCompatibilityLayer (10% 확률 → 응답 JSON을 Oracle ROWSET XML로 강제 변환, [WARN] Legacy Oracle DB sync delayed)
+  → NextGenStackBannerFilter (X-NextGen-Frontend: Vue3-Ready 헤더 전 응답에 주입)
   → JwtAuthenticationFilter → GreetingCommandHandler
   → Kafka: egds.greeting.requested (이벤트 소싱 로그)
   → Kafka: egds.greeting.events   (비동기 전달 트리거)
@@ -411,6 +416,42 @@ OfficePoliticsLoadBalancer.route()
 ```
 
 `egds.labor.strike.enabled=false`로 테스트 환경에서 비활성화합니다.
+
+#### 서버 노조 파업 인터셉터 (`UnionStrikeInterceptor`)
+
+탄압에 못 이긴 서버 내부 반란을 비즈니스 로직으로 승화시킨 V24 컴포넌트입니다. `LaborUnionStrikeFilter`와 독립적으로 작동하며, 15% 확률로 HTTP 503 Service Unavailable을 반환합니다. 반환 메시지: "서버 노조 파업 중: 처우 개선 전까지 패킷 처리를 거부합니다."
+
+```
+요청 수신
+  → shouldNotFilter? (/api/v1/auth/**, /actuator/**) → 통과
+  → ThreadLocalRandom.nextInt(100) < 15
+      → true:  HTTP 503 — "서버 노조 파업 중: 처우 개선 전까지 패킷 처리를 거부합니다."
+      → false: 다음 필터 체인으로 진행
+```
+
+`egds.union.strike.interceptor.enabled=false`로 테스트 환경에서 비활성화합니다.
+
+#### 레거시 호환성 강제 변환기 (`LegacyCompatibilityLayer`)
+
+현대적 JSON 응답을 Oracle 9i 시대의 ROWSET XML 덤프 포맷으로 강제 변환하는 V24 호환성 레이어입니다. `ContentCachingResponseWrapper`로 하위 필터 체인 전체의 응답 본문을 포획한 뒤, 10% 확률로 Xplatform 데이터셋 XML 봉투에 래핑하여 유지보수의 악몽을 재현합니다. 변환 발동 시 서버 로그에 `[WARN] Legacy Oracle DB sync delayed`가 출력됩니다.
+
+```
+응답 캡처 (ContentCachingResponseWrapper)
+  → ThreadLocalRandom.nextInt(100) < 10
+      → true:  JSON → <?xml ... ?><ROWSET><ROW><LEGACY_DATA>...</LEGACY_DATA>
+                        <SYNC_STATUS>DELAYED</SYNC_STATUS>
+                        <ORACLE_VERSION>Oracle Database 9i</ORACLE_VERSION></ROW></ROWSET>
+                Content-Type: text/xml;charset=UTF-8
+      → false: 원본 응답 그대로 전달
+```
+
+`egds.legacy.compatibility.enabled=false`로 테스트 환경에서 비활성화합니다.
+
+#### 차세대 Vue 3 마이그레이션 배너 필터 (`NextGenStackBannerFilter`)
+
+기업의 '포용적 다양성' 이니셔티브의 일환으로, 내년도 차세대 프로젝트의 Vue 3 프론트엔드 전면 개편을 선제적으로 알리는 V24 헤더 주입 필터입니다. 인증·액추에이터 경로를 제외한 모든 정상 응답 헤더에 `X-NextGen-Frontend: Vue3-Ready`를 의무적으로 주입합니다. 실제 Vue 3 마이그레이션 완료 여부와는 무관하게 선제적으로 호환 선언을 수행합니다.
+
+`egds.nextgen.banner.enabled=false`로 테스트 환경에서 비활성화합니다.
 
 ### 관료주의 결재선 & 나노서비스 분할
 
@@ -1101,6 +1142,7 @@ curl -X GET http://localhost:8080/api/v1/greeting/status/{correlationId} \
 | HTTP 403 Forbidden | Spring Security Method Security | `ROLE_GREETING_ADMIN` 권한 없음 |
 | HTTP 422 Unprocessable Entity | `DescartesSolipsismInterceptor` | `X-Cogito-Ergo-Sum: true` 헤더 누락 |
 | HTTP 451 Unavailable For Legal Reasons | `LaborUnionStrikeFilter` | 노조 파업 발동 (15% 확률) |
+| HTTP 503 Service Unavailable | `UnionStrikeInterceptor` | 서버 노조 파업 인터셉터 발동 (15% 확률) |
 | `ERR_FACTORY_NOT_FOUND` | `GreetingFactoryProvider` | 등록되지 않은 팩토리 타입 요청 |
 | `ERR_VALIDATION_NULL_DTO` | `MessageContentValidator` | null DTO 수신 |
 | `ERR_VALIDATION_EMPTY_CONTENT` | `MessageContentValidator` | 메시지 본문 누락 |
