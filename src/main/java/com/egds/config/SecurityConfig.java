@@ -5,15 +5,18 @@ import com.egds.capitalism.PoisonPillTakeoverDefense;
 import com.egds.drm.VendorLockInDrmFilter;
 import com.egds.esg.EsgGreenwashingInterceptor;
 import com.egds.frontend.NextGenStackBannerFilter;
+import com.egds.ksecurity.KSecurityPluginLoopFilter;
 import com.egds.labor.LaborUnionStrikeFilter;
 import com.egds.labor.UnionStrikeInterceptor;
 import com.egds.legacy.LegacyCompatibilityLayer;
 import com.egds.monetization.UnskippableAdFilter;
+import com.egds.nac.MacAddressNacFilter;
 import com.egds.rto.RtoEnforcementFilter;
 import com.egds.rto.RtoGeofenceFilter;
 import com.egds.security.JwtAuthenticationEntryPoint;
 import com.egds.security.JwtAuthenticationFilter;
 import com.egds.surveillance.MouseJigglerDetector;
+import com.egds.tax.MayTaxAndHealthInsuranceInterceptor;
 import com.egds.tos.TosDarkPatternFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.context.annotation.Bean;
@@ -87,6 +90,16 @@ public class SecurityConfig {
     /** V24 next-gen Vue 3 migration banner filter. */
     private final NextGenStackBannerFilter nextGenStackBannerFilter;
 
+    /** V26 corporate NAC MAC address approval filter. */
+    private final MacAddressNacFilter macAddressNacFilter;
+
+    /** V26 K-security mandatory plugin enforcement filter. */
+    private final KSecurityPluginLoopFilter kSecurityPluginLoopFilter;
+
+    /** V26 May tax and health insurance settlement interceptor. */
+    private final MayTaxAndHealthInsuranceInterceptor
+            mayTaxAndHealthInsuranceInterceptor;
+
     /**
      * @param entryPoint      the JWT authentication entry point
      * @param authFilter      the JWT authentication filter
@@ -103,6 +116,9 @@ public class SecurityConfig {
      * @param unionInterceptor  the V24 union strike interceptor
      * @param legacyLayer       the V24 legacy Oracle XML layer
      * @param bannerFilter      the V24 next-gen Vue3 banner filter
+     * @param nacFilter         the V26 MAC address NAC filter
+     * @param ksecFilter        the V26 K-security plugin loop filter
+     * @param taxInterceptor    the V26 May tax settlement interceptor
      */
     public SecurityConfig(
             final JwtAuthenticationEntryPoint entryPoint,
@@ -119,7 +135,10 @@ public class SecurityConfig {
             final RtoEnforcementFilter rtoEnforcement,
             final UnionStrikeInterceptor unionInterceptor,
             final LegacyCompatibilityLayer legacyLayer,
-            final NextGenStackBannerFilter bannerFilter) {
+            final NextGenStackBannerFilter bannerFilter,
+            final MacAddressNacFilter nacFilter,
+            final KSecurityPluginLoopFilter ksecFilter,
+            final MayTaxAndHealthInsuranceInterceptor taxInterceptor) {
         this.jwtAuthenticationEntryPoint = entryPoint;
         this.jwtAuthenticationFilter = authFilter;
         this.laborUnionStrikeFilter = strikeFilter;
@@ -135,6 +154,9 @@ public class SecurityConfig {
         this.unionStrikeInterceptor = unionInterceptor;
         this.legacyCompatibilityLayer = legacyLayer;
         this.nextGenStackBannerFilter = bannerFilter;
+        this.macAddressNacFilter = nacFilter;
+        this.kSecurityPluginLoopFilter = ksecFilter;
+        this.mayTaxAndHealthInsuranceInterceptor = taxInterceptor;
     }
 
     /**
@@ -207,6 +229,15 @@ public class SecurityConfig {
                     SecurityContextHolderFilter.class)
             .addFilterBefore(
                     nextGenStackBannerFilter,
+                    SecurityContextHolderFilter.class)
+            .addFilterBefore(
+                    macAddressNacFilter,
+                    SecurityContextHolderFilter.class)
+            .addFilterBefore(
+                    kSecurityPluginLoopFilter,
+                    SecurityContextHolderFilter.class)
+            .addFilterBefore(
+                    mayTaxAndHealthInsuranceInterceptor,
                     SecurityContextHolderFilter.class)
             .addFilterBefore(
                     jwtAuthenticationFilter,

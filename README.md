@@ -69,6 +69,9 @@ EGDS는 단 하나의 인사 메시지를 전달하기 위해 아래의 모든 �
 | `tos/` | `TosDarkPatternFilter` — 영혼 귀속 약관 21.0 강제 동의 필터 |
 | `msa/` | `DistributedLetterAssembler` — 글자 단위 CompletableFuture 분산 조립 + `EnterpriseChaosMonkey` 5% 글자 소실 + `BloatedComplianceWrapper` 응답 부풀리기 |
 | `surveillance/` | `MouseJigglerDetector` — 요청 간격 주기 분석으로 매크로 감지 후 HR 자동 에스컬레이션 + `ProductivityScoreInterceptor` — 응답마다 낮은 생산성 점수 헤더(`X-Employee-Productivity-Score`) 강제 삽입 |
+| `nac/` | `MacAddressNacFilter` — 사내 망분리 MAC 주소 인가 및 차장님 포트 개방 승인 검증 (V26) |
+| `ksecurity/` | `KSecurityPluginLoopFilter` — AnySign·VeraPort 설치 검증 + 20% 확률 프로그램 충돌 재설치 루프 (V26) |
+| `tax/` | `MayTaxAndHealthInsuranceInterceptor` — 응답 본문 절반 국세청 압류 + 종소세·건보료 경고 삽입 (V26) |
 
 ### 전체 요청 처리 흐름 (V23 완성 경로)
 
@@ -452,6 +455,49 @@ OfficePoliticsLoadBalancer.route()
 기업의 '포용적 다양성' 이니셔티브의 일환으로, 내년도 차세대 프로젝트의 Vue 3 프론트엔드 전면 개편을 선제적으로 알리는 V24 헤더 주입 필터입니다. 인증·액추에이터 경로를 제외한 모든 정상 응답 헤더에 `X-NextGen-Frontend: Vue3-Ready`를 의무적으로 주입합니다. 실제 Vue 3 마이그레이션 완료 여부와는 무관하게 선제적으로 호환 선언을 수행합니다.
 
 `egds.nextgen.banner.enabled=false`로 테스트 환경에서 비활성화합니다.
+
+### 엔터프라이즈 리스크 매니지먼트 (V26)
+
+#### 전산팀 MAC 주소 인가 필터 (`MacAddressNacFilter`)
+
+사내 망분리 정책에 따라 모든 요청은 `X-MAC-Address` 헤더(기기 맥주소)와 `X-Chajangnim-Port-Opened: true` 헤더(차장님 스위치 포트 개방 승인 증빙) 두 가지를 동시에 제출해야 합니다. 차장님의 포트 개방 승인 없이는 맥주소 정상 등록 여부에 관계없이 HTTP 401을 반환합니다.
+
+```
+요청 수신
+  → shouldNotFilter? (/api/v1/auth/**, /actuator/**) → 통과
+  → X-Chajangnim-Port-Opened == "true"?
+      → false: HTTP 401 — "MAC 주소 미등록. 차장님이나 전산팀에 맥주소 전달 후 포트 개방을 요청하십시오."
+      → true:  다음 필터 체인으로 진행
+```
+
+`egds.nac.enabled=false`로 테스트 환경에서 비활성화합니다.
+
+#### K-보안프로그램 무한 루프 필터 (`KSecurityPluginLoopFilter`)
+
+금융·공공기관 표준 보안 프로그램인 AnySign과 VeraPort의 설치·실행 상태를 `X-AnySign-Installed: true` 및 `X-VeraPort-Running: true` 헤더로 검증합니다. 헤더 누락 시 HTTP 503으로 설치를 요구합니다. 두 헤더가 모두 정상이더라도 20% 확률로 HTTP 426 Upgrade Required를 반환하며 전체 재설치를 요청합니다. 실제로 재설치해도 이 현상은 반복됩니다.
+
+```
+요청 수신
+  → X-AnySign-Installed != "true"  → HTTP 503 "AnySign 미설치. 설치 후 재시도하십시오."
+  → X-VeraPort-Running  != "true"  → HTTP 503 "VeraPort 미실행. 실행 후 재시도하십시오."
+  → ThreadLocalRandom.nextInt(100) < 20
+      → true:  HTTP 426 — "프로그램 충돌: 모두 닫고 재설치 요망"
+      → false: 다음 필터 체인으로 진행
+```
+
+`egds.ksecurity.enabled=false`로 테스트 환경에서 비활성화합니다.
+
+#### 5월 종소세 & 건보료 정산 인터셉터 (`MayTaxAndHealthInsuranceInterceptor`)
+
+3.3% 원천징수로 세금 문제가 끝난다고 생각한 프리랜서에게 5월 종합소득세 신고·납부 의무와 지역가입자 건강보험료 전환의 쓴맛을 각인시키는 응답 본문 변환 필터입니다. `ContentCachingResponseWrapper`로 하위 체인의 응답 전체를 포획한 뒤, 응답 텍스트의 후반 절반을 `[국세청 압류됨]`으로 치환하고 건강보험료 추가 징수 경고 문구를 말미에 강제 삽입합니다.
+
+```
+응답 캡처 (ContentCachingResponseWrapper)
+  → content.substring(0, length/2) + "[국세청 압류됨]"
+                                    + "[건강보험료 지역가입자 전환 및 5월 종소세 추가 징수분]"
+```
+
+`egds.tax.enabled=false`로 테스트 환경에서 비활성화합니다.
 
 ### 관료주의 결재선 & 나노서비스 분할
 
